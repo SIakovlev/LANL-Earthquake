@@ -1,0 +1,17 @@
+# ignore log files
+#**/logs
+#*.log
+
+# ignore python cache files
+**/__pycache__
+**/.ipynb_checkpoints
+
+# ignore .idea
+**/.idea
+
+# ignore python compilation files
+*.pyc
+*.cpython-36
+
+# ignore other platform specific file types
+*.DS_Store
