@@ -53,7 +53,7 @@ class DataProcessorMin(DataProcessorBase):
         # TODO: fix for large frames: (generators?)
 
         for name in self.cell_names:
-            df[name + '_min_' + str(self.window)] = df[name].rolling(self.window).min()
+            df[name + '_min_' + str(self.window)] = df[name].rolling(self.window, min_periods=1).min()
         return df
 
 
@@ -64,5 +64,5 @@ class DataProcessorMean(DataProcessorBase):
 
     def __call__(self, df, *args, **kwargs):
         for name in self.cell_names:
-            df[name + '_mean_' + str(self.window)] = df[name].rolling(self.window).mean()
+            df[name + '_mean_' + str(self.window)] = df[name].rolling(self.window, min_periods=1).mean()
         return df
