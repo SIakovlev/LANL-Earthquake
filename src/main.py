@@ -1,42 +1,52 @@
 import json
-import matplotlib as mpl
-import platform
-import importlib
-import numpy as np
+import argparse
 import pandas as pd
+import platform
+import matplotlib as mpl
 
+from src.utils import str_to_class
 
 if platform.system() == 'Darwin':
     mpl.use('TkAgg')  # Mac OS specific
 
-# Load packages
-from DataProcessing import DataProcessorBase, DataProcessorMin
-
-# from FeatureEngineering import FE_unit
-
-# from Validation import
 
 def main(**kwargs):
+    data_fname = kwargs['data_fname']
+    data_fname_dest = kwargs['data_fname_dest']
 
-    # Create data processor object, convert to hdr5, load it if exists
-    data_processor = DataProcessorBase()
-    data_processor_min = DataProcessorMin(**{'cell_names': ['acoustic_data'], 'window_length': 100})
-    # train_data = data_processor.data_loader('~/Dev/Kaggle/LANL-Earthquake-Prediction/train.csv')
-    df = data_processor.load('~/Dev/Kaggle/LANL-Earthquake-Prediction/train.h5')
-    df = data_processor_min.process(df)
-    data_processor.save(df, '~/Dev/Kaggle/LANL-Earthquake-Prediction/train_processed.h5')
+    # 1. Parse params and create a chain of processing instances
+    processors = []
+    for p in kwargs['processing']:
+        class_ = str_to_class('DataProcessing', p['name'])
+        processor = class_(**p)
+        processors.append(processor)
 
-    # Explore data
-    # eda_test = EDA_unit()
+    # 2. Load data
+    # TODO: implement "smart" data loading to handle data too big to fit in the memory
+    df = processors[0].load(data_fname)
 
+    # 3. Run processing
+    print('.......................Processing started.........................')
+    for i, p in enumerate(processors):
+        print(f'{i}: name={p.__class__.__name__} | columns={p.cell_names}')
+        df = p(df)
 
-    # Feature engineering
-    # fe_unit = FE_unit()
+    # 4. Save modified dataframe
+    processors[0].save(df, data_fname_dest)
+    print(f'dataframe saved as{data_fname_dest}')
 
+    pd.set_option('display.max_columns', 500)
+    print('.......................Processing finished.........................')
+    print(df.head(10))
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config_fname',
+                        help='name of the config file',
+                        type=str,
+                        default='data_processing_config_example.json')
+    args = parser.parse_args()
 
-    # with open('../settings.json') as settings:
-    #     params = json.load(settings)
-
-    main()
+    with open(args.config_fname) as config:
+        params = json.load(config)
+    main(**params)

@@ -21,6 +21,7 @@ class DataProcessorBase:
     def __init__(self, cell_names=None, **kwargs):
         self.cell_names = cell_names  # ?
 
+
     def load(self, path, key='table', **kwargs):
 
         # TODO: fix for large frames: (generators?)
@@ -36,7 +37,7 @@ class DataProcessorBase:
     def data_loader(self, path, **kargs):
         return pd.read_csv(path, dtype={'s': np.int16, 'ttf': np.float32})
 
-    def process(self, df, **kwargs):
+    def __call__(self, df, *args, **kwargs):
 
         raise NotImplementedError
 
@@ -49,7 +50,7 @@ class DataProcessorMin(DataProcessorBase):
         super(DataProcessorMin, self).__init__(**kwargs)
         self.window = kwargs['window_length']  # ?
 
-    def process(self, df, **kwargs):
+    def __call__(self, df, *args, **kwargs):
 
         # TODO: fix for large frames: (generators?)
 
@@ -57,3 +58,14 @@ class DataProcessorMin(DataProcessorBase):
             df[name + '_min_' + str(self.window)] = df[name].rolling(self.window).min()
         return df
 
+
+class DataProcessorMean(DataProcessorBase):
+
+    def __init__(self, **kwargs):
+        super(DataProcessorMean, self).__init__(**kwargs)
+        self.window = kwargs['window_length']
+
+    def __call__(self, df, *args, **kwargs):
+        for name in self.cell_names:
+            df[name + '_mean_' + str(self.window)] = df[name].rolling(self.window).mean()
+        return df
