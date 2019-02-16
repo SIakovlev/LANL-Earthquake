@@ -21,7 +21,6 @@ class DataProcessorBase:
     def __init__(self, cell_names=None, **kwargs):
         self.cell_names = cell_names  # ?
 
-
     def load(self, path, key='table', **kwargs):
 
         # TODO: fix for large frames: (generators?)
@@ -45,7 +44,6 @@ class DataProcessorBase:
 
 
 class DataProcessorMin(DataProcessorBase):
-
     def __init__(self, **kwargs):
         super(DataProcessorMin, self).__init__(**kwargs)
         self.window = kwargs['window_length']  # ?
@@ -60,7 +58,6 @@ class DataProcessorMin(DataProcessorBase):
 
 
 class DataProcessorMean(DataProcessorBase):
-
     def __init__(self, **kwargs):
         super(DataProcessorMean, self).__init__(**kwargs)
         self.window = kwargs['window_length']

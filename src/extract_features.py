@@ -4,7 +4,7 @@ import pandas as pd
 import platform
 import matplotlib as mpl
 
-from src.utils import str_to_class
+from utils import str_to_class
 
 if platform.system() == 'Darwin':
     mpl.use('TkAgg')  # Mac OS specific
@@ -41,7 +41,7 @@ def main(**kwargs):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--config_fname',
+    parser.add_argument('config_fname',
                         help='name of the config file',
                         type=str,
                         default='data_processing_config_example.json')
