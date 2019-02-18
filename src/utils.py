@@ -1,5 +1,6 @@
 import importlib
 
+
 def str_to_class(module_name, class_name):
     try:
         module_ = importlib.import_module(module_name)

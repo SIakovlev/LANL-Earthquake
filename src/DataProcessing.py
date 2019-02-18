@@ -16,6 +16,7 @@ Description:
 
 """
 
+
 class DataProcessorBase:
 
     def __init__(self, cell_names=None, **kwargs):
@@ -24,17 +25,23 @@ class DataProcessorBase:
     def load(self, path, key='table', **kwargs):
 
         # TODO: fix for large frames: (generators?)
-
+        if 'chunk_size' in kwargs:
+            return pd.read_hdf(path, key, chunksize=kwargs['chunk_size'])
         return pd.read_hdf(path, key)
 
     def save(self, obj, path, key='table', **kwargs):
 
         # TODO: fix for large frames: (generators?)
-
-        obj.to_hdf(path, key)
+        if 'append' in kwargs:
+            obj.to_hdf(path, key, append=True)
+        else:
+            obj.to_hdf(path, key)
 
     def data_loader(self, path, **kargs):
-        return pd.read_csv(path, dtype={'s': np.int16, 'ttf': np.float32})
+        return pd.read_csv(path,
+                           dtype={'acoustic_data': np.int16, 'time_to_failure': np.float32},
+                           skiprows=1,
+                           names=['s', 'ttf'])
 
     def __call__(self, df, *args, **kwargs):
 
