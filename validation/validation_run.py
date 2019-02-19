@@ -9,6 +9,7 @@ from sklearn.model_selection import KFold, RepeatedKFold, StratifiedKFold, Repea
 from folds import *
 
 
+# from ..src.utils import str_to_class
 
 
 if platform.system() == 'Darwin':
@@ -17,16 +18,17 @@ if platform.system() == 'Darwin':
 
 def main(**kwargs):
     train_data = kwargs['train_data']
+    test_data = kwargs['test_data']
     summary_dest = kwargs['summary_dest']
     print(' work with next Fold  objects: KFold, RepeatedKFold, LeaveOneOut, StraifiedKFold,  RepeatedStraifiedKKFold')
 
     # 1. Parse params and create a chain of folds
     folds_list = []
     for f in kwargs['folds']:
-        class_ = str_to_fold_object(f['name'])
+        class_ = str_to_class('sklearn.model_selection',f['name'])
         del f['name']
-        fold_data = class_(**f)
-        folds_list.append(fold_data)
+        fold_obj = class_(**f)
+        folds_list.append(fold_obj)
 
     # 2. Parse params and create a chain of validation instances
     validators = []
@@ -38,16 +40,18 @@ def main(**kwargs):
 
     # 2. Load data
     #TODO: implement "smart" data loading to handle data too big to fit in the memory
-    df = pd.read_hdf(train_data,key='table')
+    train_df = pd.read_hdf(train_data,key='table')
+    test_df = pd.read_hdf(test_data, key='table')
     #
-
+    print(train_df.columns)
     # 3. Run train
     print('.......................Processing started.........................')
 
     for f in folds_list:
         for i, v in enumerate(validators):
-            print(f'{i}: fold_type = {f.__class__.__name__} | name={v.__class__.__name__} | model={v.model}')
-            #v.train_model()
+            #print(f'{i}: fold_type = {f.__class__.__name__} | name={v.__class__.__name__} | models={v.models_list }')
+            v.train_model(train_df.drop(['time_to_failure'], axis=1), train_df['time_to_failure'], f)
+            # v.summary(summary_dest)
     # # 4. Save modified dataframe
     # processors[0].save(df, data_fname_dest)
     # print(f'dataframe saved as{data_fname_dest}')
