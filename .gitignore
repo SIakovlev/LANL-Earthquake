@@ -15,3 +15,7 @@
 
 # ignore other platform specific file types
 *.DS_Store
+
+# ignore data folder and all .h5 files
+**/data
+*.h5
