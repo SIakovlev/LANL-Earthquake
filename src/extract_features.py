@@ -43,8 +43,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('config_fname',
                         help='name of the config file',
-                        type=str,
-                        default='data_processing_config_example.json')
+                        type=str)
     args = parser.parse_args()
 
     with open(args.config_fname) as config:

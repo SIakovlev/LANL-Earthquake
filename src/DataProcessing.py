@@ -8,13 +8,8 @@ Date: 16.02.2019
 
 Description:
 
-
-
-
-
-
-
 """
+
 
 class DataProcessorBase:
     """
