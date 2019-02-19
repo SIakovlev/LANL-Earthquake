@@ -8,8 +8,12 @@ from sklearn.model_selection import KFold, RepeatedKFold, StratifiedKFold, Repea
 
 from folds import *
 
+import os
+import sys
 
-# from ..src.utils import str_to_class
+sys.path.append(os.path.dirname(os.path.expanduser('../src/utils.py')))
+
+from utils import str_to_class
 
 
 if platform.system() == 'Darwin':

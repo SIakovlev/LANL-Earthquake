@@ -60,6 +60,7 @@ class ValidationSklearn(ValidationBase):
                     score_data = get_scorer(metric)(model, X_valid, y_valid)
                     print(f' model = {model.get_params()} | fold = {folds.__class__.__name__} | metric : {metric} = {score_data}')
 
+
 class ValidationMatrix(ValidationBase):
     def __init__(self, **kwargs):
         super(ValidationMatrix, self).__init__(**kwargs)
