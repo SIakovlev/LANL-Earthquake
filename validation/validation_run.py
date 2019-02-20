@@ -14,19 +14,29 @@ import sys
 sys.path.append(os.path.dirname(os.path.expanduser('../src/utils.py')))
 
 from utils import str_to_class
-
+from tqdm import tqdm
 
 if platform.system() == 'Darwin':
     mpl.use('TkAgg')  # Mac OS specific
 
 
 def main(**kwargs):
+    '''
+    1. take the data
+    2. create folds
+    3. create wrappers for model or models (validation instances-vi)
+    4. train vi and create summary for each vi (or each models in vi)
+    '''
+
+    # 1. path to data
     train_data = kwargs['train_data']
-    test_data = kwargs['test_data']
+
+    # path to summary
     summary_dest = kwargs['summary_dest']
+
     print(' work with next Fold  objects: KFold, RepeatedKFold, LeaveOneOut, StraifiedKFold,  RepeatedStraifiedKKFold')
 
-    # 1. Parse params and create a chain of folds
+    # 2. parse params and create a chain of folds
     folds_list = []
     for f in kwargs['folds']:
         class_ = str_to_class('sklearn.model_selection',f['name'])
@@ -34,35 +44,24 @@ def main(**kwargs):
         fold_obj = class_(**f)
         folds_list.append(fold_obj)
 
-    # 2. Parse params and create a chain of validation instances
+    # 3. parse params and create a chain of validation instances
     validators = []
-
     for v in kwargs['validate']:
         class_ = str_to_class('ValidationProc', v['name'])
         validator = class_(**v)
         validators.append(validator)
 
-    # 2. Load data
-    #TODO: implement "smart" data loading to handle data too big to fit in the memory
+    # Load data
     train_df = pd.read_hdf(train_data,key='table')
-    test_df = pd.read_hdf(test_data, key='table')
-    #
-    print(train_df.columns)
-    # 3. Run train
-    print('.......................Processing started.........................')
+    # 4. train models
+    print('....................... Train models ..............................')
 
     for f in folds_list:
-        for i, v in enumerate(validators):
-            #print(f'{i}: fold_type = {f.__class__.__name__} | name={v.__class__.__name__} | models={v.models_list }')
-            v.train_model(train_df.drop(['time_to_failure'], axis=1), train_df['time_to_failure'], f)
-            # v.summary(summary_dest)
-    # # 4. Save modified dataframe
-    # processors[0].save(df, data_fname_dest)
-    # print(f'dataframe saved as{data_fname_dest}')
-    #
-    # pd.set_option('display.max_columns', 500)
-    # print('.......................Processing finished.........................')
-    # print(df.tail(10))
+        for i, v in enumerate(tqdm(validators)):
+            # create the summary in summary_dest
+            v.train_model(train_df.drop(['time_to_failure'], axis=1), train_df['time_to_failure'], f,summary_dest)
+
+    print('.......................Processing finished.........................')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

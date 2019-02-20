@@ -1,7 +1,6 @@
 {
   "train_data": "../data/train_short.h5",
-  "test_data": "../data/train_short.h5",
-  "summary_dest": "../data/summary.h5",
+  "summary_dest": "../data/summary",
 
   "folds":
           [
@@ -22,13 +21,22 @@
           [
             {
               "name": "ValidationSklearn",
-              "model_params":{ "LinearRegression":{"n_jobs":"-1"},
-                             "Ridge":{"alpha":0.1},
-                              "RandomForestRegressor": {}
+              "model":{ "LinearRegression":{"n_jobs":"-1"},
 
+                        "Ridge":{"alpha":0.1},
+                        "RandomForestRegressor": {}
+                      }
+                      ,
+              "metrics": ["neg_mean_absolute_error", "neg_mean_squared_error"]
+            },
 
-                              },
+            {
+              "name": "ValidationCustom",
+              "model": "LSTM"             ,
               "metrics": ["neg_mean_absolute_error", "neg_mean_squared_error"]
             }
+
+
+
           ]
 }

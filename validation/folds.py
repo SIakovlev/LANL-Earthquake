@@ -1,6 +1,12 @@
 import importlib
 from modulefinder import ModuleFinder
 
+def fold_to_str(fold_class):
+    if 'cv' in fold_class.__dict__:
+        return ''.join([str(fold_class.__class__).split('.')[-1], str({k:l for k, l in fold_class.__dict__.items() if l is not None and k is not 'cv'})])
+    else:
+        return str(fold_class)
+
 
 
 def str_to_models(class_name):
