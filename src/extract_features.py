@@ -23,6 +23,7 @@ def main(**kwargs):
 
     # 2. Load data
     # TODO: implement "smart" data loading to handle data too big to fit in the memory
+
     df_handler = processors[0].load(data_fname, chunk_size=1e6)
     for df in df_handler:
         # 3. Run processing
@@ -44,8 +45,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--config_fname',
                         help='name of the config file',
-                        type=str,
-                        default='data_processing_config_example.json')
+                        type=str)
     args = parser.parse_args()
 
     with open(args.config_fname) as config:
