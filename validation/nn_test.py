@@ -25,6 +25,8 @@ class CustomNN(Module):
         self.minibatch_size = kwargs['minibatch_size']
         self.num_epochs = kwargs['num_epochs']
 
+        self.metrics = ["neg_mean_absolute_error", "neg_mean_squared_error"]
+
         self.loss = MSELoss()
 
     def forward(self, x):
@@ -32,6 +34,7 @@ class CustomNN(Module):
         return res
 
     def train_model(self, train_data, train_y):
+        score_data_list = []
         n_train_steps_per_epoch = train_data.shape[0] // self.minibatch_size
 
         train_data = torch.tensor(train_data.values.astype(np.float32))
@@ -49,8 +52,10 @@ class CustomNN(Module):
                 loss = self.loss(predict, y_batch)
                 loss.backward()
                 self.optim.step()
+                score_data_list.append(loss)
                 print(f"\r step: {i} | loss={loss.detach().cpu():.4f}", end="")
             print()
+        return score_data_list
 
     def compute_loss(self, test_data, test_y):
         test_data = torch.tensor(test_data.values.astype(np.float32))
@@ -62,38 +67,38 @@ class CustomNN(Module):
 
 
 
-def main(**kwargs):
-    train_data_fname = kwargs['train_data_fname']
-    train_df = pd.read_hdf(train_data_fname, 'table')
-    train_data = train_df.drop(['time_to_failure'], axis=1)
-    train_y = train_df['time_to_failure']
-
-    test_data_fname = kwargs['test_data_fname']
-    test_df = pd.read_hdf(test_data_fname, 'table')
-    test_data = test_df.drop(['time_to_failure'], axis=1)
-    test_y = test_df['time_to_failure']
-
-    neural_net = CustomNN(**kwargs['neural_net'])
-
-    neural_net.train_model(train_data, train_y)
-
-    loss = neural_net.compute_loss(test_data, test_y)
-    print(f"test loss: {loss:.4f}")
-    return
-
-
-if __name__ == '__main__':
-    params = {
-        "train_data_fname" : "../data/train_short.h5",
-        "test_data_fname": "../data/train_short.h5",
-        "neural_net": {
-            "in_features": 1,
-            "out_features": 1,
-            "num_hidden": 100,
-            "learning_rate": 0.0001,
-            "num_epochs": 2,
-            "minibatch_size": 256
-        }
-    }
-
-    main(**params)
+# def main(**kwargs):
+#     train_data_fname = kwargs['train_data_fname']
+#     train_df = pd.read_hdf(train_data_fname, 'table')
+#     train_data = train_df.drop(['time_to_failure'], axis=1)
+#     train_y = train_df['time_to_failure']
+#
+#     test_data_fname = kwargs['test_data_fname']
+#     test_df = pd.read_hdf(test_data_fname, 'table')
+#     test_data = test_df.drop(['time_to_failure'], axis=1)
+#     test_y = test_df['time_to_failure']
+#
+#     neural_net = CustomNN(**kwargs['neural_net'])
+#
+#     neural_net.train_model(train_data, train_y)
+#
+#     loss = neural_net.compute_loss(test_data, test_y)
+#     print(f"test loss: {loss:.4f}")
+#     return
+#
+#
+# if __name__ == '__main__':
+#     params = {
+#         "train_data_fname" : "../data/train_short.h5",
+#         "test_data_fname": "../data/train_short.h5",
+#         "neural_net": {
+#             "in_features": 1,
+#             "out_features": 1,
+#             "num_hidden": 100,
+#             "learning_rate": 0.0001,
+#             "num_epochs": 2,
+#             "minibatch_size": 256
+#         }
+#     }
+#
+#     main(**params)

@@ -17,6 +17,10 @@
 
           ],
 
+   "metrics": ["neg_mean_absolute_error", "neg_mean_squared_error"],
+
+
+
   "validate":
           [
             {
@@ -26,17 +30,23 @@
                         "Ridge":{"alpha":0.1},
                         "RandomForestRegressor": {}
                       }
-                      ,
-              "metrics": ["neg_mean_absolute_error", "neg_mean_squared_error"]
+
             },
 
             {
               "name": "ValidationCustom",
-              "model": "LSTM"             ,
-              "metrics": ["neg_mean_absolute_error", "neg_mean_squared_error"]
+              "path": "nn_test",
+              "model": {
+                "CustomNN": {
+                  "in_features": 1,
+                  "out_features": 1,
+                  "num_hidden": 100,
+                  "learning_rate": 0.0001,
+                  "num_epochs": 2,
+                  "minibatch_size": 256
+                }
+              }
             }
-
-
 
           ]
 }
