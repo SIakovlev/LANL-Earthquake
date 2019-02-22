@@ -6,16 +6,16 @@ def fold_to_str(fold_class):
     else:
         return str(fold_class)
 
-def str_to_class2(module_name, class_name):
-    try:
-        module_ = importlib.import_module(module_name)
-        try:
-            class_ = getattr(module_, class_name)
-        except AttributeError:
-            raise AttributeError(f'Class does not exist: {class_name}')
-    except ImportError:
-        raise ImportError(f'Module does not exist: {module_name}')
-    return class_ or None
+# def str_to_class2(module_name, class_name):
+#     try:
+#         module_ = importlib.import_module(module_name)
+#         try:
+#             class_ = getattr(module_, class_name)
+#         except AttributeError:
+#             raise AttributeError(f'Class does not exist: {class_name}')
+#     except ImportError:
+#         raise ImportError(f'Module does not exist: {module_name}')
+#     return class_ or None
 
 
 

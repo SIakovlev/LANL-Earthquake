@@ -36,17 +36,17 @@
             {
               "name": "ValidationCustom",
               "path": "nn_test",
-              "model": {
-                "CustomNN": {
-                  "in_features": 1,
-                  "out_features": 1,
-                  "num_hidden": 100,
-                  "learning_rate": 0.0001,
-                  "num_epochs": 2,
-                  "minibatch_size": 256
-                }
-              }
+              "model": { "CustomNN": {
+                                      "in_features": 1,
+                                      "out_features": 1,
+                                      "num_hidden": 100,
+                                      "learning_rate": 0.0001,
+                                      "num_epochs": 2,
+                                      "minibatch_size": 256
+                                    }
+                       }
             }
 
           ]
+
 }

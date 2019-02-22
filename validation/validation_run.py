@@ -5,13 +5,15 @@ import platform
 import matplotlib as mpl
 from sklearn.model_selection import KFold, RepeatedKFold, StratifiedKFold, RepeatedStratifiedKFold
 
-
+from ast import literal_eval
 from folds import *
 
 import os
 import sys
 
 sys.path.append(os.path.dirname(os.path.expanduser('../src/utils.py')))
+#sys.path.append(os.path.dirname(os.path.expanduser('validation/')))
+
 
 from utils import str_to_class
 from tqdm import tqdm
@@ -26,6 +28,7 @@ def main(**kwargs):
     '''
     1. take the data
     2. create folds
+    3. create metrics
     3. create wrappers for model or models (validation instances-vi)
     4. train vi and create summary for each vi (or each models in vi)
     '''
@@ -52,11 +55,11 @@ def main(**kwargs):
         fold_features.append({})
         fold_obj = class_(**f)
         folds_list.append(fold_obj)
+
     # 3. load metrics from config
     metrics = []
     for m in kwargs["metrics"]:
         metrics.append(m)
-
 
     # 4. parse params and create a chain of validation instances
     validators = []
@@ -66,7 +69,6 @@ def main(**kwargs):
         # check if metrics in class
         validator.check_metrics(metrics)
         validators.append(validator)
-
 
     # Load data
     train_df = pd.read_hdf(train_data,key='table')
@@ -83,15 +85,30 @@ def main(**kwargs):
 
 
 
+
+def info():
+    print('Config example: validation_config.json')
+
+    print("For custom models: ")
+    print("1. Function must have command \"path\" ")
+    print("2. Function must have attribute-dictionary self.metrics with same names (keys) as the sklearn metrics in SCORES")
+    print("3. Function must have method train_model(train_data, train_y))")
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+
+    parser.add_argument('--i', dest = "info", help = 'print info about usage of script' , action='store_true', default=False)
+
     parser.add_argument('config_fname',
                         help='name of the config file',
-                        type=str,
-                        default='validation_config.json')
+                        type=str, default='')
 
     args = parser.parse_args()
 
-    with open(args.config_fname) as config:
-        params = json.load(config)
-    main(**params)
+    if args.info:
+        info()
+    else:
+        with open(args.config_fname) as config:
+            params = json.load(config)
+        main(**params)

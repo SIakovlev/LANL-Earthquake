@@ -25,7 +25,9 @@ class CustomNN(Module):
         self.minibatch_size = kwargs['minibatch_size']
         self.num_epochs = kwargs['num_epochs']
 
-        self.metrics = ["neg_mean_absolute_error", "neg_mean_squared_error"]
+        self.metrics = {"neg_mean_absolute_error": MSELoss(), "neg_mean_squared_error": MSELoss()}
+
+
 
         self.loss = MSELoss()
 

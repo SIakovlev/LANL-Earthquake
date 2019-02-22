@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from folds import str_to_models, fold_to_str, str_to_class2
+from folds import str_to_models, fold_to_str
 
 from sklearn import metrics as sklearn_metrics
 from sklearn.metrics import get_scorer
@@ -50,8 +50,8 @@ class ValidationBase:
             self.models_features[i_m]["features"] = m_p
             self.models_features.append({})
 
-    def train_model(self, train_data, y_train_data, folds):
-        raise NotImplementedError
+    def train_model(self, train_data, y_train_data, folds, metric, path_to_save, folds_param):
+            raise NotImplementedError
 
     def save_summary_of_model(self,name, fold_params, model_params, metric):
         save_temp_dict = {"fold_data": self.folds_data,
@@ -121,7 +121,7 @@ class ValidationCustom(ValidationBase):
 
     def create_models(self,**kwargs):
         for i_m, (m, m_p) in enumerate(kwargs['model'].items()):
-            self.model = str_to_class2(self.path, m)
+            self.model = str_to_class(self.path, m)
             self.model = self.model(**m_p)
             self.models_list.append(self.model)
             self.models_features[i_m]["name"] = str(m)
@@ -131,12 +131,9 @@ class ValidationCustom(ValidationBase):
     def check_metrics(self,metrics):
         for metric in metrics:
             for m in self.models_list:
-                if metric not in m.metrics:
+                if metric not in m.metrics.keys():
                     raise AttributeError(f"not metric {metric} for model {str(m)}")
 
-
-
-    # not
     def train_model(self, train_data, y_train_data, folds, folds_param, metric, path_to_save):
         for num_model, m in enumerate(self.models_list):
             try:
