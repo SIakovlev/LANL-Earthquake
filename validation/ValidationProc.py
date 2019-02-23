@@ -126,7 +126,6 @@ class ValidationBoost(ValidationBase):
 class ValidationCustom(ValidationBase):
     def __init__(self, **kwargs):
         super(ValidationCustom, self).__init__(**kwargs)
-        self.path =  kwargs['path']
         self.create_models(**kwargs)
 
     def create_models(self,**kwargs):
