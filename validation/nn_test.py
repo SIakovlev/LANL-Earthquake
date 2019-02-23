@@ -25,10 +25,6 @@ class CustomNN(Module):
         self.minibatch_size = kwargs['minibatch_size']
         self.num_epochs = kwargs['num_epochs']
 
-        self.metrics = {"neg_mean_absolute_error": MSELoss(), "neg_mean_squared_error": MSELoss()}
-
-
-
         self.loss = MSELoss()
 
     def forward(self, x):
@@ -36,7 +32,6 @@ class CustomNN(Module):
         return res
 
     def train_model(self, train_data, train_y):
-        score_data_list = []
         n_train_steps_per_epoch = train_data.shape[0] // self.minibatch_size
 
         train_data = torch.tensor(train_data.values.astype(np.float32))
@@ -54,19 +49,15 @@ class CustomNN(Module):
                 loss = self.loss(predict, y_batch)
                 loss.backward()
                 self.optim.step()
-                score_data_list.append(loss)
                 print(f"\r step: {i} | loss={loss.detach().cpu():.4f}", end="")
             print()
-        return score_data_list
 
     def compute_loss(self, test_data, test_y):
         test_data = torch.tensor(test_data.values.astype(np.float32))
         test_y = torch.tensor(test_y.values.astype(np.float32)).view(-1, 1)
 
         predict = self(test_data)
-        loss = self.loss(predict, test_y).detach()
-        return loss
-
+        return predict.detach().numpy()
 
 
 # def main(**kwargs):

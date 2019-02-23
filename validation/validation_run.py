@@ -8,17 +8,19 @@ from sklearn.model_selection import KFold, RepeatedKFold, StratifiedKFold, Repea
 from ast import literal_eval
 from folds import *
 
+
+
 import os
 import sys
+import glob
 
-sys.path.append(os.path.dirname(os.path.expanduser('../src/utils.py')))
-#sys.path.append(os.path.dirname(os.path.expanduser('validation/')))
+import importlib.util
+spec = importlib.util.spec_from_file_location("utils", os.path.join(os.getcwd(), '../src/utils.py'))
+foo = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(foo)
 
 
-from utils import str_to_class
 from tqdm import tqdm
-
-import nn_test
 
 if platform.system() == 'Darwin':
     mpl.use('TkAgg')  # Mac OS specific
@@ -49,7 +51,7 @@ def main(**kwargs):
 
     for index_f, f in enumerate(kwargs['folds']):
         fold_features[index_f] = {'fold_name': f['name'], "fold_param":[]}
-        class_ = str_to_class('sklearn.model_selection',f['name'])
+        class_ = foo.str_to_class('sklearn.model_selection', f['name'])
         del f['name']
         fold_features[index_f]["fold_param"] = f
         fold_features.append({})
@@ -60,14 +62,13 @@ def main(**kwargs):
     metrics = []
     for m in kwargs["metrics"]:
         metrics.append(m)
+    metrics_classes = check_metrics(metrics)
 
     # 4. parse params and create a chain of validation instances
     validators = []
     for v in kwargs['validate']:
-        class_ = str_to_class('ValidationProc', v['name'])
+        class_ = foo.str_to_class('ValidationProc', v['name'])
         validator = class_(**v)
-        # check if metrics in class
-        validator.check_metrics(metrics)
         validators.append(validator)
 
     # Load data
@@ -79,7 +80,7 @@ def main(**kwargs):
         for i, v in enumerate(tqdm(validators)):
             # create the summary in summary_dest
             for i_m, m in enumerate(metrics):
-                v.train_model(train_df.drop(['time_to_failure'], axis=1), train_df['time_to_failure'], f, fold_features[i_f] , m, summary_dest)
+                v.train_model(train_df.drop(['time_to_failure'], axis=1), train_df['time_to_failure'], f, fold_features[i_f] , m, summary_dest, metrics_classes[i_m])
 
     print('.......................Processing finished.........................')
 
@@ -94,8 +95,10 @@ def info():
     print("2. Function must have attribute-dictionary self.metrics with same names (keys) as the sklearn metrics in SCORES")
     print("3. Function must have method train_model(train_data, train_y))")
 
-
 if __name__ == '__main__':
+
+
+
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--i', dest = "info", help = 'print info about usage of script' , action='store_true', default=False)

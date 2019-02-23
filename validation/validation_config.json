@@ -1,6 +1,6 @@
 {
   "train_data": "../data/train_short.h5",
-  "summary_dest": "../data/summary",
+  "summary_dest": "../data/summary.pickle",
 
   "folds":
           [
@@ -17,7 +17,7 @@
 
           ],
 
-   "metrics": ["neg_mean_absolute_error", "neg_mean_squared_error"],
+   "metrics": ["mean_absolute_error", "mean_squared_error"],
 
 
 

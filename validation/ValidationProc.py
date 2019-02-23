@@ -1,15 +1,17 @@
 import pandas as pd
 import numpy as np
-from folds import str_to_models, fold_to_str
+from folds import *
 
 from sklearn import metrics as sklearn_metrics
 from sklearn.metrics import get_scorer
-from utils import str_to_class
 from sklearn.metrics import SCORERS
 import pickle
 import os
 
-import nn_test
+import importlib.util
+spec = importlib.util.spec_from_file_location("utils", os.path.join(os.getcwd(), '../src/utils.py'))
+foo = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(foo)
 
 """
 ValidationModule
@@ -19,6 +21,7 @@ Date: 19.02.2019
 Description:
 
 """
+
 
 class ValidationBase:
 
@@ -34,6 +37,10 @@ class ValidationBase:
             y_train_data = y_train_data.values.reshape(-1, 1)
         return (train_data, y_train_data)
 
+    def print_models(self):
+        for l_item in self.models_list:
+            print(l_item)
+
     def prepare_data(self,x_data,y_data, t_index, v_index):
         return x_data.iloc[t_index], \
                x_data.iloc[v_index],\
@@ -43,51 +50,45 @@ class ValidationBase:
     def create_models(self,**kwargs):
         for i_m, (m, m_p) in enumerate(kwargs['model'].items()):
             self.model = str_to_models(m)
-            print(m, m_p)
             self.model = self.model(**m_p)
             self.models_list.append(self.model)
             self.models_features[i_m]["name"] = str(m)
             self.models_features[i_m]["features"] = m_p
             self.models_features.append({})
 
-    def train_model(self, train_data, y_train_data, folds, metric, path_to_save, folds_param):
+    def train_model(self, train_data, y_train_data, folds, folds_param, metric, path_to_save, metric_clases):
             raise NotImplementedError
 
     def save_summary_of_model(self,name, fold_params, model_params, metric):
-        save_temp_dict = {"fold_data": self.folds_data,
-                          "fold_features" : fold_params,
-                          "metric" : metric,
-                          "model": model_params}
-        print(save_temp_dict)
+        # save_temp_dict = {"fold_data": self.folds_data,
+        #                   "fold_features" : fold_params,
+        #                   "metric" : metric,
+        #                   "model": model_params}
+        dfObj = pd.DataFrame()
+        dfObj['fold_data'] = self.folds_data,
+        dfObj['fold_name'] = fold_params['fold_name'],
+        dfObj["fold_params"] = [fold_params['fold_param']],
+        dfObj["metric"] = [metric]
+        dfObj["model_name"] = [model_params['name']]
+        dfObj["model_features"] = [model_params['features']]
+        if not os.path.exists(name):
+            with open(name, 'wb') as f:
+                pickle.dump(dfObj,f)
+        else:
+            with open(name, 'rb') as f:
+                modDfObj = pickle.load(f)
 
-        #check if file exist
-        while True:
-            if os.path.isfile(name+'.pkl') is True:
-                name += '_new'
-            else:
-                name += '.pkl'
-                break
-        print(name)
-        with open(name, "wb") as f:
-            pickle.dump(save_temp_dict, f)
-
+            with open(name, '+wb') as f:
+                concat = pd.concat([dfObj, modDfObj])
+                pickle.dump(concat,f)
+                del concat,modDfObj
 
 class ValidationSklearn(ValidationBase):
     def __init__(self, **kwargs):
         super(ValidationSklearn, self).__init__(**kwargs)
         self.create_models(**kwargs)
 
-    def check_metrics(self,metrics):
-        for metric in metrics:
-            if metric not in SCORERS:
-                raise AttributeError(f"not metric {metric} for sklearn models")
-
-
-    def print_models(self):
-        for l_item in self.models_list:
-            print(l_item)
-
-    def train_model(self, train_data, y_train_data, folds, folds_param, metric, path_to_save):
+    def train_model(self, train_data, y_train_data, folds, folds_param, metric, path_to_save,metric_clases):
 
         train_data, y_train_data = self.reshape_data(train_data, y_train_data)
 
@@ -95,22 +96,31 @@ class ValidationSklearn(ValidationBase):
             for fold_n, (train_index, valid_index) in enumerate(folds.split(train_data)):
                 X_train, X_valid, y_train, y_valid = self.prepare_data(train_data,y_train_data, train_index, valid_index)
                 model.fit(X_train, y_train)
-                score_data = get_scorer(metric)(model, X_valid, y_valid)
+                score_data = metric_clases(X_valid, y_valid)
                 self.folds_data.append(score_data)
 
-            self.save_summary_of_model(''.join([path_to_save, str(self.__class__.__name__)]), folds_param, self.models_features[num_model], metric)
+            self.save_summary_of_model(path_to_save, folds_param, self.models_features[num_model], metric)
             self.folds_data = []
 
 
-class ValidationMatrix(ValidationBase):
+class ValidationBoost(ValidationBase):
     def __init__(self, **kwargs):
-        super(ValidationMatrix, self).__init__(**kwargs)
+        super(ValidationBoost, self).__init__(**kwargs)
         self.create_models(**kwargs)
 
-    # not work now
-    def train_model(self, train_data, y_train_data, folds, metric, path_to_save, folds_param):
-        #X_train, X_valid, y_train, y_valid = self.prepare_data(train_data,y_train_data, train_index, valid_index)
-        pass
+    def train_model(self, train_data, y_train_data, folds, folds_param, metric, path_to_save, metric_clases):
+        train_data, y_train_data = self.reshape_data(train_data, y_train_data)
+        for num_model, model in enumerate(self.models_list):
+            for fold_n, (train_index, valid_index) in enumerate(folds.split(train_data)):
+                X_train, X_valid, y_train, y_valid = self.prepare_data(train_data, y_train_data, train_index,
+                                                                       valid_index)
+                model.fit(X_train, y_train)
+                score_data = metric_clases(y_valid, model.predict(X_valid))
+                self.folds_data.append(score_data)
+
+            self.save_summary_of_model(path_to_save, folds_param,
+                                       self.models_features[num_model], metric)
+            self.folds_data = []
 
 
 class ValidationCustom(ValidationBase):
@@ -121,24 +131,28 @@ class ValidationCustom(ValidationBase):
 
     def create_models(self,**kwargs):
         for i_m, (m, m_p) in enumerate(kwargs['model'].items()):
-            self.model = str_to_class(self.path, m)
+            self.model = find_and_load_class(m)
             self.model = self.model(**m_p)
             self.models_list.append(self.model)
             self.models_features[i_m]["name"] = str(m)
             self.models_features[i_m]["features"] = m_p
             self.models_features.append({})
 
-    def check_metrics(self,metrics):
-        for metric in metrics:
-            for m in self.models_list:
-                if metric not in m.metrics.keys():
-                    raise AttributeError(f"not metric {metric} for model {str(m)}")
-
-    def train_model(self, train_data, y_train_data, folds, folds_param, metric, path_to_save):
+    def train_model(self, train_data, y_train_data, folds, folds_param, metric, path_to_save,metric_clases):
         for num_model, m in enumerate(self.models_list):
             try:
-                self.folds_data = m.train_model(train_data, y_train_data)
-                self.save_summary_of_model(''.join([path_to_save, str(self.__class__.__name__)]), folds_param,
+                for fold_n, (train_index, valid_index) in enumerate(folds.split(train_data)):
+                    X_train, X_valid, y_train, y_valid = self.prepare_data(train_data, y_train_data, train_index,
+                                                                           valid_index)
+                    m.train_model(X_train, y_train)
+
+                    y_probe = m.compute_loss(X_valid, y_valid)
+                    score_data = metric_clases(y_valid, y_probe)
+
+                    self.folds_data.append(score_data)
+
+
+                self.save_summary_of_model(path_to_save, folds_param,
                                            self.models_features[num_model], metric)
                 self.folds_data = []
             except AttributeError or NameError:
