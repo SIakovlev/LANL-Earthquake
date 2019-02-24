@@ -50,11 +50,11 @@ class ValidationBase:
             self.model = self.create_model(m)
             self.model = self.model(**m_p)
             self.models_list.append(self.model)
-            self.models_features[i_m]["name"] = str(m)
-            self.models_features[i_m]["features"] = m_p
+            self.models_features[i_m]["model_name"] = str(m)
+            self.models_features[i_m]["model_features"] = m_p
             self.models_features.append({})
 
-    def train_models(self, train_data, y_train_data, folds, folds_param, metric, path_to_save,metric_classes):
+    def train_models(self, train_data, y_train_data, folds, path_to_save,metric_classes,list_param):
 
         train_data, y_train_data = self.reshape_data(train_data, y_train_data)
 
@@ -69,8 +69,8 @@ class ValidationBase:
                 score_d = metric_classes(y_predict, y_valid)
 
                 self.score_data.append(score_d)
-
-            self.save_summary_of_model(path_to_save, [folds_param, self.models_features[num_model], {'metric':metric}])
+            list_param.append(self.models_features[num_model])
+            self.save_summary_of_model(path_to_save,list_param)
             self.score_data = []
 
     def save_summary_of_model(self, name, *list_data):
