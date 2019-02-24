@@ -59,18 +59,18 @@ class ValidationBase:
     def train_model(self, train_data, y_train_data, folds, folds_param, metric, path_to_save, metric_clases):
             raise NotImplementedError
 
-    def save_summary_of_model(self,name, fold_params, model_params, metric):
+    #def save_summary_of_model(self,name, **kwargs, fold_params, model_params, metric):
+    def save_summary_of_model(self, name, *list_data):
         # save_temp_dict = {"fold_data": self.folds_data,
         #                   "fold_features" : fold_params,
         #                   "metric" : metric,
         #                   "model": model_params}
         dfObj = pd.DataFrame()
-        dfObj['fold_data'] = self.folds_data,
-        dfObj['fold_name'] = fold_params['fold_name'],
-        dfObj["fold_params"] = [fold_params['fold_param']],
-        dfObj["metric"] = [metric]
-        dfObj["model_name"] = [model_params['name']]
-        dfObj["model_features"] = [model_params['features']]
+        for l in list_data[0]:
+            for d_k in l.keys():
+                dfObj[d_k] = [l[d_k]]
+
+        dfObj["folds_data"] = [self.folds_data]
         if not os.path.exists(name):
             with open(name, 'wb') as f:
                 pickle.dump(dfObj,f)
@@ -81,6 +81,7 @@ class ValidationBase:
             with open(name, '+wb') as f:
                 concat = pd.concat([dfObj, modDfObj])
                 pickle.dump(concat,f)
+                print(concat)
                 del concat,modDfObj
 
 class ValidationSklearn(ValidationBase):
@@ -88,7 +89,7 @@ class ValidationSklearn(ValidationBase):
         super(ValidationSklearn, self).__init__(**kwargs)
         self.create_models(**kwargs)
 
-    def train_model(self, train_data, y_train_data, folds, folds_param, metric, path_to_save,metric_clases):
+    def train_model(self, train_data, y_train_data, folds, folds_param, metric, path_to_save,metric_classes):
 
         train_data, y_train_data = self.reshape_data(train_data, y_train_data)
 
@@ -96,10 +97,10 @@ class ValidationSklearn(ValidationBase):
             for fold_n, (train_index, valid_index) in enumerate(folds.split(train_data)):
                 X_train, X_valid, y_train, y_valid = self.prepare_data(train_data,y_train_data, train_index, valid_index)
                 model.fit(X_train, y_train)
-                score_data = metric_clases(X_valid, y_valid)
+                score_data = metric_classes(X_valid, y_valid)
                 self.folds_data.append(score_data)
 
-            self.save_summary_of_model(path_to_save, folds_param, self.models_features[num_model], metric)
+            self.save_summary_of_model(path_to_save, [folds_param, self.models_features[num_model], {'metric':metric}])
             self.folds_data = []
 
 
@@ -118,8 +119,8 @@ class ValidationBoost(ValidationBase):
                 score_data = metric_clases(y_valid, model.predict(X_valid))
                 self.folds_data.append(score_data)
 
-            self.save_summary_of_model(path_to_save, folds_param,
-                                       self.models_features[num_model], metric)
+            self.save_summary_of_model(path_to_save, [folds_param,
+                                       self.models_features[num_model], {'metric':metric}])
             self.folds_data = []
 
 
@@ -151,8 +152,8 @@ class ValidationCustom(ValidationBase):
                     self.folds_data.append(score_data)
 
 
-                self.save_summary_of_model(path_to_save, folds_param,
-                                           self.models_features[num_model], metric)
+                self.save_summary_of_model(path_to_save, [folds_param,
+                                           self.models_features[num_model], {'metric':metric}])
                 self.folds_data = []
             except AttributeError or NameError:
                 raise AttributeError(f'Method train not implement for class : {str(m)}')
