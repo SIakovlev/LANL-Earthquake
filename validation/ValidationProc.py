@@ -27,7 +27,7 @@ Description:
 class ValidationBase:
 
     def __init__(self, **kwargs):
-        self.score_data = []
+        self.score_data = {}
         self.models_list = []
         self.models_features = [{}]
 
@@ -66,21 +66,36 @@ class ValidationBase:
 
                 model.fit(X_train, y_train)
                 y_predict = model.predict(X_valid)
-                score_d = metric_classes(y_predict, y_valid)
+                for metric_name,metric_value in metric_classes.items():
 
-                self.score_data.append(score_d)
+                    if fold_n==0:
+                        self.score_data[metric_name] = []
+
+                    score_d = metric_value(y_predict, y_valid)
+                    self.score_data[metric_name].append(score_d)
+
             list_param.append(self.models_features[num_model])
             self.save_summary_of_model(path_to_save,list_param)
-            self.score_data = []
+            self.score_data = {}
 
     def save_summary_of_model(self, name, *list_data):
 
-        dfObj = pd.DataFrame()
+        dfObj1 = pd.DataFrame(columns=['metric', 'score_data'])
+        dfObj2 = pd.DataFrame()
+        n_metrics = 0
+
+        for s_k,s_v  in self.score_data.items():
+            dfObj1.loc[len(dfObj1)] = [s_k, s_v]
+            n_metrics = n_metrics+1
+
         for l in list_data[0]:
             for d_k in l.keys():
-                dfObj[d_k] = [l[d_k]]
+                dfObj2[d_k] = [l[d_k]]
 
-        dfObj["score_data"] = [self.score_data]
+        dfObj2 = pd.concat([dfObj2] * n_metrics)
+        dfObj2 = dfObj2.reset_index(drop=True)
+
+        dfObj = pd.concat([dfObj2, dfObj1], axis=1)
 
         if not os.path.exists(name):
             with open(name, 'wb') as f:

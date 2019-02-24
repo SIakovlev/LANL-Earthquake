@@ -79,8 +79,8 @@ def main(**kwargs):
     for i_f, f in enumerate(folds_list):
         for i, v in enumerate(tqdm(validators)):
             # create the summary in summary_dest
-            for i_m, m in enumerate(metrics):
-                v.train_models(train_df.drop(['time_to_failure'], axis=1), train_df['time_to_failure'], f, summary_dest, metrics_classes[i_m], [fold_features[i_f], {'metric':m}])
+            #for i_m, m in enumerate(metrics):
+            v.train_models(train_df.drop(['time_to_failure'], axis=1), train_df['time_to_failure'], f, summary_dest, metrics_classes, [fold_features[i_f]])
 
     print('.......................Processing finished.........................')
 

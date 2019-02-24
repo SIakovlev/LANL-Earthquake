@@ -6,8 +6,8 @@
           [
             {
               "name":"RepeatedKFold",
-              "n_splits": 5,
-              "n_repeats": 2
+              "n_splits": 2,
+              "n_repeats": 1
             },
 
             {
@@ -47,7 +47,7 @@
             },
             {
               "name": "ValidationSklearn",
-              "model":{ "XGBRegressor" : {"learnong_rate": 0.1},
+              "model":{ "XGBRegressor" : {"learning_rate": 0.1},
                         "LGBMRegressor" : {"max_depth": 2}
                       }
             }

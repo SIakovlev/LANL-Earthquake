@@ -9,10 +9,10 @@ foo = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(foo)
 
 def check_metrics(metrics):
-    metrics_class = []
+    metrics_class = {}
     try:
         for m in metrics:
-            metrics_class.append(foo.str_to_class('sklearn.metrics', m))
+            metrics_class[m] = foo.str_to_class('sklearn.metrics', m)
     except AttributeError:
         raise AttributeError(f'Metric does not exist: {m}')
     return metrics_class
