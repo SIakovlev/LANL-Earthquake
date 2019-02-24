@@ -80,7 +80,7 @@ def main(**kwargs):
         for i, v in enumerate(tqdm(validators)):
             # create the summary in summary_dest
             for i_m, m in enumerate(metrics):
-                v.train_model(train_df.drop(['time_to_failure'], axis=1), train_df['time_to_failure'], f, fold_features[i_f] , m, summary_dest, metrics_classes[i_m])
+                v.train_models(train_df.drop(['time_to_failure'], axis=1), train_df['time_to_failure'], f, fold_features[i_f] , m, summary_dest, metrics_classes[i_m])
 
     print('.......................Processing finished.........................')
 
@@ -91,13 +91,10 @@ def info():
     print('Config example: validation_config.json')
 
     print("For custom models: ")
-    print("1. Function must have command \"path\" ")
-    print("2. Function must have attribute-dictionary self.metrics with same names (keys) as the sklearn metrics in SCORES")
-    print("3. Function must have method train_model(train_data, train_y))")
+    print("1. Function must have method predict(train_data) that return y_predict")
+    print("2. Function must have method fit(train_data, train_y))")
 
 if __name__ == '__main__':
-
-
 
     parser = argparse.ArgumentParser()
 

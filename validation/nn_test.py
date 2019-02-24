@@ -31,7 +31,7 @@ class CustomNN(Module):
         res = self.out(self.relu(self.linear(x)))
         return res
 
-    def train_model(self, train_data, train_y):
+    def fit(self, train_data, train_y):
         n_train_steps_per_epoch = train_data.shape[0] // self.minibatch_size
 
         train_data = torch.tensor(train_data.values.astype(np.float32))
@@ -52,46 +52,9 @@ class CustomNN(Module):
                 print(f"\r step: {i} | loss={loss.detach().cpu():.4f}", end="")
             print()
 
-    def compute_loss(self, test_data, test_y):
+    def predict(self, test_data):
         test_data = torch.tensor(test_data.values.astype(np.float32))
-        test_y = torch.tensor(test_y.values.astype(np.float32)).view(-1, 1)
-
-        predict = self(test_data)
-        return predict.detach().numpy()
+        y_predict = self(test_data)
+        return y_predict.detach().numpy()
 
 
-# def main(**kwargs):
-#     train_data_fname = kwargs['train_data_fname']
-#     train_df = pd.read_hdf(train_data_fname, 'table')
-#     train_data = train_df.drop(['time_to_failure'], axis=1)
-#     train_y = train_df['time_to_failure']
-#
-#     test_data_fname = kwargs['test_data_fname']
-#     test_df = pd.read_hdf(test_data_fname, 'table')
-#     test_data = test_df.drop(['time_to_failure'], axis=1)
-#     test_y = test_df['time_to_failure']
-#
-#     neural_net = CustomNN(**kwargs['neural_net'])
-#
-#     neural_net.train_model(train_data, train_y)
-#
-#     loss = neural_net.compute_loss(test_data, test_y)
-#     print(f"test loss: {loss:.4f}")
-#     return
-#
-#
-# if __name__ == '__main__':
-#     params = {
-#         "train_data_fname" : "../data/train_short.h5",
-#         "test_data_fname": "../data/train_short.h5",
-#         "neural_net": {
-#             "in_features": 1,
-#             "out_features": 1,
-#             "num_hidden": 100,
-#             "learning_rate": 0.0001,
-#             "num_epochs": 2,
-#             "minibatch_size": 256
-#         }
-#     }
-#
-#     main(**params)
