@@ -1,6 +1,6 @@
 {
   "data_fname": "../data/train_short.h5",
-  "data_fname_dest": "../data/train_short_processed.h5",
+  "data_fname_dest": "../data/",
   "processing":
           [
             {
