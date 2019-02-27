@@ -3,7 +3,8 @@ import argparse
 import pandas as pd
 import platform
 import matplotlib as mpl
-from dfc import DFShredder
+from dfc import DFHandler
+import os
 
 from utils import str_to_class
 
@@ -25,7 +26,8 @@ def main(**kwargs):
     # 2. Load data
     # TODO: implement "smart" data loading to handle data too big to fit in the memory
 
-    df_handler = DFShredder(data_fname, chunk_size=1e6)
+    df_handler = DFHandler()
+    df_handler.set_hdf_iterator(data_fname, chunk_size=1e6)
     # df_handler = processors[0].load(data_fname, chunk_size=1e6)
 
     for df in df_handler:
@@ -37,12 +39,12 @@ def main(**kwargs):
 
         # 4. Save modified dataframe
         # processors[0].save(df, data_fname_dest)
-        df_handler.save(df, data_fname_dest, chunk_size_MB=3)
+        df_handler.save(df, data_fname_dest, chunk_size_MB=3, dir_name='test_dataset')
         print(f'dataframe saved as {data_fname_dest}')
-
     pd.set_option('display.max_columns', 500)
     print('.......................Processing finished.........................')
     print(df.head(10))
+    df_handler.set_iterator(os.path.join(data_fname_dest, 'test_dataset'))
 
 
 if __name__ == '__main__':
