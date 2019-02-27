@@ -32,7 +32,7 @@ def main(**kwargs):
         # 3. Run processing
         print('.......................Processing started.........................')
         for i, p in enumerate(processors):
-            print(f'{i}: name={p.__class__.__name__} | columns={p.cell_names}')
+            print(f'{i}: name={p.__class__.__name__} | columns={p.column_names}')
             df = p(df)
 
         # 4. Save modified dataframe
