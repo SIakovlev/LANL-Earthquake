@@ -87,7 +87,6 @@ class DFShredder:
                 obj = obj.drop(obj.index[[i for i in range(0, chunk_size_rows-stash_size_rows)]])
             else:
                 obj.iloc[:N].to_hdf(self.stash.last_filename, key='table', append=True)
-                # obj = obj.drop(obj.index[[i for i in range(0, N)]])
                 return
             self.stash.B = 0
 
@@ -99,21 +98,12 @@ class DFShredder:
             filename = path + 'part_{}_{}.h5'.format(i, self.file_counter)
             obj.iloc[i * chunk_size_rows: (i + 1) * chunk_size_rows].to_hdf(filename, key='table')
 
-        # TODO: store the remainder due to integer division, i.e. N - chunk_size_rows * num_chunks
-
         # Calculate the rest data size in MB and put in in stash
         self.stash.B = N - (chunk_size_rows * num_chunks)
         if self.stash.B:
             last_filename = path + 'part_{}_{}.h5'.format(num_chunks, self.file_counter)
             obj.iloc[num_chunks * chunk_size_rows:].to_hdf(last_filename, key='table', append=True)
             self.stash.last_filename = last_filename
-
-        #
-        # # write the last chunk of data if there is anything in stash
-        # if self.stash.B:
-        #     last_filename = path + 'part_{}_{}.h5'.format(num_chunks, self.file_counter)
-        #     obj.iloc[num_chunks * chunk_size_rows:].to_hdf(last_filename, key='table', append=True)
-        #     self.stash.last_filename = last_filename
 
         # calculate its size in bytes
         self.file_counter += 1
