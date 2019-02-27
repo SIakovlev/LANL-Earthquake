@@ -1,5 +1,5 @@
 {
-  "data_fname": "../data/train_short.h5",
+  "data_fname": "../data/train_3400000.h5",
   "data_fname_dest": "../data/",
   "processing":
           [

@@ -14,6 +14,8 @@ class DFShredder:
 
     def __init__(self, path, **kwargs):
 
+        # TODO: change logic, pass path to a folder where dataframe is
+
         self.df_iterator = pd.read_hdf(path, key='table', chunksize=kwargs['chunk_size'])
         self.file_handler = h5py.File(path)
         self.stash = Stash()  # in bytes
@@ -31,10 +33,10 @@ class DFShredder:
         :rtype:
         """
         if isinstance(loc, slice):
-            # do your handling for a slice object:
+            # TODO: handling for a slice object:
             print(loc.start, loc.stop, loc.step)
         else:
-            # Do your handling for a plain index
+            # TODO: handling for a plain index
             print(loc)
 
     def iloc(self, loc):
@@ -58,13 +60,13 @@ class DFShredder:
     def save(self, obj, path, **kwargs):
         """
 
-        :param obj:
-        :type obj:
-        :param path:
-        :type path:
-        :param kwargs:
-        :type kwargs:
-        :return:
+        :param obj: data frame object
+        :type obj: pandas.DataFrame
+        :param path: path to a folder where data needs to be saved
+        :type path: string
+        :param kwargs: chunk_size_MB - data chunk size in MB
+        :type kwargs: chunk_size_MB - int
+        :return: 
         :rtype:
         """
 
@@ -72,7 +74,7 @@ class DFShredder:
             raise TypeError("You can save pandas DataFrames only")
 
         if not isinstance(path, str):
-            raise TypeError("Path should be specified as string")
+            raise TypeError("Path should be specified as a string")
 
         chunk_size_MB = kwargs['chunk_size_MB']
         chunk_size_B = chunk_size_MB * 1e6
@@ -95,15 +97,17 @@ class DFShredder:
         chunk_size_rows = int(chunk_size_B) // int(M * VALUE_SIZE)
 
         for i in range(num_chunks):
-            filename = path + 'part_{}_{}.h5'.format(i, self.file_counter)
+            filename = path + 'part_{}_{}.h5'.format(self.file_counter, i)
             obj.iloc[i * chunk_size_rows: (i + 1) * chunk_size_rows].to_hdf(filename, key='table')
 
         # Calculate the rest data size in MB and put in in stash
         self.stash.B = N - (chunk_size_rows * num_chunks)
         if self.stash.B:
-            last_filename = path + 'part_{}_{}.h5'.format(num_chunks, self.file_counter)
+            last_filename = path + 'part_{}_{}.h5'.format(self.file_counter, num_chunks)
             obj.iloc[num_chunks * chunk_size_rows:].to_hdf(last_filename, key='table', append=True)
             self.stash.last_filename = last_filename
 
         # calculate its size in bytes
         self.file_counter += 1
+
+        # TODO: add data integrity check
