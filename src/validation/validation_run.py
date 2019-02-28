@@ -72,14 +72,13 @@ def main(**kwargs):
 
     # Load data
     train_df = pd.read_hdf(train_data,key='table')
-    # 4. train models
+    # 4. train validators
     print('....................... Train models ..............................')
 
     for i_f, f in enumerate(folds_list):
-        for i, v in enumerate(tqdm(validators)):
-            # create the summary in summary_dest
-            #for i_m, m in enumerate(metrics):
-            v.train_models(train_df.drop(['time_to_failure'], axis=1), train_df['time_to_failure'], f, summary_dest, metrics_classes, list_param=[fold_features[i_f]])
+        for v in tqdm(validators):
+            # train models in validator and create summary for all models
+            v.train_models(train_df.drop(['time_to_failure'], axis=1), train_df['time_to_failure'], f, summary_dest, metrics_classes, fold_features[i_f])
 
     print('.......................Processing finished.........................')
 
@@ -88,7 +87,7 @@ def main(**kwargs):
 
 def info():
     print('Config example: validation_config.json')
-
+    print('Example of custom model: models.py')
     print("For custom models: ")
     print("1. Function must have method predict(train_data) that return y_predict")
     print("2. Function must have method fit(train_data, train_y))")
@@ -102,7 +101,7 @@ if __name__ == '__main__':
 
     parser.add_argument('--config_fname',
                         help='name of the config file',
-                        type=str, default='validation_config.json')
+                        type=str)
 
     args = parser.parse_args()
 
