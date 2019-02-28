@@ -141,14 +141,23 @@ class DFHandler:
             size_list.append(df.shape[0])
             indices.extend([df.index[0], df.index[-1]])
 
-        # check size
         check_size = size_list[1:-1] == size_list[:-2]
+        print()
+        print("Data integrity check:")
+        # check size
+        print("Test 1. All parts except the last one should have the same size: {}".
+              format(check_size))
+
         # check indices
         check_indices = []
         for i in range(0, len(indices) - 3, 2):
             check_indices.append(indices[i+1] + 1 == indices[i+2])
-        # check total size
-        return check_size, all(check_indices)
+
+        print("Test 2. Indices of two consecutive parts should differ by 1: {}".
+              format(all(check_indices)))
+        print()
+
+        return check_size and all(check_indices)
 
     @staticmethod
     def gen(directory):

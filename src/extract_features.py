@@ -45,7 +45,7 @@ def main(**kwargs):
     print('.......................Processing finished.........................')
     print(df.head(10))
     df_handler.set_iterator(os.path.join(data_fname_dest, 'test_dataset/'))
-    print("Integrity check: {}".format(df_handler.check_integrity()))
+    df_handler.check_integrity()
     # print(os.path.join(data_fname_dest, 'test_dataset/'))
     print("500th element: {}".format(df_handler.iloc(500)))
     print("5000th element: {}".format(df_handler.iloc(5000)))
