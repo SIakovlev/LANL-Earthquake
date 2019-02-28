@@ -4,7 +4,7 @@ import pandas as pd
 import platform
 import matplotlib as mpl
 
-from src.utils import str_to_class
+from utils import str_to_class
 
 if platform.system() == 'Darwin':
     mpl.use('TkAgg')  # Mac OS specific
@@ -28,7 +28,7 @@ def main(**kwargs):
     # 3. Run processing
     print('.......................Processing started.........................')
     for i, p in enumerate(processors):
-        print(f'{i}: name={p.__class__.__name__} | columns={p.cell_names}')
+        print(f'{i}: name={p.__class__.__name__} | columns={p.column_names}')
         df = p(df)
 
     # 4. Save modified dataframe
@@ -41,10 +41,9 @@ def main(**kwargs):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--config_fname',
+    parser.add_argument('config_fname',
                         help='name of the config file',
-                        type=str,
-                        default='data_processing_config_example.json')
+                        type=str)
     args = parser.parse_args()
 
     with open(args.config_fname) as config:
