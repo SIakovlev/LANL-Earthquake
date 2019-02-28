@@ -26,8 +26,8 @@ def main(**kwargs):
     # 2. Load data
     # TODO: implement "smart" data loading to handle data too big to fit in the memory
 
-    df_handler = DFHandler()
-    df_handler.set_hdf_iterator(data_fname, chunk_size=1e6)
+    df_handler = DFHandler(chunk_size=1e6)
+    df_handler.set_hdf_iterator(data_fname)
     # df_handler = processors[0].load(data_fname, chunk_size=1e6)
 
     for df in df_handler:
@@ -44,7 +44,13 @@ def main(**kwargs):
     pd.set_option('display.max_columns', 500)
     print('.......................Processing finished.........................')
     print(df.head(10))
-    df_handler.set_iterator(os.path.join(data_fname_dest, 'test_dataset'))
+    df_handler.set_iterator(os.path.join(data_fname_dest, 'test_dataset/'))
+    print("Integrity check: {}".format(df_handler.check_integrity()))
+    # print(os.path.join(data_fname_dest, 'test_dataset/'))
+    print("500th element: {}".format(df_handler.iloc(500)))
+    print("5000th element: {}".format(df_handler.iloc(5000)))
+    print("50000th element: {}".format(df_handler.iloc(50000)))
+    print("500000th element: {}".format(df_handler.iloc(500000)))
 
 
 if __name__ == '__main__':
