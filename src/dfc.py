@@ -12,6 +12,64 @@ class Stash:
     last_filename = None
 
 
+class iLocWrapper:
+    def __init__(self, obj):
+        self.obj = obj
+
+    def __getitem__(self, loc):
+        if isinstance(loc, slice):
+            if loc.step is not None:
+                raise Exception("Slicing with a fixed step size is not supported yet")
+
+            start_chunk_number = loc.start // self.obj.chunk_nrows
+            start_index = loc.start % self.obj.chunk_nrows
+            stop_chunk_number = loc.stop // self.obj.chunk_nrows
+            stop_index = loc.stop % self.obj.chunk_nrows
+
+            if start_chunk_number == stop_chunk_number:
+                return self.obj.df_iterator[start_chunk_number].iloc[start_index:stop_index]
+            elif stop_chunk_number > start_chunk_number:
+                df = pd.DataFrame()
+                df = df.append(self.obj.df_iterator[start_chunk_number].iloc[start_index:])
+                for chunk_number in range(start_chunk_number + 1, stop_chunk_number):
+                    df = df.append(self.obj.df_iterator[chunk_number])
+                df = df.append(self.obj.df_iterator[stop_chunk_number].iloc[:stop_index])
+                return df
+
+        elif isinstance(loc, list):
+            df = pd.DataFrame()
+            for loc_i in loc:
+                chunk_number = loc_i // self.obj.chunk_nrows
+                index = loc_i % self.obj.chunk_nrows
+                df = df.append(self.obj.df_iterator[chunk_number].iloc[index])
+            return df
+
+        elif isinstance(loc, int):
+            chunk_number = loc // self.obj.chunk_nrows
+            index = loc % self.obj.chunk_nrows
+            return self.obj.df_iterator[chunk_number].iloc[index]
+
+        else:
+            raise TypeError("The argument of iloc can only be: slice, list of ints or int")
+
+    def __setitem__(self, loc, value):
+        if isinstance(loc, slice):
+            pass
+            # Not sure if implemented properly in pandas
+
+        elif isinstance(loc, list):
+            pass
+            # Not sure if implemented properly in pandas
+
+        elif isinstance(loc, int):
+            chunk_number = loc // self.obj.chunk_nrows
+            index = loc % self.obj.chunk_nrows
+            self.obj.df_iterator[chunk_number].iloc[index] = value
+
+        else:
+            raise TypeError("The argument of iloc can only be: slice, list of ints or int")
+
+
 class MemoryManager:
 
     def __init__(self, **kwargs):
@@ -28,6 +86,7 @@ class MemoryManager:
         self.stash = Stash()  # in bytes
         self.file_counter = 0
         self.chunk_size = kwargs['chunk_size']
+        self.iloc = iLocWrapper(self)
 
         # self.num_files = len([name for name in os.listdir(path) if os.path.isfile(os.path.join(path, name))])
 
@@ -61,53 +120,31 @@ class MemoryManager:
             raise Exception('Memory manager iterator is not set!')
 
         if isinstance(loc, slice):
-            # TODO: handling for a slice object:
-            print(loc.start, loc.stop, loc.step)
+            pass
+        elif isinstance(loc, str):
+            pass
+            # df_temp = pd.DataFrame
+            # for df in self.df_iterator:
+            #     df_temp = df_temp.append(df[loc])
+            # return df_temp
         else:
-            # TODO: handling for a plain index
-            print(loc)
+            raise TypeError("The argument of iloc can only be: slice, list of ints or int")
 
-    def iloc(self, loc):
+    def __setitem__(self, loc):
         """
 
-        :param loc: column location
-        :type loc: slice, list of ints, int,
+        :param loc: row location
+        :type loc: slice, int
         :return:
         :rtype:
         """
+        if self.df_iterator is None:
+            raise Exception('Memory manager iterator is not set!')
 
         if isinstance(loc, slice):
-            if loc.step is not None:
-                raise Exception("Slicing with a fixed step size is not supported yet")
-
-            start_chunk_number = loc.start // self.chunk_nrows
-            start_index = loc.start % self.chunk_nrows
-            stop_chunk_number = loc.stop // self.chunk_nrows
-            stop_index = loc.stop % self.chunk_nrows
-
-            if start_chunk_number == stop_chunk_number:
-                return self.df_iterator[start_chunk_number].iloc[start_index:stop_index]
-            elif start_chunk_number > stop_chunk_number:
-                df = pd.DataFrame()
-                df.append(self.df_iterator[start_chunk_number].iloc[start_index:])
-                for chunk_number in range(start_chunk_number + 1, stop_chunk_number):
-                    df.append(self.df_iterator[chunk_number])
-                df.append(self.df_iterator[stop_chunk_number].iloc[:stop_index])
-                return df
-
-        elif isinstance(loc, list):
-            df = pd.DataFrame()
-            for loc_i in loc:
-                chunk_number = loc_i // self.chunk_nrows
-                index = loc_i % self.chunk_nrows
-                df = df.append(self.df_iterator[chunk_number].iloc[index])
-            return df
-
-        elif isinstance(loc, int):
-            chunk_number = loc // self.chunk_nrows
-            index = loc % self.chunk_nrows
-            return self.df_iterator[chunk_number].iloc[index]
-
+            pass
+        elif isinstance(loc, str):
+            pass
         else:
             raise TypeError("The argument of iloc can only be: slice, list of ints or int")
 

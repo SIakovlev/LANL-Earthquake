@@ -47,16 +47,17 @@ def main(**kwargs):
     df_handler.set_iterator(os.path.join(data_fname_dest, 'test_dataset/'))
     df_handler.check_integrity()
     # print(os.path.join(data_fname_dest, 'test_dataset/'))
-    print("500th element: {}".format(df_handler.iloc(500)))
-    print("5000th element: {}".format(df_handler.iloc(5000)))
-    print("50000th element: {}".format(df_handler.iloc(50000)))
-    print("500000th element: {}".format(df_handler.iloc(500000)))
+    print("500th element: {}".format(df_handler.iloc[500]))
+    print("5000th element: {}".format(df_handler.iloc[5000]))
+    print("50000th element: {}".format(df_handler.iloc[50000]))
+    print("500000th element: {}".format(df_handler.iloc[500000]))
     print()
-    print("500 + 502 elements: {}".format(df_handler.iloc([500, 502])))
-    print("50000 + 500000 element: {}".format(df_handler.iloc([50000, 500000])))
+    print("500 + 502 elements: {}".format(df_handler.iloc[[500, 502]]))
+    print("50000 + 500000 element: {}".format(df_handler.iloc[[50000, 500000]]))
     print()
-    print(df_handler.iloc(slice(1, 7)).head(10))
-
+    print(df_handler.iloc[1:70000].tail(10))
+    print()
+    # print(df_handler['s'].head(10))
 
 
 if __name__ == '__main__':
