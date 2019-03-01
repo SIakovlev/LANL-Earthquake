@@ -61,6 +61,7 @@ def main(**kwargs):
     metrics = []
     for m in kwargs["metrics"]:
         metrics.append(m)
+
     metrics_classes = check_metrics(metrics)
 
     # 4. parse params and create a chain of validation instances
