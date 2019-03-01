@@ -83,7 +83,7 @@ class MemoryManager:
         self.df_iterator = None
         self.stash = Stash()  # in bytes
         self.file_counter = 0
-        self.chunk_size = kwargs['chunk_size']
+        # self.chunk_size = kwargs['chunk_size']
         self.iloc = iLocWrapper(self)
 
     def set_iterator(self, path):
@@ -96,7 +96,7 @@ class MemoryManager:
 
     # TODO: fix later, will be deprecated for sure
     def set_hdf_iterator(self, path, **kwargs):
-        self.df_iterator = pd.read_hdf(path, key='table', chunksize=self.chunk_size)
+        self.df_iterator = pd.read_hdf(path, key='table', chunksize=kwargs['chunk_size'])
 
     def __iter__(self):
         try:
@@ -168,8 +168,7 @@ class MemoryManager:
                 os.makedirs(dir_path)
 
         save_path = os.path.join(path, kwargs['dir_name'])
-        # chunk_size_B = kwargs['chunk_size_MB'] * 1e6
-        chunk_size_B = self.chunk_size * 1e6
+        chunk_size_B = kwargs['chunk_size_MB'] * 1e6
         row_size_B = int(obj.shape[1] * VALUE_SIZE)
         chunk_rows = int(chunk_size_B) // row_size_B
 
@@ -177,7 +176,7 @@ class MemoryManager:
             # if the next file is large enough
             if self.stash.num_rows < obj.shape[0]:
                 obj.iloc[:chunk_rows-self.stash.num_rows].to_hdf(self.stash.last_filename, key='table', append=True)
-                obj = obj.drop(obj.index[[i for i in range(0, chunk_rows - self.stash.num_rows)]])
+                obj = obj.drop(obj.index[[i for i in range(0, min(chunk_rows - self.stash.num_rows, obj.shape[0]))]])
             else:
                 obj.iloc[:].to_hdf(self.stash.last_filename, key='table', append=True)
                 return
@@ -185,6 +184,11 @@ class MemoryManager:
 
         N, M = obj.shape
         num_chunks = (M * N * VALUE_SIZE) // int(chunk_size_B)
+        if not num_chunks:
+            warnings.warn('Chunk size is too large, please choose a smaller value')
+            print('Dataframe size is {} MB'.format(M * N * VALUE_SIZE / int(1e6)))
+            print('Chunk size is {} MB'.format(chunk_size_B / int(1e6)))
+
         # Store the whole object in chunks of size chunk_size
         for i in range(num_chunks):
             filename = os.path.join(save_path, 'part_{}.h5'.format(self.file_counter))

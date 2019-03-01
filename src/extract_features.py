@@ -39,7 +39,7 @@ def main(**kwargs):
 
         # 4. Save modified dataframe
         # processors[0].save(df, data_fname_dest)
-        df_handler.save(df, data_fname_dest, chunk_size_MB=3, dir_name='test_dataset')
+        df_handler.save(df, data_fname_dest, chunk_size_MB=70, dir_name='test_dataset')
         print(f'dataframe saved as {data_fname_dest}')
 
     pd.set_option('display.max_columns', 500)
