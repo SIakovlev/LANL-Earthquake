@@ -4,7 +4,7 @@ import pandas as pd
 import platform
 import matplotlib as mpl
 
-from utils import str_to_class
+from src.utils import str_to_class
 
 if platform.system() == 'Darwin':
     mpl.use('TkAgg')  # Mac OS specific
