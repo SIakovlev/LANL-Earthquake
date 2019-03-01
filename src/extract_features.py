@@ -27,37 +27,40 @@ def main(**kwargs):
     # TODO: implement "smart" data loading to handle data too big to fit in the memory
 
     df_handler = MemoryManager(chunk_size=1e6)
-    df_handler.set_hdf_iterator(data_fname)
-    # df_handler = processors[0].load(data_fname, chunk_size=1e6)
 
-    # for df in df_handler:
-    #     # 3. Run processing
-    #     print('.......................Processing started.........................')
-    #     for i, p in enumerate(processors):
-    #         print(f'{i}: name={p.__class__.__name__} | columns={p.column_names}')
-    #         df = p(df)
-    #
-    #     # 4. Save modified dataframe
-    #     # processors[0].save(df, data_fname_dest)
-    #     df_handler.save(df, data_fname_dest, chunk_size_MB=3, dir_name='test_dataset')
-    #     print(f'dataframe saved as {data_fname_dest}')
-    # pd.set_option('display.max_columns', 500)
-    # print('.......................Processing finished.........................')
-    # print(df.head(10))
+    # set iterator to a single big HDF file
+    df_handler.set_hdf_iterator(data_fname)
+    for df in df_handler:
+        # 3. Run processing
+        print('.......................Processing started.........................')
+        for i, p in enumerate(processors):
+            print(f'{i}: name={p.__class__.__name__} | columns={p.column_names}')
+            df = p(df)
+
+        # 4. Save modified dataframe
+        # processors[0].save(df, data_fname_dest)
+        df_handler.save(df, data_fname_dest, chunk_size_MB=3, dir_name='test_dataset')
+        print(f'dataframe saved as {data_fname_dest}')
+
+    pd.set_option('display.max_columns', 500)
+    print('.......................Processing finished.........................')
+
+    # set iterator to a working directory with shredded dataset
     df_handler.set_iterator(os.path.join(data_fname_dest, 'test_dataset/'))
     df_handler.check_integrity()
+
     # print(os.path.join(data_fname_dest, 'test_dataset/'))
-    print("500th element: {}".format(df_handler.iloc[500]))
-    print("5000th element: {}".format(df_handler.iloc[5000]))
-    print("50000th element: {}".format(df_handler.iloc[50000]))
-    print("500000th element: {}".format(df_handler.iloc[500000]))
+    print("500th element: \n{}".format(df_handler.iloc[500]))
+    print("5000th element: \n{}".format(df_handler.iloc[5000]))
+    print("3399998th element: \n{}".format(df_handler.iloc[3399998]))
+    print("500000th element: \n{}".format(df_handler.iloc[500000]))
     print()
-    print("500 + 502 elements: {}".format(df_handler.iloc[[500, 502]]))
-    print("50000 + 500000 element: {}".format(df_handler.iloc[[50000, 500000]]))
+    print("500 + 502 elements: \n{}".format(df_handler.iloc[[500, 502]]))
+    print("50000 + 500000 elements: \n{}".format(df_handler.iloc[[50000, 500000]]))
     print()
-    print(df_handler.iloc[1:70000].tail(10))
+    print(df_handler.iloc[0:70000].tail(10))
     print()
-    # print(df_handler['s'].head(10))
+    print(df_handler['s'].tail(10))
 
 
 if __name__ == '__main__':

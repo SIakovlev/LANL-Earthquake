@@ -97,7 +97,6 @@ class MemoryManager:
         # last chunk can have a different number of rows due to arbitrary chunk size
         self.last_chunk_nrows = self.df_iterator[-1].shape[0]
 
-    # not sure how to embed yet
     # TODO: fix later, will be deprecated for sure
     def set_hdf_iterator(self, path, **kwargs):
         self.df_iterator = pd.read_hdf(path, key='table', chunksize=self.chunk_size)
@@ -122,11 +121,10 @@ class MemoryManager:
         if isinstance(loc, slice):
             pass
         elif isinstance(loc, str):
-            pass
-            # df_temp = pd.DataFrame
-            # for df in self.df_iterator:
-            #     df_temp = df_temp.append(df[loc])
-            # return df_temp
+            df_temp = pd.DataFrame()
+            for df in self.df_iterator:
+                df_temp = df_temp.append(df[[loc]])
+            return df_temp
         else:
             raise TypeError("The argument of iloc can only be: slice, list of ints or int")
 
@@ -193,6 +191,8 @@ class MemoryManager:
         # Store the whole object in chunks of size chunk_size
         for i in range(num_chunks):
             filename = os.path.join(save_path, 'part_{}.h5'.format(self.file_counter))
+            if os.path.exists(filename):
+                warnings.warn('Rewriting the existing file: {}'.format(filename))
             obj.iloc[i * chunk_rows: (i + 1) * chunk_rows].to_hdf(filename, key='table')
             self.file_counter += 1
 
@@ -200,6 +200,8 @@ class MemoryManager:
         self.stash.num_rows = N - (chunk_rows * num_chunks)
         if self.stash.num_rows:
             last_filename = os.path.join(save_path, 'part_{}.h5'.format(self.file_counter))
+            if os.path.exists(last_filename):
+                warnings.warn('Rewriting the existing file: {}'.format(last_filename))
             obj.iloc[num_chunks * chunk_rows:].to_hdf(last_filename, key='table', append=True)
             self.stash.last_filename = last_filename
             self.file_counter += 1
@@ -211,6 +213,7 @@ class MemoryManager:
             size_list.append(df.shape[0])
             indices.extend([df.index[0], df.index[-1]])
 
+        # Test 1. All parts except the last one should have the same size
         check_size = size_list[1:-1] == size_list[:-2]
         print()
         print("Data integrity check:")
@@ -218,7 +221,7 @@ class MemoryManager:
         print("Test 1. All parts except the last one should have the same size: {}".
               format(check_size))
 
-        # check indices
+        # Test 2. Indices of two consecutive chunks should differ by 1
         check_indices = []
         for i in range(0, len(indices) - 3, 2):
             check_indices.append(indices[i+1] + 1 == indices[i+2])
