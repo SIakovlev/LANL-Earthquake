@@ -26,10 +26,10 @@ def main(**kwargs):
     # 2. Load data
     # TODO: implement "smart" data loading to handle data too big to fit in the memory
 
-    df_handler = MemoryManager(chunk_size=1e6)
+    df_handler = MemoryManager()
 
     # set iterator to a single big HDF file
-    df_handler.set_hdf_iterator(data_fname)
+    df_handler.set_hdf_iterator(data_fname, chunk_size=1e6)
     for df in df_handler:
         # 3. Run processing
         print('.......................Processing started.........................')
@@ -45,21 +45,28 @@ def main(**kwargs):
     pd.set_option('display.max_columns', 500)
     print('.......................Processing finished.........................')
 
-    # set iterator to a working directory with shredded dataset
+    """
+    This is a short example demonstrating how to use MemoryManager
+    
+    """
+    # 1) set iterator to a working directory with shredded dataset
     df_handler.set_iterator(os.path.join(data_fname_dest, 'test_dataset/'))
+    # 2) Optional. Check data integrity. For now there are two simple tests performed
     df_handler.check_integrity()
-
-    # print(os.path.join(data_fname_dest, 'test_dataset/'))
+    # 3) To get access to the elements of distributed dataframe, use .iloc[] method:
+    # with a single integer index
     print("500th element: \n{}".format(df_handler.iloc[500]))
     print("5000th element: \n{}".format(df_handler.iloc[5000]))
     print("3399998th element: \n{}".format(df_handler.iloc[3399998]))
-    print("500000th element: \n{}".format(df_handler.iloc[500000]))
     print()
+    # with a list of indices
     print("500 + 502 elements: \n{}".format(df_handler.iloc[[500, 502]]))
     print("50000 + 500000 elements: \n{}".format(df_handler.iloc[[50000, 500000]]))
     print()
+    # with a slice
     print(df_handler.iloc[0:70000].tail(10))
     print()
+    # to get a value of specific column use []
     print(df_handler['s'].tail(10))
 
 

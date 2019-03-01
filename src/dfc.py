@@ -80,17 +80,14 @@ class MemoryManager:
         """
         # TODO: finish description
 
-        # self.df_iterator = pd.read_hdf(path, key='table', chunksize=kwargs['chunk_size'])
-        # self.file_handler = h5py.File(path)
         self.df_iterator = None
         self.stash = Stash()  # in bytes
         self.file_counter = 0
         self.chunk_size = kwargs['chunk_size']
         self.iloc = iLocWrapper(self)
 
-        # self.num_files = len([name for name in os.listdir(path) if os.path.isfile(os.path.join(path, name))])
-
     def set_iterator(self, path):
+        self.file_counter = 0
         self.df_iterator = list(self.gen(path))
         self.nfiles = len(self.df_iterator)
         self.chunk_nrows = self.df_iterator[0].shape[0]
@@ -165,14 +162,14 @@ class MemoryManager:
         if not isinstance(path, str):
             raise TypeError("Path should be specified as a string")
 
-        try:
-            os.makedirs(os.path.join(path, kwargs['dir_name']))
-        except FileExistsError:
-            warnings.warn('Directory {} already exists! This can lead to mixing several datasets into a single one'.
-                          format(os.path.join(path, kwargs['dir_name'])))
+        dir_path = os.path.join(path, kwargs['dir_name'])
+        if not os.path.exists(dir_path):
+            if not self.file_counter:
+                os.makedirs(dir_path)
 
         save_path = os.path.join(path, kwargs['dir_name'])
-        chunk_size_B = kwargs['chunk_size_MB'] * 1e6
+        # chunk_size_B = kwargs['chunk_size_MB'] * 1e6
+        chunk_size_B = self.chunk_size * 1e6
         row_size_B = int(obj.shape[1] * VALUE_SIZE)
         chunk_rows = int(chunk_size_B) // row_size_B
 
