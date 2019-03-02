@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-from folds import *
 
 from sklearn import metrics as sklearn_metrics
 from sklearn.metrics import get_scorer

@@ -6,7 +6,6 @@ import matplotlib as mpl
 from sklearn.model_selection import KFold, RepeatedKFold, StratifiedKFold, RepeatedStratifiedKFold
 
 from ast import literal_eval
-from folds import *
 
 import src.validation.ValidationProc
 
