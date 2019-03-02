@@ -17,6 +17,7 @@ class MemoryManager:
     def __init__(self, **kwargs):
         """
         Initialise MemoryManager constructor
+
         :param kwargs:
         :type kwargs:
         """
@@ -26,7 +27,8 @@ class MemoryManager:
 
     def set_iterator(self, path):
         """
-        Create an iterator over objects in a given directory containing .h5 files. Do some preparation
+        Create an iterator over objects in a given directory containing .h5 files, do some preparation
+
         :param path: path to the directory with .h5 files
         :type path: str
         :return: None
@@ -48,15 +50,16 @@ class MemoryManager:
 
     def save(self, obj, path, **kwargs):
         """
+        Split obj (pandas DataFrame) in chunks of chunk_size each and save everything to the specified path
 
         :param obj: data frame object
         :type obj: pandas.DataFrame
-        :param path: path to a folder where data needs to be saved
+        :param path: path to a data folder
         :type path: string
-        :param kwargs: chunk_size_MB - data chunk size in MB
-        :type kwargs: chunk_size_MB - int
-        :return:
-        :rtype:
+        :param kwargs: chunk_size_MB - data chunk size in MB, dir_name - name of the directory where data is stored
+        :type kwargs: chunk_size_MB - int, dir_name - str
+        :return: None
+        :rtype: None
         """
 
         if not isinstance(obj, pd.DataFrame):
@@ -124,6 +127,16 @@ class MemoryManager:
             self.file_counter += 1
 
     def check_integrity(self, path, **kwargs):
+        """
+        Perform two simple tests over shredded dataset
+
+        :param path: path to a data folder
+        :type path: str
+        :param kwargs: dir_name - name of the directory where data is stored
+        :type kwargs: dir_name - str
+        :return: True if tests are passed, False otherwise
+        :rtype: boolean
+        """
         size_list = []          # list of chunk sizes (in rows)
         indices = []            # list of the first and last indices for each chunk of data
         self.set_iterator(os.path.join(path, kwargs['dir_name']))
@@ -152,6 +165,14 @@ class MemoryManager:
 
     @staticmethod
     def gen(directory):
+        """
+        This function returns an iterator over files in a given directory.
+
+        :param directory:
+        :type directory: str
+        :return:
+        :rtype: generator object
+        """
         file_list = glob.glob(os.path.join(directory, '*.h5'))
         file_list.sort(key=natural_keys)
         for filename in file_list:

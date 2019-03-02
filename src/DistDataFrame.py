@@ -10,6 +10,7 @@ class iLocWrapper:
 
     def __getitem__(self, loc):
         """
+        Overload .iloc[] similar to pandas DataFrame.
 
         :param loc: position index for a distributed dataframe
         :type loc: slice, list of ints or int
@@ -17,9 +18,12 @@ class iLocWrapper:
         :rtype: pd.DataFrame
         """
         if isinstance(loc, slice):
+
+            # TODO: add support of slicing with a given step size
             if loc.step is not None:
                 raise Exception("Slicing with a fixed step size is not supported yet")
 
+            # Calculate start and stop chunk numbers and indices wrt a given chunk
             start_chunk_number = loc.start // self.obj.chunk_nrows
             start_index = loc.start % self.obj.chunk_nrows
             stop_chunk_number = loc.stop // self.obj.chunk_nrows
@@ -29,9 +33,12 @@ class iLocWrapper:
                 return self.obj.df_iterator[start_chunk_number].iloc[start_index:stop_index]
             elif stop_chunk_number > start_chunk_number:
                 df = pd.DataFrame()
+                # append a part of the start chunk
                 df = df.append(self.obj.df_iterator[start_chunk_number].iloc[start_index:])
+                # go over all chunks between start and stop and append them as well
                 for chunk_number in range(start_chunk_number + 1, stop_chunk_number):
                     df = df.append(self.obj.df_iterator[chunk_number])
+                # append the rest from the last chunk
                 df = df.append(self.obj.df_iterator[stop_chunk_number].iloc[:stop_index])
                 return df
 
@@ -39,12 +46,14 @@ class iLocWrapper:
             df = pd.DataFrame()
             for loc_i in loc:
                 chunk_number = loc_i // self.obj.chunk_nrows
+                # index is calculated wrt to a given chunk
                 index = loc_i % self.obj.chunk_nrows
                 df = df.append(self.obj.df_iterator[chunk_number].iloc[index])
             return df
 
         elif isinstance(loc, int):
             chunk_number = loc // self.obj.chunk_nrows
+            # index is calculated wrt to a given chunk
             index = loc % self.obj.chunk_nrows
             return self.obj.df_iterator[chunk_number].iloc[index]
 
@@ -83,6 +92,7 @@ class DistDataFrame:
     def __init__(self, path, **kwargs):
         """
         Initialise DistDataFrame constructor
+
         :param kwargs:
         :type kwargs:
         """
@@ -92,7 +102,8 @@ class DistDataFrame:
 
     def __getitem__(self, loc):
         """
-        Allows [] usage for the class object
+        Overload [] similar to pandas DataFrame
+
         :param loc: column name
         :type loc: str
         :return: column specified by loc
