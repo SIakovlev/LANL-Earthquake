@@ -44,17 +44,13 @@ class ValidationBase:
         self.score_data = {}
         self.models_list = []
         self.models_features = [{}]
-        if 'fold_clean' in kwargs.keys():
-            self.folds_clean = kwargs['fold_clean']
-        else:
-            self.folds_clean = False
         self._create_models(**kwargs)
 
     def _reshape_data(self, train_data, y_train_data):
         # DIMENSION OF DATA MUST BE MORE THAN 1
         if train_data.values.ndim == 1:
             train_data = train_data.values.reshape(-1, 1)
-            y_train_data = y_train_data.values.reshape(-1, 1)
+            # y_train_data = y_train_data.values.reshape(-1, 1)
         return (train_data, y_train_data)
 
     def print_models(self):
@@ -75,7 +71,7 @@ class ValidationBase:
             self.model = self._create_model(m, m_p)
             self.models_list.append(self.model)
             self.models_features[i_m]["model_name"] = str(m)
-            self.models_features[i_m]["model_features"] = m_p
+            self.models_features[i_m]["model_params"] = m_p
             self.models_features.append({})
 
     def train_models(self, train_data, y_train_data, *args):
@@ -98,8 +94,7 @@ class ValidationBase:
                 X_train, X_valid = train_data.iloc[train_index], train_data.iloc[valid_index]
                 y_train, y_valid = y_train_data.iloc[train_index], y_train_data.iloc[valid_index]
                 #clean model
-                if self.folds_clean:
-                    model = self._create_model(self.models_features[num_model]["model_name"], self.models_features[num_model]["model_features"])
+                model = self._create_model(self.models_features[num_model]["model_name"], self.models_features[num_model]["model_params"])
                 # train model
                 model.fit(X_train, y_train)
                 # validate
@@ -124,22 +119,24 @@ class ValidationBase:
         :param kwargs: columns in summary
         '''
 
-        dfObj1 = pd.DataFrame(columns=['metric', 'score_data'])
-        dfObj2 = pd.DataFrame()
-        n_metrics = 0
+        columns_in_summary = ["data_fname", "preproc_name","preproc_params",
+                        "folds_name", "folds_params", "model_name", "model_params"]
 
+        dfObj = pd.DataFrame()
         for s_k,s_v  in self.score_data.items():
-            dfObj1.loc[len(dfObj1)] = [s_k, s_v]
-            n_metrics = n_metrics+1
+            dfObj[s_k] = [s_v]
 
+        keys_in_model = []
         for l in args[0]:
-            for d_k in l.keys():
-                dfObj2[d_k] = [l[d_k]]
+            if l is not None:
+                for d_k in l.keys():
+                    keys_in_model.append(d_k)
+                    dfObj[d_k] = [l[d_k]]
 
-        dfObj2 = pd.concat([dfObj2] * n_metrics)
-        dfObj2 = dfObj2.reset_index(drop=True)
+        for d in columns_in_summary:
+            if d not in keys_in_model:
+                dfObj[d] = None
 
-        dfObj = pd.concat([dfObj2, dfObj1], axis=1)
 
         if not os.path.exists(path):
             with open(path, 'wb') as f:
@@ -151,6 +148,7 @@ class ValidationBase:
             with open(path, '+wb') as f:
                 concat = pd.concat([dfObj, modDfObj])
                 pickle.dump(concat,f)
+                print(concat)
                 del concat,modDfObj
 
 

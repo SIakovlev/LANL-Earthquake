@@ -1,5 +1,5 @@
 {
-  "train_data": "../../data/train_short.h5",
+  "train_data": "../../data/train_short_processed.h5",
   "summary_dest": "../../data/summary.pickle",
 
   "folds":
@@ -23,10 +23,9 @@
 
   "validate":
           [
-
             {
               "model": { "CustomNN": {
-                                      "in_features": 1,
+                                      "in_features": 8,
                                       "out_features": 1,
                                       "num_hidden": 100,
                                       "learning_rate": 0.0001,

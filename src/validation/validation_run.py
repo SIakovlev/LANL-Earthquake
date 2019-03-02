@@ -44,26 +44,28 @@ def main(**kwargs):
 
     print(' work with next Fold  objects: KFold, RepeatedKFold, LeaveOneOut, StraifiedKFold,  RepeatedStraifiedKKFold')
 
-    # 2. parse params and create a chain of folds
+    # 2. parse params and create a chain of preprocessors
+    preprocessor = None
+    if 'preproc' in kwargs:
+        preprocessor = str_to_class("src.validation.preproc", kwargs['preproc']['name'])(**kwargs['preproc'])
+
+    # 3. parse params and create a chain of folds
     folds_list = []
     fold_features = [{}]
 
     for index_f, f in enumerate(kwargs['folds']):
-        fold_features[index_f] = {'fold_name': f['name'], "fold_param":[]}
+        fold_features[index_f] = {'folds_name': f['name'], "folds_params":[]}
         class_ = str_to_class('sklearn.model_selection', f['name'])
         del f['name']
-        fold_features[index_f]["fold_param"] = f
+        fold_features[index_f]["folds_params"] = f
         fold_features.append({})
         fold_obj = class_(**f)
         folds_list.append(fold_obj)
 
-    # 3. load metrics from config
-    metrics = []
-    for m in kwargs["metrics"]:
-        metrics.append(m)
-    metrics_classes = check_metrics(metrics)
+    # 4. load metrics from config
+    metrics_classes = {k: str_to_class('sklearn.metrics', k) for k in kwargs["metrics"]}
 
-    # 4. parse params and create a chain of validation instances
+    # 5. parse params and create a chain of validation instances
     validators = []
     for v in kwargs['validate']:
         class_ = str_to_class('ValidationProc', 'ValidationBase')
@@ -78,7 +80,7 @@ def main(**kwargs):
     for i_f, f in enumerate(folds_list):
         for v in tqdm(validators):
             # train models in validator and create summary for all models
-            v.train_models(train_df.drop(['time_to_failure'], axis=1), train_df['time_to_failure'], f, summary_dest, metrics_classes, fold_features[i_f])
+            v.train_models(train_df.drop(['time_to_failure'], axis=1), train_df['time_to_failure'], f, summary_dest, metrics_classes, fold_features[i_f], preprocessor)
 
     print('.......................Processing finished.........................')
 
