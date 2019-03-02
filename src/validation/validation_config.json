@@ -32,8 +32,8 @@
                                       "num_epochs": 2,
                                       "minibatch_size": 256
                                     }
-                       },
-              "fold_clean": "True"
+                       }
+
             },
             {
               "model":{ "LinearRegression":{"n_jobs":"-1"},
