@@ -129,12 +129,13 @@ class ValidationBase:
         for l in args[0]:
             if l is not None:
                 for d_k in l.keys():
+                    print(d_k)
                     keys_in_model.append(d_k)
                     dfObj[d_k] = [l[d_k]]
 
         for d in columns_in_summary:
             if d not in keys_in_model:
-                dfObj[d] = None
+                dfObj[d] = np.NaN
 
 
         if not os.path.exists(path):
