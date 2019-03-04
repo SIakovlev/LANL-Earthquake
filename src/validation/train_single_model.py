@@ -2,17 +2,18 @@ import json
 import argparse
 import platform
 import pandas as pd
-import numpy as np
 import matplotlib as mpl
 import pickle
 import copy
 from tqdm import tqdm
 from collections import defaultdict
+# import numpy as np
 
 from src.validation.models import *
 from src.utils import str_to_class
-from src.validation.logging import summarize
+from src.validation.summary_utils import summarize
 
+# import all models
 
 from src.validation.nn_test import CustomNN
 from sklearn.ensemble import RandomForestRegressor
@@ -24,7 +25,8 @@ from xgboost import XGBRegressor
 from catboost import CatBoostRegressor
 from lightgbm import LGBMRegressor
 
-
+# import all preprocessors
+from src.preprocessing.PreprocessingShuffle import PreprocShuffle
 
 
 if platform.system() == 'Darwin':
@@ -60,7 +62,7 @@ def main(**kwargs):
     # 2. create preprocessor
     preprocessor = None
     if 'preproc' in kwargs:
-        preprocessor = str_to_class("src.validation.preproc", kwargs['preproc']['name'])(**kwargs['preproc'])
+        preprocessor = str_to_class(__name__, kwargs['preproc']['name'])(**kwargs['preproc'])
 
     # 3. create folds
     folds_kwargs = copy.deepcopy(kwargs['folds'])
@@ -76,6 +78,15 @@ def main(**kwargs):
 
     # 6. train model
     print('....................... Training model ..............................')
+
+    # get rid of nans in dataframe
+    train_data = train_data.fillna(0)
+
+    # run preprocessing
+    if preprocessor:
+        preprocessor.fit(train_data)
+        train_data, y_train_data = preprocessor.transform(train_data, y_train_data)
+
     scores = defaultdict(list)
     for fold_n, (train_index, valid_index) in enumerate(folds.split(train_data)):
         # split data
