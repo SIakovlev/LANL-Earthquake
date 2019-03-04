@@ -16,13 +16,13 @@ def summarize(scores=None,
     columns.extend(scores.keys())
 
     row = []
-    if not train_data_fname:
+    if train_data_fname is not None:
         raise KeyError
     else:
         row.append(train_data_fname)
 
     # preproc is optional, so put None if missing
-    if preproc:
+    if preproc is not None:
         row.append(preproc['name'])
         row.append(preproc)
     else:

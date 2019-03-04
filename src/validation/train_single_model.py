@@ -50,10 +50,12 @@ def main(**kwargs):
 
     # path to summary
     summary_dest_fname = kwargs['summary_dest_fname']
-    with open(summary_dest_fname, 'rb') as f:
-        summary = pickle.load(f)
-
-    print(' work with next Fold  objects: KFold, RepeatedKFold, LeaveOneOut, StraifiedKFold,  RepeatedStraifiedKKFold')
+    try:
+        with open(summary_dest_fname, 'rb') as f:
+            summary = pickle.load(f)
+    except:
+        print(f"Couldn't open summary file: {summary_dest_fname}")
+        summary = None
 
     # 2. create preprocessor
     preprocessor = None
@@ -93,7 +95,6 @@ def main(**kwargs):
 
     # 7. create summary
     summary_row = summarize(scores=scores, **kwargs)
-    summary = None
     summary = pd.concat((summary, summary_row)).fillna(np.nan) if summary is not None else summary_row
     with open(summary_dest_fname, 'wb') as f:
         pickle.dump(summary, f)
