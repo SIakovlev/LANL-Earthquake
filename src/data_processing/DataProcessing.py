@@ -8,9 +8,6 @@ Description:
 """
 
 
-
-
-
 class DataProcessorBase:
     """
     Base class for all the data processing
@@ -109,3 +106,4 @@ class DataProcessorMean(DataProcessorBase):
         for name in self.column_names:
             df[name + self.suffix] = df[name].rolling(self.window, min_periods=1).mean()
         return df
+

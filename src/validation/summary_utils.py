@@ -16,7 +16,7 @@ def summarize(scores=None,
     columns.extend(scores.keys())
 
     row = []
-    if train_data_fname is not None:
+    if train_data_fname is None:
         raise KeyError
     else:
         row.append(train_data_fname)

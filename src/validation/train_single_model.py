@@ -11,7 +11,7 @@ from collections import defaultdict
 
 from src.validation.models import *
 from src.utils import str_to_class
-from src.validation.logging import summarize
+from src.validation.summary_utils import summarize
 
 
 from src.validation.nn_test import CustomNN
@@ -23,9 +23,6 @@ from sklearn.linear_model import Ridge
 from xgboost import XGBRegressor
 from catboost import CatBoostRegressor
 from lightgbm import LGBMRegressor
-
-
-
 
 if platform.system() == 'Darwin':
     mpl.use('TkAgg')  # Mac OS specific
@@ -45,8 +42,8 @@ def main(**kwargs):
     # 1. load data
     train_data_fname = kwargs['train_data_fname']
     train_df = pd.read_hdf(train_data_fname, key='table')
-    train_data = train_df.drop(['time_to_failure'], axis=1)
-    y_train_data = train_df['time_to_failure']
+    train_data = train_df.drop(['ttf'], axis=1)
+    y_train_data = train_df['ttf']
 
     # path to summary
     summary_dest_fname = kwargs['summary_dest_fname']
