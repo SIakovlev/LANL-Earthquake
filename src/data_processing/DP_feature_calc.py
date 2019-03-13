@@ -79,15 +79,15 @@ def calc_data(df,col_name, list_of_functions, list_of_params, window_sizes, stri
     return None
 
 
-#EXAMPLE
-df = (pd.read_hdf('~./data/sample.h5', key = 'df'))
-df.columns = ["s","y"]
-
-list_of_functions = ["np.max",'np.min', "abs_energy","np.std", \
-                     "quantile*1", "quantile*2", "mean_second_derivative_central"]
-list_of_params = [None, None, None, None, {"q" : 0.6}, {"q" : 0.8}, None]
-window_sizes = len(list_of_functions)*[1000]
-
-stride = 500
-save_to = "/home/pavel/Documents/0Research/Projects/LANL-Earthquake/data/featurised_sample.h5"
-calc_data(df, "s", list_of_functions, list_of_params, window_sizes, stride, save_to)
+# #EXAMPLE
+# df = (pd.read_hdf('~./data/sample.h5', key = 'df'))
+# df.columns = ["s","y"]
+#
+# list_of_functions = ["np.max",'np.min', "abs_energy","np.std", \
+#                      "quantile*1", "quantile*2", "mean_second_derivative_central"]
+# list_of_params = [None, None, None, None, {"q" : 0.6}, {"q" : 0.8}, None]
+# window_sizes = len(list_of_functions)*[1000]
+#
+# stride = 500
+# save_to = "/home/pavel/Documents/0Research/Projects/LANL-Earthquake/data/featurised_sample.h5"
+# calc_data(df, "s", list_of_functions, list_of_params, window_sizes, stride, save_to)
