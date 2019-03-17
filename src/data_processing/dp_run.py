@@ -19,7 +19,6 @@ def main(**kwargs):
     df = pd.read_hdf(data_fname, key='table')
 
     # 3. Run processing
-    routine_names = list(kwargs['routines'].keys())
     routine_settings = list(kwargs['routines'].values())
 
     dfp = pd.concat(
