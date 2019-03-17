@@ -4,6 +4,8 @@ import argparse
 import inspect
 import dp_utils as dp
 import pandas as pd
+import functools
+from tqdm import tqdm
 
 
 def main(**kwargs):
@@ -43,7 +45,7 @@ if __name__ == '__main__':
         func_ref_list = [obj[1] for obj in inspect.getmembers(dp) if inspect.isfunction(obj[1])]
         dp_config = {"data_path": "../../data/train_short.h5",
                      "data_processed_path": "../../data/train_short_processed.h5",
-                     "window_length": 10000,
+                     "window_size": 10000,
                      "routines": {}}
         for obj in func_ref_list[:-1]:
             inspect_obj = inspect.signature(obj)
@@ -62,7 +64,7 @@ if __name__ == '__main__':
     parser.add_argument('--config_fname',
                         help='name of the config file',
                         type=str,
-                        default="dp_config.json")
+                        default=config_fname)
 
     args = parser.parse_args()
 

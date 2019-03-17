@@ -5,9 +5,20 @@ import scipy.signal
 import tsfresh
 import inspect
 from tqdm import tqdm
+import json
+
+"""
+custom routines
+
+"""
 
 
-def window_decorator(window_size=10000):
+def window_decorator(window_size=None):
+    if window_size is None:
+        with open("dp_config.json") as config:
+            params = json.load(config)
+        window_size = params['window_size']
+
     def window_calc(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -24,17 +35,9 @@ def window_decorator(window_size=10000):
                 batch = df.iloc[i: i + window_size].values
                 temp.append(func(batch, *args, **kwargs))
             return pd.DataFrame(temp, columns={func.__name__})
-
         return wrapper
-
     return window_calc
 
-
-
-"""
-custom routines
-
-"""
 
 @window_decorator()
 def w_psd(df, *args, fs=4e6, **kwargs):
@@ -45,6 +48,7 @@ def w_psd(df, *args, fs=4e6, **kwargs):
 numpy routines
 
 """
+
 
 @window_decorator()
 def w_min(df, *args, **kwargs):
@@ -200,6 +204,3 @@ def w_skewness(df, *args, **kwargs):
 @window_decorator()
 def w_skewness(df, *args, lag=100, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.time_reversal_asymmetry_statistic(df, lag=lag)
-
-
-

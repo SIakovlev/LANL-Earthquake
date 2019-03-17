@@ -1,7 +1,7 @@
 {
   "data_path": "../../data/train_short.h5",
   "data_processed_path": "../../data/train_short_processed.h5",
-  "window_length": 10000,
+  "window_size": 10000,
   "routines": {
     "w_abs_energy": {
       "on": true,
