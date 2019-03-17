@@ -1,28 +1,26 @@
 {
   "data_fname": "../../data/train_short.h5",
   "data_fname_dest": "../../data/train_short_processed.h5",
+  "window_length": 10000,
+  "stride": 10000,
   "processing":
           [
             {
               "name": "DataProcessorMin",
               "column_names": ["s"],
-              "window_length": 25,
               "suffix": "_my_custom_suffix"
             },
             {
               "name": "DataProcessorMin",
-              "column_names": ["s"],
-              "window_length": 25
+              "column_names": ["s"]
             },
             {
               "name": "DataProcessorMean",
-              "column_names": ["s", "s_min_25"],
-              "window_length": 100
+              "column_names": ["s", "s_min_25"]
             },
             {
               "name": "DataProcessorMean",
-              "column_names": ["s", "s_min_25", "s_mean_100"],
-              "window_length": 20
+              "column_names": ["s", "s_min_25", "s_mean_100"]
             }
           ]
 }
