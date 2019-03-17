@@ -99,6 +99,7 @@ class DataProcessorMean(DataProcessorBase):
 
     def __call__(self, df, *args, **kwargs):
         for name in self.column_names:
+            pass
             # df[name + self.suffix] = df[name].rolling(self.window, min_periods=1).mean()
         return df
 
