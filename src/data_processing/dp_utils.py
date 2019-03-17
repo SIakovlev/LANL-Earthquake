@@ -14,8 +14,13 @@ def window_decorator(window_size=10000):
             temp = []
             df = args[0]
             inspect_params = inspect.getfullargspec(func)
+            if kwargs:
+                desc_line = func.__name__ + "({}, ".format(*inspect_params.args) + ', '.join(
+                    "{}={})".format(k, v) for k, v in kwargs.items())
+            else:
+                desc_line = func.__name__ + "({})".format(*inspect_params.args)
             for i in tqdm(range(0, df.shape[0], window_size),
-                          desc=func.__name__ + "({}, ".format(*inspect_params.args) + ', '.join("{}={})".format(k, v) for k, v in kwargs.items())):
+                          desc=desc_line):
                 batch = df.iloc[i: i + window_size].values
                 temp.append(func(batch, *args, **kwargs))
             return pd.DataFrame(temp, columns={func.__name__})
