@@ -7,11 +7,6 @@ import inspect
 from tqdm import tqdm
 import json
 
-"""
-custom routines
-
-"""
-
 
 def window_decorator(window_size=None):
     if window_size is None:
@@ -22,26 +17,41 @@ def window_decorator(window_size=None):
     def window_calc(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
+
             temp = []
             df = args[0]
             inspect_params = inspect.getfullargspec(func)
+
             if kwargs:
                 desc_line = func.__name__ + "({}, ".format(*inspect_params.args) + ', '.join(
                     "{}={})".format(k, v) for k, v in kwargs.items())
             else:
                 desc_line = func.__name__ + "({})".format(*inspect_params.args)
+
             for i in tqdm(range(0, df.shape[0], window_size),
                           desc=desc_line):
                 batch = df.iloc[i: i + window_size].values
                 temp.append(func(batch, *args, **kwargs))
-            return pd.DataFrame(temp, columns={func.__name__})
+
+            return pd.DataFrame(temp, columns={desc_line})
         return wrapper
     return window_calc
+
+
+"""
+Custom routines
+
+"""
 
 
 @window_decorator()
 def w_psd(df, *args, fs=4e6, **kwargs):
     return np.sum(scipy.signal.periodogram(df, fs=fs)[1])
+
+
+@window_decorator()
+def w_labels(df, *args, **kwargs):
+    return df[-1]
 
 
 """

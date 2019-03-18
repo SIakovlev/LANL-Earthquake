@@ -1,5 +1,5 @@
 {
-  "train_data_fname": "../../data/train_short.h5",
+  "train_data_fname": "/Users/sergey/Dev/Kaggle/LANL-Earthquake-Prediction/train/train_processed.h5",
   "summary_dest_fname": "../../data/summary.pickle",
 
   "folds":{
@@ -9,13 +9,5 @@
 
   "metrics": ["mean_absolute_error", "mean_squared_error"],
 
-  "model":{
-    "name": "CustomNN",
-    "in_features": 1,
-    "out_features": 1,
-    "num_hidden": 100,
-    "learning_rate": 0.0001,
-    "num_epochs": 2,
-    "minibatch_size": 256
-  }
+  "model": { "name": "LinearRegression", "normalize": true, "n_jobs":"-1"}
 }

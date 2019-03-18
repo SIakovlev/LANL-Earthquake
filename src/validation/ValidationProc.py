@@ -62,7 +62,7 @@ class ValidationBase:
             print(l_item)
 
     def _create_model(self, model, model_par):
-        model =  str_to_class(__name__, model)
+        model = str_to_class(__name__, model)
         return model(**model_par)
 
     def _create_models(self, **kwargs):
@@ -109,6 +109,8 @@ class ValidationBase:
             params_to_save.append(self.models_features[num_model])
             self._save_summary_of_model(path_to_save, params_to_save)
             self.score_data = {}
+            with open("Model {}".format(num_model), 'wb') as file:
+                pickle.dump(model, file)
 
     def _save_summary_of_model(self, path, *args):
 

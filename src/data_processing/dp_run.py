@@ -27,6 +27,8 @@ def main(**kwargs):
         [func(df['s'], **setting['params']) for func, setting in zip(func_list, routine_settings) if setting['on']],
         axis=1)
 
+    dfp = dfp.join(dp.w_labels(df['ttf']))
+
     # 4. Save modified dataframe
     dfp.to_hdf(data_fname_dest, key='table')
     # processors[0].save(df, data_fname_dest)

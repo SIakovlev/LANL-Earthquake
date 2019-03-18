@@ -42,8 +42,8 @@ def main(**kwargs):
     # 1. load data
     train_data_fname = kwargs['train_data_fname']
     train_df = pd.read_hdf(train_data_fname, key='table')
-    train_data = train_df.drop(['ttf'], axis=1)
-    y_train_data = train_df['ttf']
+    train_data = train_df.drop(['w_labels'], axis=1)
+    y_train_data = train_df['w_labels']
 
     # path to summary
     summary_dest_fname = kwargs['summary_dest_fname']

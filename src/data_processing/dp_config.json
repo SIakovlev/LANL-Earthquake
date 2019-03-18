@@ -1,6 +1,6 @@
 {
-  "data_path": "../../data/train_short.h5",
-  "data_processed_path": "../../data/train_short_processed.h5",
+  "data_path": "/Users/sergey/Dev/Kaggle/LANL-Earthquake-Prediction/train/train.h5",
+  "data_processed_path": "/Users/sergey/Dev/Kaggle/LANL-Earthquake-Prediction/train/train_processed.h5",
   "window_size": 10000,
   "routines": {
     "w_abs_energy": {
@@ -102,7 +102,7 @@
       }
     },
     "w_number_cwt_peaks": {
-      "on": true,
+      "on": false,
       "params": {
         "n": 1
       }
@@ -133,6 +133,10 @@
     },
     "w_std": {
       "on": true,
+      "params": {}
+    },
+    "w_labels": {
+      "on": false,
       "params": {}
     }
   }
