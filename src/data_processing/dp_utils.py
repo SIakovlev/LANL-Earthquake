@@ -10,6 +10,36 @@ from tqdm import tqdm
 from scipy.signal import savgol_filter
 
 
+class WindowDecorator:
+    def __init__(self, f=None):
+        self.f = f
+        with open("dp_config.json") as config:
+            params = json.load(config)
+        self.window_size = params['window_size']
+
+    def __call__(self, *args, **kwargs):
+        if self.f is None:
+            self.f = args[0]
+        temp = []
+        df = args[0]
+        inspect_params = inspect.getfullargspec(self.f)
+
+        if kwargs:
+            desc_line = self.f.__name__ + "({}, ".format(*inspect_params.args) + ', '.join(
+                "{}={})".format(k, v) for k, v in kwargs.items())
+        else:
+            desc_line = self.f.__name__ + "({})".format(*inspect_params.args)
+
+        for i in tqdm(range(0, df.shape[0], self.window_size),
+                      desc=desc_line, file=sys.stdout):
+            batch = df.iloc[i: i + self.window_size].values
+            temp.append(self.f(batch, *args, **kwargs))
+        tqdm.write("\t window decorator: ")
+        tqdm.write("\t - window size: {}".format(self.window_size))
+        return pd.DataFrame(temp, columns={desc_line})
+
+
+# TODO: remove soon if not used
 def function_decorator(f, params):
     def filter_calc(func):
         @functools.wraps(func)
@@ -24,41 +54,43 @@ def function_decorator(f, params):
     return filter_calc
 
 
-def window_decorator(window_size=None):
-    if window_size is None:
-        with open("dp_config.json") as config:
-            params = json.load(config)
-        window_size = params['window_size']
+def process_df(df, routines):
+    this_module_name = sys.modules[__name__]
+    default_func_list = []
+    default_func_options = []
 
-    def window_calc(func):
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            temp = []
-            df = args[0]
-            inspect_params = inspect.getfullargspec(func)
+    for name, option in routines:
+        if option["column_name"] == {}:
+            default_func_list.append(getattr(this_module_name, name))
+            default_func_options.append(option)
+            routines.pop(name)
 
-            if kwargs:
-                desc_line = func.__name__ + "({}, ".format(*inspect_params.args) + ', '.join(
-                    "{}={})".format(k, v) for k, v in kwargs.items())
-            else:
-                desc_line = func.__name__ + "({})".format(*inspect_params.args)
+    df_default = pd.concat(
+        [func(df['s'], **setting['params']) for func, setting in zip(default_func_list, default_func_options) if setting['on']],
+        axis=1)
 
-            for i in tqdm(range(0, df.shape[0], window_size),
-                          desc=desc_line, file=sys.stdout):
-                batch = df.iloc[i: i + window_size].values
-                temp.append(func(batch, *args, **kwargs))
-            tqdm.write("\t window decorator: ")
-            tqdm.write("\t - window size: {}".format(window_size))
-            return pd.DataFrame(temp, columns={desc_line})
-        return wrapper
-    return window_calc
+    special_func_list = []
+    special_func_options = []
+    for name, option in routines:
+        for df_name in list(df_default):
+            if option["column_name"] == df_name:
+                special_func_list.append(getattr(this_module_name, name))
+                special_func_options.append(option)
+
+    df_special = pd.concat(
+        [func(df[setting['column_name']], **setting['params']) for func, setting in zip(special_func_list, special_func_options) if
+         setting['on']],
+        axis=1)
+
+    return pd.concat([df_default, df_special], axis=1)
 
 
 """
 TODO:
-1) remove DataProcessing.py
-2) Add chaining with a single column
-3) Add variable window size support (with upsampling and downsampling) 
+1) remove DataProcessing.py (done)
+2) Add class wrapper for decorators (done)
+3) Add chaining with a single column
+4) Add variable window size support (with upsampling and downsampling + calculate window size) 
 
 """
 
@@ -69,7 +101,7 @@ Custom routines
 """
 
 
-@window_decorator()
+@WindowDecorator
 def w_psd(df, *args, fs=4e6, **kwargs):
     return np.sum(scipy.signal.periodogram(df, fs=fs)[1])
 
@@ -81,7 +113,7 @@ def w_psd(df, *args, fs=4e6, **kwargs):
 #     return np.sum(scipy.signal.periodogram(df, fs=fs)[1])
 
 
-@window_decorator()
+@WindowDecorator
 def w_labels(df, *args, **kwargs):
     return df[-1]
 
@@ -92,22 +124,22 @@ numpy routines
 """
 
 
-@window_decorator()
+@WindowDecorator
 def w_min(df, *args, **kwargs):
     return np.min(df)
 
 
-@window_decorator()
+@WindowDecorator
 def w_max(df, *args, **kwargs):
     return np.max(df)
 
 
-@window_decorator()
+@WindowDecorator
 def w_mean(df, *args, **kwargs):
     return np.mean(df)
 
 
-@window_decorator()
+@WindowDecorator
 def w_std(df, *args, **kwargs):
     return np.std(df)
 
@@ -118,112 +150,112 @@ tsfresh routines
 """
 
 
-@window_decorator()
+@WindowDecorator
 def w_abs_energy(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.abs_energy(df)
 
 
-@window_decorator()
+@WindowDecorator
 def w_absolute_sum_of_changes(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.absolute_sum_of_changes(df)
 
 
-@window_decorator()
+@WindowDecorator
 def w_autocorrelation(df, *args, lag=100, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.autocorrelation(df, lag=lag)
 
 
-@window_decorator()
+@WindowDecorator
 def w_binned_entropy(df, *args, max_bins=10, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.binned_entropy(df, max_bins=max_bins)
 
 
-@window_decorator()
+@WindowDecorator
 def w_c3(df, *args, lag=100, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.c3(df, lag=lag)
 
 
-@window_decorator()
+@WindowDecorator
 def w_count_above_mean(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.count_above_mean(df)
 
 
-@window_decorator()
+@WindowDecorator
 def w_count_below_mean(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.count_below_mean(df)
 
 
-@window_decorator()
+@WindowDecorator
 def w_first_location_of_maximum(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.first_location_of_maximum(df)
 
 
-@window_decorator()
+@WindowDecorator
 def w_first_location_of_minimum(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.first_location_of_minimum(df)
 
 
-@window_decorator()
+@WindowDecorator
 def w_kurtosis(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.kurtosis(df)
 
 
-@window_decorator()
+@WindowDecorator
 def w_large_standard_deviation(df, *args, r=0.5, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.large_standard_deviation(df, r=r)
 
 
-@window_decorator()
+@WindowDecorator
 def w_last_location_of_minimum(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.last_location_of_minimum(df)
 
 
-@window_decorator()
+@WindowDecorator
 def w_longest_strike_above_mean(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.longest_strike_above_mean(df)
 
 
-@window_decorator()
+@WindowDecorator
 def w_longest_strike_below_mean(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.longest_strike_below_mean(df)
 
 
-@window_decorator()
+@WindowDecorator
 def w_mean_abs_change(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.mean_abs_change(df)
 
 
-@window_decorator()
+@WindowDecorator
 def w_mean_change(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.mean_change(df)
 
 
-@window_decorator()
+@WindowDecorator
 def w_mean_second_derivative_central(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.mean_second_derivative_central(df)
 
 
-@window_decorator()
+@WindowDecorator
 def w_median(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.median(df)
 
 
-@window_decorator()
+@WindowDecorator
 def w_number_crossing_m(df, *args, m=0.1, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.number_crossing_m(df, m=m)
 
 
-@window_decorator()
+@WindowDecorator
 def w_number_cwt_peaks(df, *args, n=1, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.number_cwt_peaks(df, n=n)
 
 
-@window_decorator()
+@WindowDecorator
 def w_quantile(df, *args, q=0.5, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.quantile(df, q=q)
 
 
-@window_decorator()
+@WindowDecorator
 def w_ratio_beyond_r_sigma(df, *args, r=0.5, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.ratio_beyond_r_sigma(df, r=r)
 
@@ -233,7 +265,7 @@ def w_ratio_beyond_r_sigma(df, *args, r=0.5, **kwargs):
 #     return tsfresh.feature_extraction.feature_calculators.sample_entropy(df)
 
 
-@window_decorator()
+@WindowDecorator
 def w_skewness(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.skewness(df)
 
@@ -243,7 +275,7 @@ def w_skewness(df, *args, **kwargs):
 #     return tsfresh.feature_extraction.feature_calculators.symmetry_looking(df, r=r)
 
 
-@window_decorator()
+@WindowDecorator
 def w_skewness(df, *args, lag=100, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.time_reversal_asymmetry_statistic(df, lag=lag)
 

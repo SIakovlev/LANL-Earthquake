@@ -45,10 +45,19 @@ if __name__ == '__main__':
     # build config if there is no .json file
     if not os.path.isfile(config_fname):
         func_ref_list = [obj[1] for obj in inspect.getmembers(dp) if inspect.isfunction(obj[1])]
-        dp_config = {"data_path": "../../data/train_short.h5",
-                     "data_processed_path": "../../data/train_short_processed.h5",
+
+        # Sergey Ubuntu PC paths
+        dp_config = {"data_path": "/home/sergey/Projects/Kaggle/LANL-Earthquake-Prediction/train/train.h5",
+                     "data_processed_path": "/home/sergey/Projects/Kaggle/LANL-Earthquake-Prediction/train/train_processed.h5",
                      "window_size": 10000,
                      "routines": {}}
+
+        # Sergey Mac OS paths
+        # dp_config = {"data_path": "/Users/sergey/Dev/Kaggle/LANL-Earthquake-Prediction/train/train.h5",
+        #              "data_processed_path": "/Users/sergey/Dev/Kaggle/LANL-Earthquake-Prediction/train/train_processed.h5",
+        #              "window_size": 10000,
+        #              "routines": {}}
+
         for obj in func_ref_list[:-1]:
             inspect_obj = inspect.signature(obj)
             params_dict = dict(inspect_obj.parameters)
@@ -56,7 +65,7 @@ if __name__ == '__main__':
             for k, v in params_dict.items():
                 if v.default != inspect._empty:
                     params[k] = v.default
-            dp_config["routines"][obj.__name__] = {"on": True, "params": params}
+            dp_config["routines"][obj.__name__] = {"on": True, "column_name": "s", "params": params}
 
         with open(config_fname, 'w') as outfile:
             json.dump(dp_config, outfile, indent=2)
@@ -73,3 +82,35 @@ if __name__ == '__main__':
     with open(args.config_fname) as config:
         params = json.load(config)
     main(**params)
+
+
+def update_config(name):
+    pass
+    # func_ref_list = [obj[1] for obj in inspect.getmembers(dp) if inspect.isfunction(obj[1])]
+    #
+    # # Sergey Ubuntu PC paths
+    # dp_config = {"data_path": "/home/sergey/Projects/Kaggle/LANL-Earthquake-Prediction/train/train.h5",
+    #              "data_processed_path": "/home/sergey/Projects/Kaggle/LANL-Earthquake-Prediction/train/train_processed.h5",
+    #              "window_size": 10000,
+    #              "routines": {}}
+
+    # Sergey Mac OS paths
+    # dp_config = {"data_path": "/Users/sergey/Dev/Kaggle/LANL-Earthquake-Prediction/train/train.h5",
+    #              "data_processed_path": "/Users/sergey/Dev/Kaggle/LANL-Earthquake-Prediction/train/train_processed.h5",
+    #              "window_size": 10000,
+    #              "routines": {}}
+
+    # for obj in func_ref_list[:-1]:
+    #     inspect_obj = inspect.signature(obj)
+    #     params_dict = dict(inspect_obj.parameters)
+    #     params = {}
+    #     for k, v in params_dict.items():
+    #         if v.default != inspect._empty:
+    #             params[k] = v.default
+    #     dp_config["routines"][obj.__name__] = {"on": True, "column_name": "s", "params": params}
+    #
+    # with open(name, 'w') as outfile:
+    #     json.dump(dp_config, outfile, indent=2)
+
+    # TODO: change def valus of functions if needed based on config file
+    # functools.partial(obj.__name__, **params)
