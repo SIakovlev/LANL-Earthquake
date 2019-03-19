@@ -34,6 +34,7 @@ def rolling_window(series, window_size, stride, function, params = None):
     
     return res
 
+# functions for downsampling
 def last_element(window):
     return window[-1]
 
