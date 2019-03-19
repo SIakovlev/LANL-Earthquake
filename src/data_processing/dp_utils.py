@@ -68,7 +68,7 @@ def process_df(df, routines, default_window_size):
         func_params = routine['params']
         window_size = default_window_size if 'window_size' not in routine else routine['window_size']
         try:
-            data = df[routine['column_name']]
+            data = df[routine['column_name']] if routine['column_name'] in df.columns else temp_data[routine['column_name']]
         except KeyError as e:
             raise KeyError(f"Check your feature calculation order, key: {e} is missing")
 

@@ -28,7 +28,8 @@
     {
       "name": "w_binned_entropy",
       "on": true,
-      "column_name": "s",
+      "column_name": "w_absolute_sum_of_changes(df, window_size=15000)",
+      "window_size": 2,
       "params": {
         "max_bins": 10
       }
