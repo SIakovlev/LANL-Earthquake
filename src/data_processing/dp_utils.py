@@ -58,7 +58,7 @@ def window_decorator(window_size=None):
 TODO:
 1) remove DataProcessing.py
 2) Add chaining with a single column
-3) Add variable window size support (with upscaling and downscaling) 
+3) Add variable window size support (with upsampling and downsampling) 
 
 """
 
