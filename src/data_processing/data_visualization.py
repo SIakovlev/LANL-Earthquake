@@ -20,6 +20,8 @@ def nice_plot(series):
     plt.show()
 
 
+# TODO: def plot_func(data, func, params)
+
 def plot_feature_series(path_to_data, feature_name, params, window_size, stride, list_of_EQs, downsample_by = 'central_element'):
     dataframes = [pd.read_hdf(path_to_data + "/EQ_" + str(list_of_EQs[i]) + ".h5") for i in range(len(list_of_EQs))]
 

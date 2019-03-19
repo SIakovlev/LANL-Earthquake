@@ -8,9 +8,6 @@ Description:
 """
 
 
-
-
-
 class DataProcessorBase:
     """
     Base class for all the data processing
@@ -24,6 +21,7 @@ class DataProcessorBase:
         """
         self.column_names = column_names
         self.suffix = suffix
+        self.df = pd.DataFrame()
 
     def load(self, path, key='table', **kwargs):
         """
@@ -75,37 +73,31 @@ class DataProcessorMin(DataProcessorBase):
     """
     Calculate running min
     """
-    def __init__(self, window_length=None, **kwargs):
+    def __init__(self, **kwargs):
         super(DataProcessorMin, self).__init__(**kwargs)
-        if type(window_length) is not int:
-            raise AttributeError("Window length has to be int")
-        self.window = window_length
         if not self.suffix:
-            self.suffix = '_min_' + str(self.window)
+            self.suffix = '_min_'
 
     def __call__(self, df, *args, **kwargs):
         for name in self.column_names:
-            df[name + self.suffix] = df[name].rolling(self.window, min_periods=1).min()
+            temp = df[name]
+            # df[name + self.suffix] = df[name].rolling(self.window, min_periods=1).min()
         return df
-
 
 class DataProcessorMean(DataProcessorBase):
     """
     Calculate running mean
     """
-    def __init__(self, window_length=None, **kwargs):
+    def __init__(self, **kwargs):
         """
-        :param window_length: int
         :param kwargs:
         """
         super(DataProcessorMean, self).__init__(**kwargs)
-        if type(window_length) is not int:
-            raise AttributeError("Window length has to be int")
-        self.window = window_length
-        if not self.suffix:
-            self.suffix = '_mean_' + str(self.window)
 
+    # @window_decorator()
     def __call__(self, df, *args, **kwargs):
         for name in self.column_names:
-            df[name + self.suffix] = df[name].rolling(self.window, min_periods=1).mean()
+            pass
+            # df[name + self.suffix] = df[name].rolling(self.window, min_periods=1).mean()
         return df
+
