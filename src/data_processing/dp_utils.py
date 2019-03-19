@@ -12,14 +12,8 @@ from scipy.signal import savgol_filter
 
 
 class WindowDecorator:
-    def __init__(self, f, window_size=10000):
+    def __init__(self, f):
         self.f = f
-        if not os.path.isfile("dp_config.json"):
-            self.window_size = window_size
-        else:
-            with open("dp_config.json") as config:
-                params = json.load(config)
-            self.window_size = params['window_size']
         functools.update_wrapper(self, f)
 
     def __call__(self, *args, **kwargs):
@@ -28,6 +22,7 @@ class WindowDecorator:
 
         temp = []
         df = args[0]
+        window_size = kwargs['window_size']
         inspect_params = inspect.getfullargspec(self.f)
 
         if kwargs:
@@ -36,12 +31,12 @@ class WindowDecorator:
         else:
             desc_line = self.f.__name__ + "({})".format(*inspect_params.args)
 
-        for i in tqdm(range(0, df.shape[0], self.window_size),
+        for i in tqdm(range(0, df.shape[0], window_size),
                       desc=desc_line, file=sys.stdout):
-            batch = df.iloc[i: i + self.window_size].values
+            batch = df.iloc[i: i + window_size].values
             temp.append(self.f(batch, *args, **kwargs))
         tqdm.write("\t window decorator: ")
-        tqdm.write("\t - window size: {}".format(self.window_size))
+        tqdm.write("\t - window size: {}".format(window_size))
         return pd.DataFrame(temp, columns={desc_line})
 
 
@@ -60,7 +55,7 @@ def function_decorator(f, params):
     return filter_calc
 
 
-def process_df(df, routines):
+def process_df(df, routines, default_window_size):
     this_module_name = sys.modules[__name__]
     temp_data = {}
 
@@ -68,14 +63,15 @@ def process_df(df, routines):
     for routine in routines:
         if not routine['on']:
             continue
-        func = getattr(this_module_name, routine["name"])
+5        func = getattr(this_module_name, routine["name"])
         func_params = routine['params']
+        window_size = default_window_size if 'window_size' not in routine else routine['window_size']
         try:
             data = df[routine['column_name']]
         except KeyError as e:
             raise KeyError(f"Check your feature calculation order, key: {e} is missing")
 
-        data_processed = func(data, **func_params)
+        data_processed = func(data, window_size=window_size, **func_params)
         new_col_name = data_processed.columns.values.tolist()[0]
         temp_data[new_col_name] = data_processed
 

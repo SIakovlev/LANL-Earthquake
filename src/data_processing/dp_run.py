@@ -12,6 +12,8 @@ def main(**kwargs):
     data_fname = kwargs['data_path']
     data_fname_dest = kwargs['data_processed_path']
 
+    default_window_size = kwargs['window_size']
+
     # # 1. Parse params and create a chain of processing instances
     # func_list = []
     # for name in list(kwargs['routines'].keys()):
@@ -26,7 +28,7 @@ def main(**kwargs):
     # dfp = pd.concat(
     #     [func(df['s'], **setting['params']) for func, setting in zip(func_list, routine_settings) if setting['on']],
     #     axis=1)
-    dfp = dp.process_df(df, kwargs['routines'])
+    dfp = dp.process_df(df, kwargs['routines'], default_window_size)
 
     # dfp = dfp.join(dp.w_labels(df['ttf']))
 
