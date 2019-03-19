@@ -80,7 +80,11 @@ def main(**kwargs):
         y_train, y_valid = y_train_data.iloc[train_index], y_train_data.iloc[valid_index]
 
         # instantiate and train model
-        m = model_cls(**kwargs['model'])
+        model_params = copy.deepcopy(kwargs['model'])
+        if 'name' in model_params:
+
+            model_params.pop("name")
+        m = model_cls(**model_params)
         m.fit(X_train, y_train)
 
         # validate

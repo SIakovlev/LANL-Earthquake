@@ -84,6 +84,13 @@ class DataProcessorMin(DataProcessorBase):
             # df[name + self.suffix] = df[name].rolling(self.window, min_periods=1).min()
         return df
 
+def calc_win_size():
+    pass
+
+def autoscale():
+    pass
+
+
 
 class DataProcessorMean(DataProcessorBase):
     """

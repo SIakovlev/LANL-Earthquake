@@ -3,7 +3,7 @@
   "data_processed_path": "/Users/sergey/Dev/Kaggle/LANL-Earthquake-Prediction/train/train_processed.h5",
   "window_size": 10000,
   "routines": {
-    "w_abs_energy": {
+    "w_psd": {
       "on": true,
       "params": {}
     },
@@ -105,12 +105,6 @@
       "on": false,
       "params": {
         "n": 1
-      }
-    },
-    "w_psd": {
-      "on": true,
-      "params": {
-        "fs": 4000000.0
       }
     },
     "w_quantile": {
