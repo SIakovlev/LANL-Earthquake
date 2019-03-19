@@ -62,33 +62,28 @@ def function_decorator(f, params):
 
 def process_df(df, routines):
     this_module_name = sys.modules[__name__]
-    default_func_list = []
-    default_func_options = []
+    temp_data = {}
 
+    # calc all the features
     for routine in routines:
-        if routine["column_name"] == "s":
-            default_func_list.append(getattr(this_module_name, routine["name"]))
-            default_func_options.append(routine)
-            routines.remove(routine)
+        if not routine['on']:
+            continue
+        func = getattr(this_module_name, routine["name"])
+        func_params = routine['params']
+        try:
+            data = df[routine['column_name']]
+        except KeyError as e:
+            raise KeyError(f"Check your feature calculation order, key: {e} is missing")
 
-    df_default = pd.concat(
-        [func(df['s'], **option['params']) for func, option in zip(default_func_list, default_func_options) if option['on']],
-        axis=1)
+        data_processed = func(data, **func_params)
+        new_col_name = data_processed.columns.values.tolist()[0]
+        temp_data[new_col_name] = data_processed
 
-    special_func_list = []
-    special_func_options = []
-    for routine in routines:
-        for df_name in list(df_default):
-            if routine["column_name"] == df_name:
-                special_func_list.append(getattr(this_module_name, routine["name"]))
-                special_func_options.append(routine)
+    # perform scaling if needed
+    # TODO: do scaling
 
-    df_special = pd.concat(
-        [func(df[option['column_name']], **option['params']) for func, option in zip(special_func_list, special_func_options) if
-         option['on']],
-        axis=1)
-
-    return pd.concat([df_default, df_special], axis=1)
+    res = pd.concat(temp_data.values(), axis=1)
+    return res
 
 
 """

@@ -1,6 +1,6 @@
 {
-  "data_path": "/home/sergey/Projects/Kaggle/LANL-Earthquake-Prediction/train/train.h5",
-  "data_processed_path": "/home/sergey/Projects/Kaggle/LANL-Earthquake-Prediction/train/train_processed.h5",
+  "data_path": "C:/Study/LANL-Earthquake/data/train_short.h5",
+  "data_processed_path": "C:/Study/LANL-Earthquake/data/train_processed.h5",
   "window_size": 10000,
   "routines": [
     {
@@ -153,7 +153,7 @@
     },
     {
       "name": "w_number_cwt_peaks",
-      "on": true,
+      "on": false,
       "column_name": "s",
       "params": {
         "n": 1

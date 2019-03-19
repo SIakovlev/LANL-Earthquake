@@ -28,7 +28,7 @@ def main(**kwargs):
     #     axis=1)
     dfp = dp.process_df(df, kwargs['routines'])
 
-    dfp = dfp.join(dp.w_labels(df['ttf']))
+    # dfp = dfp.join(dp.w_labels(df['ttf']))
 
     # 4. Save modified dataframe
     dfp.to_hdf(data_fname_dest, key='table')
