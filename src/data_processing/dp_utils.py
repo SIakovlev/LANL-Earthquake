@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import functools
 import scipy.signal
+from scipy import interpolate
 import tsfresh
 import inspect
 import sys
@@ -82,13 +83,54 @@ def process_df(df, routines, default_window_size):
         temp_data[new_col_name] = data_processed
 
     # perform scaling if needed
-    # TODO: do scaling
-    resulted_size = temp_data['ttf']
-    print(resulted_size)
+    # TODO: do proper scaling
+    resulted_size = temp_data['ttf'].shape[0]
+    for k, v in temp_data.items():
+        temp_data[k] = rescale_column(v, resulted_size)
 
     res = pd.concat(temp_data.values(), axis=1)
     return res
 
+
+def rescale_column(df, resulted_size):
+    if df.shape[0] == resulted_size:
+        return df
+    elif df.shape[0] < resulted_size:
+        print(f'upscale {df.columns.tolist()[0]} from {df.shape[0]} to size {resulted_size}')
+        return _upscale_column(df, resulted_size)
+    else:
+        print(f'downscale {df.columns.tolist()[0]} from {df.shape[0]} to size {resulted_size}')
+        return _downscale_column(df, resulted_size)
+
+
+def _upscale_column(df, resulted_size):
+    col_name = df.columns.values.tolist()[0]
+
+    old_size = df.shape[0]
+    step = old_size / resulted_size
+    x_old = np.arange(0, old_size)
+
+    f = interpolate.interp1d(x_old, df[col_name])
+
+    x_new = np.linspace(0, old_size-1, resulted_size)
+    y_new = f(x_new)
+    y_new = pd.DataFrame(y_new, columns={col_name})
+    return y_new
+
+
+def _downscale_column(df, resulted_size):
+    col_name = df.columns.values.tolist()[0]
+
+    old_size = df.shape[0]
+    step = old_size / resulted_size
+    x_old = np.arange(0, old_size)
+
+    f = interpolate.interp1d(x_old, df[col_name])
+
+    x_new = np.linspace(0, old_size - 1, resulted_size)
+    y_new = f(x_new)
+    y_new = pd.DataFrame(y_new, columns={col_name})
+    return y_new
 
 """
 TODO:
