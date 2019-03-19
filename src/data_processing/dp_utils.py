@@ -4,8 +4,24 @@ import functools
 import scipy.signal
 import tsfresh
 import inspect
-from tqdm import tqdm
+import sys
 import json
+from tqdm import tqdm
+from scipy.signal import savgol_filter
+
+
+def function_decorator(f, params):
+    def filter_calc(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            df = func(args[0], *args, **kwargs)
+            temp = f(df.squeeze(), **params)
+            tqdm.write("\t function decorator: ")
+            tqdm.write("\t - {}{}".format(f.__name__, inspect.signature(f)))
+            tqdm.write("\t - params: {}".format(params))
+            return pd.DataFrame(temp, columns={func.__name__})
+        return wrapper
+    return filter_calc
 
 
 def window_decorator(window_size=None):
@@ -17,7 +33,6 @@ def window_decorator(window_size=None):
     def window_calc(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-
             temp = []
             df = args[0]
             inspect_params = inspect.getfullargspec(func)
@@ -29,13 +44,18 @@ def window_decorator(window_size=None):
                 desc_line = func.__name__ + "({})".format(*inspect_params.args)
 
             for i in tqdm(range(0, df.shape[0], window_size),
-                          desc=desc_line):
+                          desc=desc_line, file=sys.stdout):
                 batch = df.iloc[i: i + window_size].values
                 temp.append(func(batch, *args, **kwargs))
-
+            tqdm.write("\t window decorator: ")
+            tqdm.write("\t - window size: {}".format(window_size))
             return pd.DataFrame(temp, columns={desc_line})
         return wrapper
     return window_calc
+
+
+
+
 
 
 """
@@ -47,6 +67,13 @@ Custom routines
 @window_decorator()
 def w_psd(df, *args, fs=4e6, **kwargs):
     return np.sum(scipy.signal.periodogram(df, fs=fs)[1])
+
+
+# TODO: not quite clear if this is easy to use
+# @function_decorator(savgol_filter, {"window_length": 11, "polyorder": 1})
+# @window_decorator()
+# def wf_psd(df, *args, fs=4e6, **kwargs):
+#     return np.sum(scipy.signal.periodogram(df, fs=fs)[1])
 
 
 @window_decorator()
@@ -214,3 +241,4 @@ def w_skewness(df, *args, **kwargs):
 @window_decorator()
 def w_skewness(df, *args, lag=100, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.time_reversal_asymmetry_statistic(df, lag=lag)
+
