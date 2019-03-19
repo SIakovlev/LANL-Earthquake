@@ -13,19 +13,20 @@ def main(**kwargs):
     data_fname_dest = kwargs['data_processed_path']
 
     # # 1. Parse params and create a chain of processing instances
-    func_list = []
-    for name in list(kwargs['routines'].keys()):
-        func_list.append(getattr(dp, name))
+    # func_list = []
+    # for name in list(kwargs['routines'].keys()):
+    #     func_list.append(getattr(dp, name))
 
     # 2. Load data
     df = pd.read_hdf(data_fname, key='table')
 
     # 3. Run processing
-    routine_settings = list(kwargs['routines'].values())
+    # routine_settings = list(kwargs['routines'].values())
 
-    dfp = pd.concat(
-        [func(df['s'], **setting['params']) for func, setting in zip(func_list, routine_settings) if setting['on']],
-        axis=1)
+    # dfp = pd.concat(
+    #     [func(df['s'], **setting['params']) for func, setting in zip(func_list, routine_settings) if setting['on']],
+    #     axis=1)
+    dfp = dp.process_df(df, kwargs['routines'])
 
     dfp = dfp.join(dp.w_labels(df['ttf']))
 
@@ -44,7 +45,7 @@ if __name__ == '__main__':
     config_fname = "dp_config.json"
     # build config if there is no .json file
     if not os.path.isfile(config_fname):
-        func_ref_list = [obj[1] for obj in inspect.getmembers(dp) if inspect.isfunction(obj[1])]
+        func_ref_list = [obj[1] for obj in inspect.getmembers(dp) if obj[0].startswith("w_")]
 
         # Sergey Ubuntu PC paths
         dp_config = {"data_path": "/home/sergey/Projects/Kaggle/LANL-Earthquake-Prediction/train/train.h5",
@@ -57,7 +58,7 @@ if __name__ == '__main__':
         #              "data_processed_path": "/Users/sergey/Dev/Kaggle/LANL-Earthquake-Prediction/train/train_processed.h5",
         #              "window_size": 10000,
         #              "routines": {}}
-
+        routines = []
         for obj in func_ref_list[:-1]:
             inspect_obj = inspect.signature(obj)
             params_dict = dict(inspect_obj.parameters)
@@ -65,8 +66,8 @@ if __name__ == '__main__':
             for k, v in params_dict.items():
                 if v.default != inspect._empty:
                     params[k] = v.default
-            dp_config["routines"][obj.__name__] = {"on": True, "column_name": "s", "params": params}
-
+            routines.append({"name": obj.__name__, "on": True, "column_name": "s", "params": params})
+        dp_config["routines"] = routines
         with open(config_fname, 'w') as outfile:
             json.dump(dp_config, outfile, indent=2)
 

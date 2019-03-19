@@ -6,20 +6,26 @@ import tsfresh
 import inspect
 import sys
 import json
+import os
 from tqdm import tqdm
 from scipy.signal import savgol_filter
 
 
 class WindowDecorator:
-    def __init__(self, f=None):
+    def __init__(self, f, window_size=10000):
         self.f = f
-        with open("dp_config.json") as config:
-            params = json.load(config)
-        self.window_size = params['window_size']
+        if not os.path.isfile("dp_config.json"):
+            self.window_size = window_size
+        else:
+            with open("dp_config.json") as config:
+                params = json.load(config)
+            self.window_size = params['window_size']
+        functools.update_wrapper(self, f)
 
     def __call__(self, *args, **kwargs):
         if self.f is None:
             self.f = args[0]
+
         temp = []
         df = args[0]
         inspect_params = inspect.getfullargspec(self.f)
@@ -59,27 +65,27 @@ def process_df(df, routines):
     default_func_list = []
     default_func_options = []
 
-    for name, option in routines:
-        if option["column_name"] == {}:
-            default_func_list.append(getattr(this_module_name, name))
-            default_func_options.append(option)
-            routines.pop(name)
+    for routine in routines:
+        if routine["column_name"] == "s":
+            default_func_list.append(getattr(this_module_name, routine["name"]))
+            default_func_options.append(routine)
+            routines.remove(routine)
 
     df_default = pd.concat(
-        [func(df['s'], **setting['params']) for func, setting in zip(default_func_list, default_func_options) if setting['on']],
+        [func(df['s'], **option['params']) for func, option in zip(default_func_list, default_func_options) if option['on']],
         axis=1)
 
     special_func_list = []
     special_func_options = []
-    for name, option in routines:
+    for routine in routines:
         for df_name in list(df_default):
-            if option["column_name"] == df_name:
-                special_func_list.append(getattr(this_module_name, name))
-                special_func_options.append(option)
+            if routine["column_name"] == df_name:
+                special_func_list.append(getattr(this_module_name, routine["name"]))
+                special_func_options.append(routine)
 
     df_special = pd.concat(
-        [func(df[setting['column_name']], **setting['params']) for func, setting in zip(special_func_list, special_func_options) if
-         setting['on']],
+        [func(df[option['column_name']], **option['params']) for func, option in zip(special_func_list, special_func_options) if
+         option['on']],
         axis=1)
 
     return pd.concat([df_default, df_special], axis=1)
