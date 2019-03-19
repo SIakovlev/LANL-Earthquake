@@ -63,7 +63,7 @@ def process_df(df, routines, default_window_size):
     for routine in routines:
         if not routine['on']:
             continue
-5        func = getattr(this_module_name, routine["name"])
+        func = getattr(this_module_name, routine["name"])
         func_params = routine['params']
         window_size = default_window_size if 'window_size' not in routine else routine['window_size']
         try:
@@ -73,10 +73,18 @@ def process_df(df, routines, default_window_size):
 
         data_processed = func(data, window_size=window_size, **func_params)
         new_col_name = data_processed.columns.values.tolist()[0]
+
+        # dirty hack (better make smth clever with labels column)
+        if new_col_name.startswith("w_labe"):
+            data_processed.rename(index=str, columns={new_col_name: "ttf"}, inplace=True)
+            new_col_name = 'ttf'
+
         temp_data[new_col_name] = data_processed
 
     # perform scaling if needed
     # TODO: do scaling
+    resulted_size = temp_data['ttf']
+    print(resulted_size)
 
     res = pd.concat(temp_data.values(), axis=1)
     return res
