@@ -19,3 +19,4 @@
 # ignore data folder and all .h5 files
 **/data
 *.h5
+*.html
