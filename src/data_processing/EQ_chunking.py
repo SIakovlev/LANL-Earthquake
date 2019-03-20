@@ -24,7 +24,7 @@ def chunk_data_on_EQs(path_to_data, save_to):
             print("Successfully created the directory %s " % save_to)
 
     try:
-        df = pd.read_hdf(path_to_data, key = 'df')
+        df = pd.read_hdf(path_to_data, key = 'table')
     except:
         df = pd.read_csv(path_to_data)
 
@@ -39,7 +39,7 @@ def chunk_data_on_EQs(path_to_data, save_to):
     EQs_time = cluster(indices)
     for i in range(len(EQs_time)-1):
         print("\rSaving the data relevant to EQ_{}".format(i+1))
-        df.iloc[EQs_time[i]:EQs_time[i+1]].to_hdf(save_to + "/EQ_"+str(i+1)+".h5", key = "df", mode = 'w')
+        df.iloc[EQs_time[i]:EQs_time[i+1]].to_hdf(save_to + "/EQ_"+str(i+1)+".h5", key = "table", mode = 'w')
 
 if __name__ == '__main__':
 

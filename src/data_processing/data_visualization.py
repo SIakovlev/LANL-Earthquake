@@ -7,7 +7,6 @@ import dask.dataframe as dd
 import dask
 import plotly
 plotly.tools.set_credentials_file(username='ptolmachev', api_key='Fs5sBFAg7YuBn52rzy6n')
-from DP_feature_calc import rolling_window
 
 #simple function for plotting small datasets in matplotlib
 def nice_plot(series):
@@ -22,7 +21,7 @@ def nice_plot(series):
 
 # TODO: def plot_func(data, func, params)
 
-def plot_feature_series(path_to_data, feature_name, params, window_size, stride, list_of_EQs, downsample_by = 'central_element'):
+def plot_data(data, feature_name, params, list_of_EQs, downsample = False):
     dataframes = [pd.read_hdf(path_to_data + "/EQ_" + str(list_of_EQs[i]) + ".h5") for i in range(len(list_of_EQs))]
 
     df = pd.concat(dataframes)
@@ -84,34 +83,3 @@ if __name__ == "__main__":
     plot_feature_series(path_to_data, feature_name, params, window_size, stride, list_of_EQs)
 
 
-    #some info
-    # example 1
-    # plot_feature_series("quantile", {"q" : 0.7}) # + gives the results similar to some sort of filtering. There are peaks clearly visible on the graphs
-    # # example 2
-    # plot_feature_series("longest_strike_above_mean", None) # - mostly seem like a noise
-    # # example 3
-    # plot_feature_series("number_crossing_m", {"m" : 0}) # - mostly noise
-
-    # plot_feature_series("number_crossing_m", {"m" : 50}) # + seems like it has some information. The further the more variable the signal is
-
-    # plot_feature_series("number_crossing_m", {"m" : 75}) # + seems like it has some information. The further the more variable the signal is
-
-    # plot_feature_series("abs_energy", None) # +- there are a couple of very distinct peakes, but the rest of it seems like noise
-
-    # plot_feature_series("absolute_sum_of_changes", None) # - Doesnt seem any more meaningful than the original signal
-
-    # plot_feature_series("autocorrelation", {"lag":500}) # - BS
-
-    # plot_feature_series("binned_entropy", {"max_bins":50}) # - noise
-
-    # plot_feature_series("binned_entropy", {"max_bins":10}) # - noise
-
-    # plot_feature_series("c3", {"lag":100}) # +- seems very sparse
-
-    # plot_feature_series("c3", {"lag":10}) # +- seems very sparse
-
-    # plot_feature_series("cid_ce", {"normalize":True}) # - there are some weird dips, but overall seems like noise
-
-    # plot_feature_series("count_above_mean", None) # - noise
-
-    # plot_feature_series("np.std", None) # +
