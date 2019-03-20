@@ -62,7 +62,7 @@ class ValidationBase:
             print(l_item)
 
     def _create_model(self, model, model_par):
-        model =  str_to_class(__name__, model)
+        model = str_to_class(__name__, model)
         return model(**model_par)
 
     def _create_models(self, **kwargs):
@@ -109,6 +109,8 @@ class ValidationBase:
             params_to_save.append(self.models_features[num_model])
             self._save_summary_of_model(path_to_save, params_to_save)
             self.score_data = {}
+            with open("Model {}".format(num_model), 'wb') as file:
+                pickle.dump(model, file)
 
     def _save_summary_of_model(self, path, *args):
 
@@ -129,12 +131,13 @@ class ValidationBase:
         for l in args[0]:
             if l is not None:
                 for d_k in l.keys():
+                    print(d_k)
                     keys_in_model.append(d_k)
                     dfObj[d_k] = [l[d_k]]
 
         for d in columns_in_summary:
             if d not in keys_in_model:
-                dfObj[d] = None
+                dfObj[d] = np.NaN
 
 
         if not os.path.exists(path):
