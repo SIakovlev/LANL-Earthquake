@@ -3,8 +3,7 @@ from matplotlib import pyplot as plt
 import pandas as pd
 import plotly
 import plotly.graph_objs as go
-import dask.dataframe as dd
-import dask
+import dp_utils as dp
 import plotly
 plotly.tools.set_credentials_file(username='ptolmachev', api_key='Fs5sBFAg7YuBn52rzy6n')
 
