@@ -1,6 +1,6 @@
 {
-  "data_path": "C:/Study/LANL-Earthquake/data/train_short.h5",
-  "data_processed_path": "C:/Study/LANL-Earthquake/data/train_processed.h5",
+  "data_path": "../../data/train_short.h5",
+  "data_processed_path": "../../data/train_processed_short.h5",
   "window_size": 10000,
   "routines": [
     {
@@ -73,7 +73,7 @@
       "params": {}
     },
     {
-      "name": "w_labels",
+      "name": "w_last_elem",
       "on": true,
       "column_name": "s",
       "params": {}

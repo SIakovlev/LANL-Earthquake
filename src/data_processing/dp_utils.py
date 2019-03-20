@@ -24,13 +24,7 @@ class WindowDecorator:
         temp = []
         df = args[0]
         window_size = kwargs['window_size']
-        inspect_params = inspect.getfullargspec(self.f)
-
-        if kwargs:
-            desc_line = self.f.__name__ + "({}, ".format(*inspect_params.args) + ', '.join(
-                "{}={})".format(k, v) for k, v in kwargs.items())
-        else:
-            desc_line = self.f.__name__ + "({})".format(*inspect_params.args)
+        desc_line = kwargs['desc_line']
 
         for i in tqdm(range(0, df.shape[0], window_size),
                       desc=desc_line, file=sys.stdout):
@@ -41,22 +35,22 @@ class WindowDecorator:
         return pd.DataFrame(temp, columns={desc_line})
 
 
-# TODO: remove soon if not used
-def function_decorator(f, params):
-    def filter_calc(func):
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            df = func(args[0], *args, **kwargs)
-            temp = f(df.squeeze(), **params)
-            tqdm.write("\t function decorator: ")
-            tqdm.write("\t - {}{}".format(f.__name__, inspect.signature(f)))
-            tqdm.write("\t - params: {}".format(params))
-            return pd.DataFrame(temp, columns={func.__name__})
-        return wrapper
-    return filter_calc
-
-
 def process_df(df, routines, default_window_size):
+    """
+    Data processing is done in three main steps:
+    1) Calculate all features listed in configuration file (dp_config.json)
+    2) Append labels
+    3) Perform data resampling in case different window sizes are used
+
+    :param df: raw data
+    :type df: pandas DataFrame
+    :param routines: list of routines specified in dp_config.json file
+    :type routines: list
+    :param default_window_size:
+    :type default_window_size:
+    :return: dataframe with features calculated based on the list of routines
+    :rtype: pandas DataFrame
+    """
     this_module_name = sys.modules[__name__]
     temp_data = {}
 
@@ -72,74 +66,60 @@ def process_df(df, routines, default_window_size):
         except KeyError as e:
             raise KeyError(f"Check your feature calculation order, key: {e} is missing")
 
-        data_processed = func(data, window_size=window_size, **func_params)
+        if func_params:
+            desc_line = f"{func.__name__}(df, window_size={window_size}, " + \
+                        ', '.join("{!s}={!r}".format(key, val) for (key, val) in func_params.items()) + ')'
+        else:
+            desc_line = f"{func.__name__}(df, window_size={window_size})"
+
+        data_processed = func(data, window_size=window_size, desc_line=desc_line, **func_params)
         new_col_name = data_processed.columns.values.tolist()[0]
-
-        # dirty hack (better make smth clever with labels column)
-        if new_col_name.startswith("w_labe"):
-            data_processed.rename(index=str, columns={new_col_name: "ttf"}, inplace=True)
-            new_col_name = 'ttf'
-
         temp_data[new_col_name] = data_processed
 
-    # perform scaling if needed
-    # TODO: do proper scaling
+    # append column with labels
+    try:
+        temp_data['ttf'] = w_last_elem(df['ttf'], window_size=default_window_size, desc_line="ttf")
+    except KeyError as e:
+        raise KeyError(f"Labels can't be calculated, key: {e} is missing")
+
+    # perform resampling if needed
+    # TODO: do proper sampling
     resulted_size = temp_data['ttf'].shape[0]
     for k, v in temp_data.items():
-        temp_data[k] = rescale_column(v, resulted_size)
+        temp_data[k] = resample_column(v, resulted_size)
 
     res = pd.concat(temp_data.values(), axis=1)
     return res
 
 
-def rescale_column(df, resulted_size):
-    if df.shape[0] == resulted_size:
+def resample_column(df, resulted_size):
+    """
+    Perform resampling of dataframe df to the resulted size
+
+    :param df:
+    :type df:
+    :param resulted_size:
+    :type resulted_size:
+    :return:
+    :rtype:
+    """
+    old_size = df.shape[0]
+
+    if old_size == resulted_size:
         return df
-    elif df.shape[0] < resulted_size:
-        print(f'upscale {df.columns.tolist()[0]} from {df.shape[0]} to size {resulted_size}')
-        return _upscale_column(df, resulted_size)
     else:
-        print(f'downscale {df.columns.tolist()[0]} from {df.shape[0]} to size {resulted_size}')
-        return _downscale_column(df, resulted_size)
+        col_name = list(df)[0]
 
+        if old_size < resulted_size:
+            print(f'upsample {col_name} from {old_size} to size {resulted_size}')
+        else:
+            print(f'downsample {col_name} from {old_size} to size {resulted_size}')
 
-def _upscale_column(df, resulted_size):
-    col_name = df.columns.values.tolist()[0]
-
-    old_size = df.shape[0]
-    step = old_size / resulted_size
-    x_old = np.arange(0, old_size)
-
-    f = interpolate.interp1d(x_old, df[col_name])
-
-    x_new = np.linspace(0, old_size-1, resulted_size)
-    y_new = f(x_new)
-    y_new = pd.DataFrame(y_new, columns={col_name})
-    return y_new
-
-
-def _downscale_column(df, resulted_size):
-    col_name = df.columns.values.tolist()[0]
-
-    old_size = df.shape[0]
-    step = old_size / resulted_size
-    x_old = np.arange(0, old_size)
-
-    f = interpolate.interp1d(x_old, df[col_name])
-
-    x_new = np.linspace(0, old_size - 1, resulted_size)
-    y_new = f(x_new)
-    y_new = pd.DataFrame(y_new, columns={col_name})
-    return y_new
-
-"""
-TODO:
-1) remove DataProcessing.py (done)
-2) Add class wrapper for decorators (done)
-3) Add chaining with a single column
-4) Add variable window size support (with upsampling and downsampling + calculate window size) 
-
-"""
+        x_old = np.arange(0, old_size)
+        f = interpolate.interp1d(x_old, df[col_name])
+        x_new = np.linspace(0, old_size - 1, resulted_size)
+        y_new = f(x_new)
+        return pd.DataFrame(y_new, columns={col_name})
 
 
 """
@@ -161,7 +141,7 @@ def w_psd(df, *args, fs=4e6, **kwargs):
 
 
 @WindowDecorator
-def w_labels(df, *args, **kwargs):
+def w_last_elem(df, *args, **kwargs):
     return df[-1]
 
 
