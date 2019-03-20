@@ -133,13 +133,6 @@ def w_psd(df, *args, fs=4e6, **kwargs):
     return np.sum(scipy.signal.periodogram(df, fs=fs)[1])
 
 
-# TODO: not quite clear if this is easy to use
-# @function_decorator(savgol_filter, {"window_length": 11, "polyorder": 1})
-# @window_decorator()
-# def wf_psd(df, *args, fs=4e6, **kwargs):
-#     return np.sum(scipy.signal.periodogram(df, fs=fs)[1])
-
-
 @WindowDecorator
 def w_last_elem(df, *args, **kwargs):
     return df[-1]
