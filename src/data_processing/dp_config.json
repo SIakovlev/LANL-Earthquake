@@ -193,6 +193,17 @@
       "params": {
         "lag": 100
       }
+    },
+    {
+      "name": "w_savgol_filter",
+      "on": true,
+      "window_size": 100,
+      "column_name": "w_psd(df, window_size=10000, fs=4000000.0)",
+      "params": {
+        "window_length": 11,
+        "polyorder": 1
+      }
     }
+
   ]
 }

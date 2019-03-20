@@ -21,18 +21,25 @@ class WindowDecorator:
         if self.f is None:
             self.f = args[0]
 
-        temp = []
         df = args[0]
         window_size = kwargs['window_size']
         desc_line = kwargs['desc_line']
 
-        for i in tqdm(range(0, df.shape[0], window_size),
-                      desc=desc_line, file=sys.stdout):
-            batch = df.iloc[i: i + window_size].values
-            temp.append(self.f(batch, *args, **kwargs))
-        tqdm.write("\t window decorator: ")
-        tqdm.write("\t - window size: {}".format(window_size))
-        return pd.DataFrame(temp, columns={desc_line})
+        if window_size >= df.shape[0]:
+            tqdm.write(f"{desc_line}:")
+            tqdm.write("\t window decorator: ")
+            tqdm.write("\t - window size: {}".format(window_size))
+            return pd.DataFrame(df.values, columns={desc_line})
+        else:
+            temp = []
+            for i in tqdm(range(0, df.shape[0], window_size),
+                          desc=desc_line, file=sys.stdout):
+                batch = df.iloc[i: i + window_size].values
+                temp.append(self.f(batch, *args, **kwargs))
+            tqdm.write("\t window decorator: ")
+            tqdm.write("\t - window size: {}".format(window_size))
+
+            return pd.DataFrame(temp, columns={desc_line})
 
 
 def process_df(df, routines, default_window_size):
@@ -62,10 +69,11 @@ def process_df(df, routines, default_window_size):
         func_params = routine['params']
         window_size = default_window_size if 'window_size' not in routine else routine['window_size']
         try:
-            data = df[routine['column_name']] if routine['column_name'] in df.columns else temp_data[routine['column_name']]
+            data = df[routine['column_name']] if routine['column_name'] in df.columns else temp_data[routine['column_name']].squeeze()
         except KeyError as e:
             raise KeyError(f"Check your feature calculation order, key: {e} is missing")
 
+        # TODO: add chaining to column names
         if func_params:
             desc_line = f"{func.__name__}(df, window_size={window_size}, " + \
                         ', '.join("{!s}={!r}".format(key, val) for (key, val) in func_params.items()) + ')'
@@ -299,3 +307,12 @@ def w_skewness(df, *args, **kwargs):
 def w_skewness(df, *args, lag=100, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.time_reversal_asymmetry_statistic(df, lag=lag)
 
+
+"""
+Other libraries
+
+"""
+
+@WindowDecorator
+def w_savgol_filter(df, *args, window_length=101, polyorder=1, **kwargs):
+    return savgol_filter(df, window_length=window_length, polyorder=polyorder)
