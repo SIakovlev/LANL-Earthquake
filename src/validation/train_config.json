@@ -1,6 +1,6 @@
 {
-  "train_data_fname": "../../data/train_short_processed.h5",
-  "summary_dest_fname": "../../data/summary.pickle",
+  "train_data_fname": "../../data.nosync/train_processed.h5",
+  "summary_dest_fname": "../../data.nosync/summary.pickle",
 
   "folds":{
       "name":"KFold",

@@ -12,14 +12,25 @@ from tqdm import tqdm
 from scipy.signal import savgol_filter
 
 
+class DumpDecorator:
+    def __init__(self, func):
+        self._func = func
+
+    def __call__(self, target, *args, **kwargs):
+        df = self._func(target, *args, **kwargs)
+        if "save_path" in kwargs:
+            df.to_hdf(kwargs["save_path"], key='table')
+        return df
+
+
 class WindowDecorator:
     def __init__(self, f):
-        self.f = f
+        self.unwrapped = f
         functools.update_wrapper(self, f)
 
     def __call__(self, *args, **kwargs):
-        if self.f is None:
-            self.f = args[0]
+        if self.unwrapped is None:
+            self.unwrapped = args[0]
 
         df = args[0]
         window_size = kwargs['window_size']
@@ -35,7 +46,7 @@ class WindowDecorator:
             for i in tqdm(range(0, df.shape[0], window_size),
                           desc=desc_line, file=sys.stdout):
                 batch = df.iloc[i: i + window_size].values
-                temp.append(self.f(batch, *args, **kwargs))
+                temp.append(self.unwrapped(batch, *args, **kwargs))
             tqdm.write("\t window decorator: ")
             tqdm.write("\t - window size: {}".format(window_size))
 
@@ -69,7 +80,8 @@ def process_df(df, routines, default_window_size):
         func_params = routine['params']
         window_size = default_window_size if 'window_size' not in routine else routine['window_size']
         try:
-            data = df[routine['column_name']] if routine['column_name'] in df.columns else temp_data[routine['column_name']].squeeze()
+            data = df[routine['column_name']] if routine['column_name'] in df.columns \
+                else temp_data[routine['column_name']].squeeze()
         except KeyError as e:
             raise KeyError(f"Check your feature calculation order, key: {e} is missing")
 
@@ -136,11 +148,13 @@ Custom routines
 """
 
 
+@DumpDecorator
 @WindowDecorator
 def w_psd(df, *args, fs=4e6, **kwargs):
     return np.sum(scipy.signal.periodogram(df, fs=fs)[1])
 
 
+@DumpDecorator
 @WindowDecorator
 def w_last_elem(df, *args, **kwargs):
     return df[-1]
@@ -312,6 +326,7 @@ def w_skewness(df, *args, lag=100, **kwargs):
 Other libraries
 
 """
+
 
 @WindowDecorator
 def w_savgol_filter(df, *args, window_length=101, polyorder=1, **kwargs):
