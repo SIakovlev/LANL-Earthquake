@@ -19,6 +19,8 @@ class DumpDecorator:
     def __call__(self, target, *args, **kwargs):
         df = self._func(target, *args, **kwargs)
         if "save_path" in kwargs:
+            tqdm.write("\t dump decorator: ")
+            tqdm.write("\t - save_path: {}".format(kwargs["save_path"]))
             df.to_hdf(kwargs["save_path"], key='table')
         return df
 
@@ -148,13 +150,13 @@ Custom routines
 """
 
 
-@DumpDecorator
+# @DumpDecorator
 @WindowDecorator
 def w_psd(df, *args, fs=4e6, **kwargs):
     return np.sum(scipy.signal.periodogram(df, fs=fs)[1])
 
 
-@DumpDecorator
+# @DumpDecorator
 @WindowDecorator
 def w_last_elem(df, *args, **kwargs):
     return df[-1]
