@@ -14,29 +14,16 @@ def main(**kwargs):
 
     default_window_size = kwargs['window_size']
 
-    # # 1. Parse params and create a chain of processing instances
-    # func_list = []
-    # for name in list(kwargs['routines'].keys()):
-    #     func_list.append(getattr(dp, name))
-
-    # 2. Load data
+    # 1. Load data
     df = pd.read_hdf(data_fname, key='table')
 
-    # 3. Run processing
-    # routine_settings = list(kwargs['routines'].values())
-
-    # dfp = pd.concat(
-    #     [func(df['s'], **setting['params']) for func, setting in zip(func_list, routine_settings) if setting['on']],
-    #     axis=1)
+    # 2. Run processing
     dfp = dp.process_df(df, kwargs['routines'], default_window_size)
 
-    # dfp = dfp.join(dp.w_labels(df['ttf']))
-
-    # 4. Save modified dataframe
+    # 3. Save modified dataframe
     dfp.to_hdf(data_fname_dest, key='table')
-    # processors[0].save(df, data_fname_dest)
-    print(f'Processed dataframe saved at {data_fname_dest}')
 
+    print(f'Processed dataframe saved at {data_fname_dest}')
     pd.set_option('display.max_columns', 500)
     print('.......................Processing finished.........................')
     print(dfp.head(10))
@@ -60,6 +47,7 @@ if __name__ == '__main__':
         #              "data_processed_path": "/Users/sergey/Dev/Kaggle/LANL-Earthquake-Prediction/train/train_processed.h5",
         #              "window_size": 10000,
         #              "routines": {}}
+
         routines = []
         for obj in func_ref_list[:-1]:
             inspect_obj = inspect.signature(obj)
@@ -87,33 +75,6 @@ if __name__ == '__main__':
     main(**params)
 
 
+# TODO: add in future if needed
 def update_config(name):
     pass
-    # func_ref_list = [obj[1] for obj in inspect.getmembers(dp) if inspect.isfunction(obj[1])]
-    #
-    # # Sergey Ubuntu PC paths
-    # dp_config = {"data_path": "/home/sergey/Projects/Kaggle/LANL-Earthquake-Prediction/train/train.h5",
-    #              "data_processed_path": "/home/sergey/Projects/Kaggle/LANL-Earthquake-Prediction/train/train_processed.h5",
-    #              "window_size": 10000,
-    #              "routines": {}}
-
-    # Sergey Mac OS paths
-    # dp_config = {"data_path": "/Users/sergey/Dev/Kaggle/LANL-Earthquake-Prediction/train/train.h5",
-    #              "data_processed_path": "/Users/sergey/Dev/Kaggle/LANL-Earthquake-Prediction/train/train_processed.h5",
-    #              "window_size": 10000,
-    #              "routines": {}}
-
-    # for obj in func_ref_list[:-1]:
-    #     inspect_obj = inspect.signature(obj)
-    #     params_dict = dict(inspect_obj.parameters)
-    #     params = {}
-    #     for k, v in params_dict.items():
-    #         if v.default != inspect._empty:
-    #             params[k] = v.default
-    #     dp_config["routines"][obj.__name__] = {"on": True, "column_name": "s", "params": params}
-    #
-    # with open(name, 'w') as outfile:
-    #     json.dump(dp_config, outfile, indent=2)
-
-    # TODO: change def valus of functions if needed based on config file
-    # functools.partial(obj.__name__, **params)

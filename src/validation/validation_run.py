@@ -79,8 +79,8 @@ def main(**kwargs):
     for i_f, f in enumerate(folds_list):
         for v in tqdm(validators):
             # train models in validator and create summary for all models
-            v.train_models(train_df.drop(['w_labels'], axis=1),
-                           train_df['w_labels'],
+            v.train_models(train_df.drop(['ttf'], axis=1),
+                           train_df['ttf'],
                            f,
                            summary_dest,
                            metrics_classes,

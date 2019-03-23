@@ -1,6 +1,6 @@
 {
-  "data_path": "C:/Study/LANL-Earthquake/data/train_short.h5",
-  "data_processed_path": "C:/Study/LANL-Earthquake/data/train_processed.h5",
+  "data_path": "../../data/train_short.h5",
+  "data_processed_path": "../../data/train_processed_short.h5",
   "window_size": 10000,
   "routines": [
     {
@@ -73,7 +73,7 @@
       "params": {}
     },
     {
-      "name": "w_labels",
+      "name": "w_last_elem",
       "on": true,
       "column_name": "s",
       "params": {}
@@ -193,6 +193,17 @@
       "params": {
         "lag": 100
       }
+    },
+    {
+      "name": "w_savgol_filter",
+      "on": true,
+      "window_size": 100,
+      "column_name": "w_psd(df, window_size=10000, fs=4000000.0)",
+      "params": {
+        "window_length": 11,
+        "polyorder": 1
+      }
     }
+
   ]
 }
