@@ -71,6 +71,13 @@ def main(**kwargs):
     # 5. create model
     model_cls = str_to_class(__name__, kwargs['model']['name'])
 
+    # instantiate and train model
+    model_params = copy.deepcopy(kwargs['model'])
+    # TODO: fix this
+    if 'name' in model_params:
+        model_params.pop("name")
+    model = model_cls(**model_params)
+
     # 6. train model
     print('....................... Training model ..............................')
     scores = defaultdict(list)
@@ -79,20 +86,26 @@ def main(**kwargs):
         X_train, X_valid = train_data.iloc[train_index], train_data.iloc[valid_index]
         y_train, y_valid = y_train_data.iloc[train_index], y_train_data.iloc[valid_index]
 
-        # instantiate and train model
-        model_params = copy.deepcopy(kwargs['model'])
-        if 'name' in model_params:
+        # Move this outside of the for loop
+        # # instantiate and train model
+        # model_params = copy.deepcopy(kwargs['model'])
+        #
+        #
+        # if 'name' in model_params:
+        #     model_params.pop("name")
 
-            model_params.pop("name")
-        m = model_cls(**model_params)
-        m.fit(X_train, y_train)
+        # m = model_cls(**model_params)
+        model.fit(X_train, y_train)
 
         # validate
-        predict = m.predict(X_valid)
+        predict = model.predict(X_valid)
 
         for metric_name, metric in metrics.items():
             score = metric(predict, y_valid)
             scores[metric_name].append(score)
+
+    with open(f"Model {model}", 'wb') as file:
+        pickle.dump(model, file)
 
     # 7. create summary
     summary_row = summarize(scores=scores, **kwargs)
