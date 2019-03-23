@@ -13,8 +13,9 @@ from scipy.signal import savgol_filter
 
 
 class DumpDecorator:
-    def __init__(self, func):
-        self._func = func
+    def __init__(self, f):
+        self._func = f
+        functools.update_wrapper(self, f)
 
     def __call__(self, target, *args, **kwargs):
         df = self._func(target, *args, **kwargs)
@@ -150,13 +151,13 @@ Custom routines
 """
 
 
-# @DumpDecorator
+@DumpDecorator
 @WindowDecorator
 def w_psd(df, *args, fs=4e6, **kwargs):
     return np.sum(scipy.signal.periodogram(df, fs=fs)[1])
 
 
-# @DumpDecorator
+@DumpDecorator
 @WindowDecorator
 def w_last_elem(df, *args, **kwargs):
     return df[-1]
@@ -168,21 +169,25 @@ numpy routines
 """
 
 
+@DumpDecorator
 @WindowDecorator
 def w_min(df, *args, **kwargs):
     return np.min(df)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_max(df, *args, **kwargs):
     return np.max(df)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_mean(df, *args, **kwargs):
     return np.mean(df)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_std(df, *args, **kwargs):
     return np.std(df)
@@ -194,111 +199,133 @@ tsfresh routines
 """
 
 
+@DumpDecorator
 @WindowDecorator
 def w_abs_energy(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.abs_energy(df)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_absolute_sum_of_changes(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.absolute_sum_of_changes(df)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_autocorrelation(df, *args, lag=100, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.autocorrelation(df, lag=lag)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_binned_entropy(df, *args, max_bins=10, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.binned_entropy(df, max_bins=max_bins)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_c3(df, *args, lag=100, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.c3(df, lag=lag)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_count_above_mean(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.count_above_mean(df)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_count_below_mean(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.count_below_mean(df)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_first_location_of_maximum(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.first_location_of_maximum(df)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_first_location_of_minimum(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.first_location_of_minimum(df)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_kurtosis(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.kurtosis(df)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_large_standard_deviation(df, *args, r=0.5, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.large_standard_deviation(df, r=r)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_last_location_of_minimum(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.last_location_of_minimum(df)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_longest_strike_above_mean(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.longest_strike_above_mean(df)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_longest_strike_below_mean(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.longest_strike_below_mean(df)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_mean_abs_change(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.mean_abs_change(df)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_mean_change(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.mean_change(df)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_mean_second_derivative_central(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.mean_second_derivative_central(df)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_median(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.median(df)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_number_crossing_m(df, *args, m=0.1, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.number_crossing_m(df, m=m)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_number_cwt_peaks(df, *args, n=1, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.number_cwt_peaks(df, n=n)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_quantile(df, *args, q=0.5, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.quantile(df, q=q)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_ratio_beyond_r_sigma(df, *args, r=0.5, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.ratio_beyond_r_sigma(df, r=r)
@@ -309,6 +336,7 @@ def w_ratio_beyond_r_sigma(df, *args, r=0.5, **kwargs):
 #     return tsfresh.feature_extraction.feature_calculators.sample_entropy(df)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_skewness(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.skewness(df)
@@ -319,6 +347,7 @@ def w_skewness(df, *args, **kwargs):
 #     return tsfresh.feature_extraction.feature_calculators.symmetry_looking(df, r=r)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_skewness(df, *args, lag=100, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.time_reversal_asymmetry_statistic(df, lag=lag)
@@ -330,6 +359,7 @@ Other libraries
 """
 
 
+@DumpDecorator
 @WindowDecorator
 def w_savgol_filter(df, *args, window_length=101, polyorder=1, **kwargs):
     return savgol_filter(df, window_length=window_length, polyorder=polyorder)
