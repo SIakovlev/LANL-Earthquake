@@ -1,8 +1,9 @@
 {
-  "train_data": "../../data/train_short_processed.h5",
-  "summary_dest": "../../data/summary.pickle",
+  "train_data": "../../data/mean_100_data.h5",
+  "summary_dest": "../../data/summary_all.csv",
+  "models_directory": "../../data/saved_models",
 
-  "folds":
+ "folds":
           [
             {
               "name":"RepeatedKFold",
@@ -24,8 +25,28 @@
   "validate":
           [
             {
-              "model":{
-                        "Ridge":{"normalize": true, "alpha": 0.1}
+              "model": {
+                "Ridge": {
+                }
+              }
+            },
+            {
+              "model": { "CustomNN": {
+                                      "in_features": 1,
+                                      "out_features": 1,
+                                      "num_hidden": 100,
+                                      "learning_rate": 0.0001,
+                                      "num_epochs": 2,
+                                      "minibatch_size": 256
+                                    }
+                       }
+
+            },
+            {
+              "model":{ "LinearRegression":{"n_jobs":"-1"},
+
+                        "Ridge":{"alpha":0.1},
+                        "RandomForestRegressor": {"criterion":"mse"}
                       }
 
             },
