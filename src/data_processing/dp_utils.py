@@ -19,6 +19,7 @@ class DumpDecorator:
 
     def __call__(self, target, *args, **kwargs):
         df = self._func(target, *args, **kwargs)
+
         if "save_path" in kwargs:
             tqdm.write("\t dump decorator: ")
             tqdm.write("\t - save_path: {}".format(kwargs["save_path"]))
@@ -56,7 +57,7 @@ class WindowDecorator:
             return pd.DataFrame(temp, columns={desc_line})
 
 
-def process_df(df, routines, default_window_size):
+def process_df(df, routines, default_window_size, save_path=None, df_name=None):
     """
     Data processing is done in three main steps:
     1) Calculate all features listed in configuration file (dp_config.json)
@@ -75,7 +76,16 @@ def process_df(df, routines, default_window_size):
     this_module_name = sys.modules[__name__]
     temp_data = {}
 
-    # calc all the features
+    # save dataframe to disk if needed (might be useful for feature visualisation)
+    # TODO: add logic with dir creation
+    df_path = save_path + df_name if save_path is not None else None
+    if df_path is not None:
+        if not os.path.exists(df_path):
+            os.makedirs(df_path)
+
+
+    # calc all features
+    # TODO: add checking if the feature was already calculated
     for routine in routines:
         if not routine['on']:
             continue
@@ -88,14 +98,17 @@ def process_df(df, routines, default_window_size):
         except KeyError as e:
             raise KeyError(f"Check your feature calculation order, key: {e} is missing")
 
-        # TODO: add chaining to column names
         if func_params:
-            desc_line = f"{func.__name__}(df, window_size={window_size}, " + \
+            desc_line = f"{func.__name__}({routine['column_name']}, window_size={window_size}, " + \
                         ', '.join("{!s}={!r}".format(key, val) for (key, val) in func_params.items()) + ')'
         else:
-            desc_line = f"{func.__name__}(df, window_size={window_size})"
+            desc_line = f"{func.__name__}({routine['column_name']}, window_size={window_size})"
 
-        data_processed = func(data, window_size=window_size, desc_line=desc_line, **func_params)
+        data_processed = func(data,
+                              window_size=window_size,
+                              desc_line=desc_line,
+                              # save_path=os.path.join(df_path, desc_line + ".h5"),
+                              **func_params)
         new_col_name = data_processed.columns.values.tolist()[0]
         temp_data[new_col_name] = data_processed
 
@@ -106,7 +119,6 @@ def process_df(df, routines, default_window_size):
         raise KeyError(f"Labels can't be calculated, key: {e} is missing")
 
     # perform resampling if needed
-    # TODO: do proper sampling
     resulted_size = temp_data['ttf'].shape[0]
     for k, v in temp_data.items():
         temp_data[k] = resample_column(v, resulted_size)
