@@ -18,8 +18,13 @@ from xgboost import XGBRegressor
 from catboost import CatBoostRegressor
 from lightgbm import LGBMRegressor
 
-
+import copy
 from src.utils import str_to_class
+import re
+import ast
+
+import json
+
 
 """
 ValidationModule
@@ -87,6 +92,9 @@ class ValidationBase:
 
         folds, path_to_save, metric_classes, *params_to_save = args
 
+        #options that not save in output summary
+        models_directory_dict = [x for x in params_to_save if x is not None and 'models_directory' in x.keys()]
+
         for num_model, model in enumerate(self.models_list):
             for fold_n, (train_index, valid_index) in enumerate(folds.split(train_data)):
                 # get data
@@ -102,15 +110,16 @@ class ValidationBase:
                 for metric_name, metric_value in metric_classes.items():
                     if fold_n==0:
                         self.score_data[metric_name] = []
+                    score_d = metric_value(y_valid, y_predict)
 
-                    score_d = metric_value(y_predict, y_valid)
                     self.score_data[metric_name].append(score_d)
             # save summary
+            #params_to_save.append({'y_valid':list(y_valid.values), 'y_predict':list(np.squeeze(y_predict))})
+            models_directory_dict[0]['model'] = model
             params_to_save.append(self.models_features[num_model])
             self._save_summary_of_model(path_to_save, params_to_save)
             self.score_data = {}
-            with open("Model {}".format(num_model), 'wb') as file:
-                pickle.dump(model, file)
+
 
     def _save_summary_of_model(self, path, *args):
 
@@ -120,18 +129,23 @@ class ValidationBase:
         :param kwargs: columns in summary
         '''
 
+        #that all columns have existed in output
         columns_in_summary = ["data_fname", "preproc_name","preproc_params",
                         "folds_name", "folds_params", "model_name", "model_params"]
+
+        models_directory_dict = [x for x in args[0] if x is not None and 'models_directory' in x.keys()]
+
+        copy_args = copy.copy(args[0])
+        copy_args.remove(models_directory_dict[0])
 
         dfObj = pd.DataFrame()
         for s_k,s_v  in self.score_data.items():
             dfObj[s_k] = [s_v]
 
         keys_in_model = []
-        for l in args[0]:
+        for l in copy_args :
             if l is not None:
                 for d_k in l.keys():
-                    print(d_k)
                     keys_in_model.append(d_k)
                     dfObj[d_k] = [l[d_k]]
 
@@ -139,18 +153,112 @@ class ValidationBase:
             if d not in keys_in_model:
                 dfObj[d] = np.NaN
 
+        _, file_extension = os.path.splitext(path)
+
+        #save model (train on last fold) in directory
+        if models_directory_dict[0]['models_directory'] is not None:
+            model_name = "Model_{0}_{1}_train_on_last_{2}".format(dfObj["model_name"].values[0],
+                                                                  dfObj["model_params"].values[0],
+                                                                  dfObj["folds_name"].values[0])
+
+            save_model_path = os.path.join(models_directory_dict[0]['models_directory'], model_name)
+            read_write_summary(save_model_path, '.pickle', 'wb', models_directory_dict[0]['model'])
+
+
 
         if not os.path.exists(path):
-            with open(path, 'wb') as f:
-                pickle.dump(dfObj,f)
+            read_write_summary(path, file_extension, 'wb', dfObj)
         else:
-            with open(path, 'rb') as f:
-                modDfObj = pickle.load(f)
-
-            with open(path, '+wb') as f:
-                concat = pd.concat([dfObj, modDfObj])
-                pickle.dump(concat,f)
-                print(concat)
-                del concat,modDfObj
+            #load summary
+            modDfObj = read_write_summary(path, file_extension, 'rb')
+            #concatenate load summary and new model's summary
+            concat = pd.concat([dfObj, modDfObj])
+            read_write_summary(path, file_extension, '+wb', concat)
+            del concat,modDfObj
 
 
+def read_write_summary(path, extension, action, df=None):
+    '''
+    :param path
+    :param extension: csv, pickle, ...
+    :param action: as like in function: open
+    :param df: dataFrame
+    :return: return pandas DataFrame
+    '''
+    if extension == '.pickle':
+        with open(path, action) as f:
+            if 'r' in action:
+                return pickle.load(f)
+            else:
+                pickle.dump(df, f)
+    elif extension == '.csv':
+        with open(path, action) as f:
+            if 'r' in action:
+                return pd.read_csv(path)
+            else:
+                df.to_csv(path, index=False)
+    elif extension == '.h5' or extension == '.hdf5':
+        with open(path, action) as f:
+            if 'r' in action:
+                return pd.read_hdf(path, key = 'table')
+            else:
+                df.to_hdf(path, index=False, key = 'table')
+    else:
+        raise  KeyError(f"extension {extension} not find")
+
+
+
+def summary_to_config(path_summary, path_json, rows = 1):
+
+    '''
+    :param path_summary:
+    :param path_json:
+    :param rows: example: 1 or [1,2,3]
+    :return: json file in path_json
+    '''
+    _, file_extension = os.path.splitext(path_summary)
+    df = read_write_summary(path_summary, file_extension, 'rb')
+
+    metrics_columns = [f for f in df.columns if not re.match(r"(?:fold|model|data|preproc)", f)]
+
+    dict_json = {}
+
+    dict_json['summary_dest'] = path_summary
+
+    if type(rows) is not list:
+        rows = [rows]
+
+    train_data_cont = []
+
+    folds_data = []
+
+    model_data = []
+
+    for l in rows:
+        dict_train_data = df['data_fname'].iloc[l]
+        if dict_train_data not in train_data_cont:
+            train_data_cont.append(dict_train_data)
+
+        if len(train_data_cont) > 1:
+            raise AttributeError("Please use models with single train data")
+
+        folds_params = ast.literal_eval(df['folds_params'].iloc[l])
+        if type(folds_params) is dict:
+            folds_elem = {"name":df['folds_name'].iloc[l],**folds_params}
+            if folds_elem not in folds_data:
+                folds_data.append(folds_elem)
+
+        model_params = ast.literal_eval(df['model_params'].iloc[l])
+
+        if type(model_params) is dict:
+            model_elem = {df['model_name'].iloc[l]: model_params}
+            model_dict= {'model':model_elem}
+            if model_dict not in model_data:
+                model_data.append(model_dict)
+
+    dict_json['train_data'] = train_data_cont[0]
+    dict_json['folds'] = folds_data
+    dict_json['metrics'] = metrics_columns
+    dict_json['validate'] = model_data
+    with open(path_json,'w') as f:
+        json.dump(dict_json, f,sort_keys=True,indent=5)

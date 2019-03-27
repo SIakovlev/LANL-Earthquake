@@ -1,6 +1,8 @@
 {
-  "data_path": "../../data.nosync/train.h5",
-  "data_processed_path": "../../data.nosync/train_processed.h5",
+  "data_dir": "../../data.nosync/",
+  "data_fname": "train.h5",
+  "data_processed_dir": "../../data.nosync/",
+  "data_processed_fname": "train_processed.h5",
   "window_size": 10000,
   "routines": [
     {
@@ -28,7 +30,7 @@
     {
       "name": "w_binned_entropy",
       "on": true,
-      "column_name": "w_absolute_sum_of_changes(df, window_size=15000)",
+      "column_name": "w_absolute_sum_of_changes(s, window_size=15000)",
       "window_size": 2,
       "params": {
         "max_bins": 10
@@ -198,7 +200,7 @@
       "name": "w_savgol_filter",
       "on": true,
       "window_size": 9999999999,
-      "column_name": "w_psd(df, window_size=10000, fs=4000000.0)",
+      "column_name": "w_psd(s, window_size=10000, fs=4000000.0)",
       "params": {
         "window_length": 201,
         "polyorder": 1

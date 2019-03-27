@@ -13,11 +13,13 @@ from scipy.signal import savgol_filter
 
 
 class DumpDecorator:
-    def __init__(self, func):
-        self._func = func
+    def __init__(self, f):
+        self._func = f
+        functools.update_wrapper(self, f)
 
     def __call__(self, target, *args, **kwargs):
         df = self._func(target, *args, **kwargs)
+
         if "save_path" in kwargs:
             tqdm.write("\t dump decorator: ")
             tqdm.write("\t - save_path: {}".format(kwargs["save_path"]))
@@ -55,7 +57,7 @@ class WindowDecorator:
             return pd.DataFrame(temp, columns={desc_line})
 
 
-def process_df(df, routines, default_window_size):
+def process_df(df, routines, default_window_size, save_path=None, df_name=None):
     """
     Data processing is done in three main steps:
     1) Calculate all features listed in configuration file (dp_config.json)
@@ -74,7 +76,16 @@ def process_df(df, routines, default_window_size):
     this_module_name = sys.modules[__name__]
     temp_data = {}
 
-    # calc all the features
+    # save dataframe to disk if needed (might be useful for feature visualisation)
+    # TODO: add logic with dir creation
+    df_path = save_path + df_name if save_path is not None else None
+    if df_path is not None:
+        if not os.path.exists(df_path):
+            os.makedirs(df_path)
+
+
+    # calc all features
+    # TODO: add checking if the feature was already calculated
     for routine in routines:
         if not routine['on']:
             continue
@@ -87,14 +98,17 @@ def process_df(df, routines, default_window_size):
         except KeyError as e:
             raise KeyError(f"Check your feature calculation order, key: {e} is missing")
 
-        # TODO: add chaining to column names
         if func_params:
-            desc_line = f"{func.__name__}(df, window_size={window_size}, " + \
+            desc_line = f"{func.__name__}({routine['column_name']}, window_size={window_size}, " + \
                         ', '.join("{!s}={!r}".format(key, val) for (key, val) in func_params.items()) + ')'
         else:
-            desc_line = f"{func.__name__}(df, window_size={window_size})"
+            desc_line = f"{func.__name__}({routine['column_name']}, window_size={window_size})"
 
-        data_processed = func(data, window_size=window_size, desc_line=desc_line, **func_params)
+        data_processed = func(data,
+                              window_size=window_size,
+                              desc_line=desc_line,
+                              # save_path=os.path.join(df_path, desc_line + ".h5"),
+                              **func_params)
         new_col_name = data_processed.columns.values.tolist()[0]
         temp_data[new_col_name] = data_processed
 
@@ -105,7 +119,6 @@ def process_df(df, routines, default_window_size):
         raise KeyError(f"Labels can't be calculated, key: {e} is missing")
 
     # perform resampling if needed
-    # TODO: do proper sampling
     resulted_size = temp_data['ttf'].shape[0]
     for k, v in temp_data.items():
         temp_data[k] = resample_column(v, resulted_size)
@@ -150,13 +163,13 @@ Custom routines
 """
 
 
-# @DumpDecorator
+@DumpDecorator
 @WindowDecorator
 def w_psd(df, *args, fs=4e6, **kwargs):
     return np.sum(scipy.signal.periodogram(df, fs=fs)[1])
 
 
-# @DumpDecorator
+@DumpDecorator
 @WindowDecorator
 def w_last_elem(df, *args, **kwargs):
     return df[-1]
@@ -168,21 +181,25 @@ numpy routines
 """
 
 
+@DumpDecorator
 @WindowDecorator
 def w_min(df, *args, **kwargs):
     return np.min(df)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_max(df, *args, **kwargs):
     return np.max(df)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_mean(df, *args, **kwargs):
     return np.mean(df)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_std(df, *args, **kwargs):
     return np.std(df)
@@ -194,111 +211,133 @@ tsfresh routines
 """
 
 
+@DumpDecorator
 @WindowDecorator
 def w_abs_energy(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.abs_energy(df)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_absolute_sum_of_changes(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.absolute_sum_of_changes(df)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_autocorrelation(df, *args, lag=100, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.autocorrelation(df, lag=lag)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_binned_entropy(df, *args, max_bins=10, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.binned_entropy(df, max_bins=max_bins)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_c3(df, *args, lag=100, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.c3(df, lag=lag)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_count_above_mean(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.count_above_mean(df)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_count_below_mean(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.count_below_mean(df)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_first_location_of_maximum(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.first_location_of_maximum(df)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_first_location_of_minimum(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.first_location_of_minimum(df)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_kurtosis(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.kurtosis(df)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_large_standard_deviation(df, *args, r=0.5, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.large_standard_deviation(df, r=r)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_last_location_of_minimum(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.last_location_of_minimum(df)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_longest_strike_above_mean(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.longest_strike_above_mean(df)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_longest_strike_below_mean(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.longest_strike_below_mean(df)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_mean_abs_change(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.mean_abs_change(df)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_mean_change(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.mean_change(df)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_mean_second_derivative_central(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.mean_second_derivative_central(df)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_median(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.median(df)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_number_crossing_m(df, *args, m=0.1, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.number_crossing_m(df, m=m)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_number_cwt_peaks(df, *args, n=1, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.number_cwt_peaks(df, n=n)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_quantile(df, *args, q=0.5, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.quantile(df, q=q)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_ratio_beyond_r_sigma(df, *args, r=0.5, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.ratio_beyond_r_sigma(df, r=r)
@@ -309,6 +348,7 @@ def w_ratio_beyond_r_sigma(df, *args, r=0.5, **kwargs):
 #     return tsfresh.feature_extraction.feature_calculators.sample_entropy(df)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_skewness(df, *args, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.skewness(df)
@@ -319,6 +359,7 @@ def w_skewness(df, *args, **kwargs):
 #     return tsfresh.feature_extraction.feature_calculators.symmetry_looking(df, r=r)
 
 
+@DumpDecorator
 @WindowDecorator
 def w_skewness(df, *args, lag=100, **kwargs):
     return tsfresh.feature_extraction.feature_calculators.time_reversal_asymmetry_statistic(df, lag=lag)
@@ -330,6 +371,7 @@ Other libraries
 """
 
 
+@DumpDecorator
 @WindowDecorator
 def w_savgol_filter(df, *args, window_length=101, polyorder=1, **kwargs):
     return savgol_filter(df, window_length=window_length, polyorder=polyorder)
