@@ -4,26 +4,34 @@ import argparse
 import inspect
 import dp_utils as dp
 import pandas as pd
-import functools
-from tqdm import tqdm
+import platform
 
 
 def main(**kwargs):
-    data_fname = kwargs['data_path']
-    data_fname_dest = kwargs['data_processed_path']
+    data_path = kwargs['data_dir'] + kwargs["data_fname"]
+    data_processed_path = kwargs['data_processed_dir'] + kwargs["data_processed_fname"]
 
     default_window_size = kwargs['window_size']
 
     # 1. Load data
-    df = pd.read_hdf(data_fname, key='table')
+    print('.......................Processing started.........................')
+    print(f' - Attempt to load data from {data_path}')
+    df = pd.read_hdf(data_path, key='table')
+    print(' - Data was successfully loaded into memory')
 
     # 2. Run processing
-    dfp = dp.process_df(df, kwargs['routines'], default_window_size)
+    print(' - Run dataframe processing')
+    dfp = dp.process_df(df,
+                        kwargs['routines'],
+                        default_window_size)
+    print(' - Dataframe was successfully processed')
 
     # 3. Save modified dataframe
-    dfp.to_hdf(data_fname_dest, key='table')
 
-    print(f'Processed dataframe saved at {data_fname_dest}')
+    print(f' - Attempt to save modified data to {data_processed_path}')
+    dfp.to_hdf(data_processed_path, key='table')
+    print(f' - Processed dataframe saved at {data_processed_path}')
+
     pd.set_option('display.max_columns', 500)
     print('.......................Processing finished.........................')
     print(dfp.head(10))
@@ -34,20 +42,21 @@ if __name__ == '__main__':
     config_fname = "dp_config.json"
     # build config if there is no .json file
     if not os.path.isfile(config_fname):
+        # TODO: fix dirty hack
         func_ref_list = [obj[1] for obj in inspect.getmembers(dp) if obj[0].startswith("w_")]
 
-        # Sergey Ubuntu PC paths
-        dp_config = {"data_path": "/home/sergey/Projects/Kaggle/LANL-Earthquake-Prediction/train/train.h5",
-                     "data_processed_path": "/home/sergey/Projects/Kaggle/LANL-Earthquake-Prediction/train/train_processed.h5",
-                     "window_size": 10000,
-                     "routines": {}}
-
-        # Sergey Mac OS paths
-        # dp_config = {"data_path": "/Users/sergey/Dev/Kaggle/LANL-Earthquake-Prediction/train/train.h5",
-        #              "data_processed_path": "/Users/sergey/Dev/Kaggle/LANL-Earthquake-Prediction/train/train_processed.h5",
-        #              "window_size": 10000,
-        #              "routines": {}}
-
+        # MacOS specific
+        if platform.system() == 'Darwin':
+            dp_config = {"data_dir": "../../data.nosync/",
+                         "data_processed_dir": "../../data.nosync/"}
+        else:
+            dp_config = {"data_dir": "../../data/",
+                         "data_processed_dir": "../../data/"}
+        dp_config.update({"data_fname": "train.h5",
+                          "data_processed_fname": "train_processed.h5",
+                          "window_size": 10000,
+                          "routines": {}})
+        # Create routines dict based on module structure
         routines = []
         for obj in func_ref_list[:-1]:
             inspect_obj = inspect.signature(obj)

@@ -41,7 +41,14 @@ def main(**kwargs):
     # path to summary
     summary_dest = kwargs['summary_dest']
 
-    print(' work with next Fold  objects: KFold, RepeatedKFold, LeaveOneOut, StraifiedKFold,  RepeatedStraifiedKKFold')
+    # path to save models (optional)
+    if 'models_directory' in kwargs:
+        models_dest = kwargs['models_directory']
+        #check if the directory exist
+        if not os.path.exists(models_dest):
+            os.makedirs(models_dest)
+    else:
+        models_dest = None
 
     # 2. parse params and create a chain of preprocessors
     preprocessor = None
@@ -79,13 +86,13 @@ def main(**kwargs):
     for i_f, f in enumerate(folds_list):
         for v in tqdm(validators):
             # train models in validator and create summary for all models
-            v.train_models(train_df.drop(['ttf'], axis=1),
-                           train_df['ttf'],
+            v.train_models(train_df.drop(['time_to_failure'], axis=1),
+                           train_df['time_to_failure'],
                            f,
                            summary_dest,
                            metrics_classes,
                            fold_features[i_f],
-                           preprocessor,{'data_fname':train_data})
+                           preprocessor,{'data_fname':train_data}, {'models_directory': models_dest})
 
     print('.......................Processing finished.........................')
 
