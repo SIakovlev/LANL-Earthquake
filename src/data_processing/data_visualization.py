@@ -6,7 +6,6 @@ import plotly
 plotly.tools.set_credentials_file(username='ptolmachev', api_key='Fs5sBFAg7YuBn52rzy6n')
 import sys
 sys.path.insert(0, '../.')
-from utils import chunk_data_on_EQs
 import os, fnmatch
 from dp_utils import *
 
@@ -86,4 +85,4 @@ def plot_data(function, params, **kwargs):
 if __name__ == '__main__':
     # example
     params = {"window_size": 1000}
-    plot_data(w_std, params, path_to_data="/home/pavel/Documents/0Research/Projects/LANL-Earthquake/data/EQs", EQs_num=[2, 3])
+    plot_data(w_std, params, path_to_data="../../data/EQs", EQs_num=[2, 3])
