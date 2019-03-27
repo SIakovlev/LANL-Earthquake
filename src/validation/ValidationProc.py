@@ -234,6 +234,8 @@ def summary_to_config(path_summary, path_json, rows = 1):
 
     model_data = []
 
+    preproc_data = []
+
     for l in rows:
         dict_train_data = df['data_fname'].iloc[l]
         if dict_train_data not in train_data_cont:
@@ -241,6 +243,21 @@ def summary_to_config(path_summary, path_json, rows = 1):
 
         if len(train_data_cont) > 1:
             raise AttributeError("Please use models with single train data")
+
+        preproc_name = df['preproc_name'].iloc[l]
+        preproc_param = None
+        if preproc_name is not None:
+            try:
+                preproc_param = ast.literal_eval(df['preproc_params'].iloc[l])
+                preproc_dict = {"name": preproc_name, **preproc_param}
+            except ValueError as e:
+                print("not preprocessing params")
+                preproc_dict = {"name": preproc_name}
+            finally:
+                if preproc_dict not in preproc_data:
+                    preproc_data.append(preproc_dict)
+                if len(preproc_data) > 1:
+                    raise AttributeError("Please use models with single preprocessing")
 
         folds_params = ast.literal_eval(df['folds_params'].iloc[l])
         if type(folds_params) is dict:
@@ -255,6 +272,9 @@ def summary_to_config(path_summary, path_json, rows = 1):
             model_dict= {'model':model_elem}
             if model_dict not in model_data:
                 model_data.append(model_dict)
+
+    if preproc_data!=[]:
+        dict_json['preproc'] = preproc_data[0]
 
     dict_json['train_data'] = train_data_cont[0]
     dict_json['folds'] = folds_data

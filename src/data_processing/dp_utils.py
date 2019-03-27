@@ -10,7 +10,10 @@ import json
 import os
 from tqdm import tqdm
 from scipy.signal import savgol_filter
+import warnings
+import feets
 
+warnings.filterwarnings("ignore", category=feets.ExtractorWarning)
 
 class DumpDecorator:
     def __init__(self, f):
@@ -375,3 +378,91 @@ Other libraries
 @WindowDecorator
 def w_savgol_filter(df, *args, window_length=101, polyorder=1, **kwargs):
     return savgol_filter(df, window_length=window_length, polyorder=polyorder)
+
+
+"""
+Feets library
+"""
+import feets
+#pip install feets
+
+@DumpDecorator
+@WindowDecorator
+def w_con(df, *args, **kwargs):
+    size = df.shape[0]
+    time = np.linspace(0,size-1, size)
+    magnitude =df
+    t_m = [time, magnitude]
+    fs = feets.FeatureSpace(only=['Con'], data=['time','magnitude'])
+    return fs.extract(*t_m)[1][0]
+
+
+@DumpDecorator
+@WindowDecorator
+def w_eta_e(df, *args, **kwargs):
+    size = df.shape[0]
+    time = np.linspace(0,size-1, size)
+    magnitude =df
+    t_m = [time, magnitude]
+    fs = feets.FeatureSpace(only=['Eta_e'], data=['time','magnitude'])
+    return fs.extract(*t_m)[1][0]
+
+@DumpDecorator
+@WindowDecorator
+def w_gskew(df, *args, **kwargs):
+    size = df.shape[0]
+    time = np.linspace(0,size-1, size)
+    magnitude =df
+    t_m = [time, magnitude]
+    fs = feets.FeatureSpace(only=['Gskew'], data=['time','magnitude'])
+    return fs.extract(*t_m)[1][0]
+
+@DumpDecorator
+@WindowDecorator
+def w_linear_trend(df, *args, **kwargs):
+    size = df.shape[0]
+    time = np.linspace(0,size-1, size)
+    magnitude =df
+    t_m = [time, magnitude]
+    fs = feets.FeatureSpace(only=['LinearTrend'], data=['time','magnitude'])
+    return fs.extract(*t_m)[1][0]
+
+@DumpDecorator
+@WindowDecorator
+def w_median_BRP(df, *args, **kwargs):
+    size = df.shape[0]
+    time = np.linspace(0,size-1, size)
+    magnitude =df
+    t_m = [time, magnitude]
+    fs = feets.FeatureSpace(only=['MedianBRP'], data=['time','magnitude'])
+    return fs.extract(*t_m)[1][0]
+
+@DumpDecorator
+@WindowDecorator
+def w_pair_slope_trend(df, *args, **kwargs):
+    size = df.shape[0]
+    time = np.linspace(0,size-1, size)
+    magnitude =df
+    t_m = [time, magnitude]
+    fs = feets.FeatureSpace(only=['PairSlopeTrend'], data=['time','magnitude'])
+    return fs.extract(*t_m)[1][0]
+
+@DumpDecorator
+@WindowDecorator
+def w_q31(df, *args, **kwargs):
+    size = df.shape[0]
+    time = np.linspace(0,size-1, size)
+    magnitude =df
+    t_m = [time, magnitude]
+    fs = feets.FeatureSpace(only=['Q31'], data=['time','magnitude'])
+    return fs.extract(*t_m)[1][0]
+
+@DumpDecorator
+@WindowDecorator
+def w_slottedA_length(df, *args, **kwargs):
+    size = df.shape[0]
+    time = np.linspace(0,size-1, size)
+    magnitude =df
+    t_m = [time, magnitude]
+    fs = feets.FeatureSpace(only=['SlottedA_length'], data=['time','magnitude'])
+    return fs.extract(*t_m)[1][0]

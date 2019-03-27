@@ -1,8 +1,11 @@
 {
   "train_data": "../../data/mean_100_data.h5",
-  "summary_dest": "../../data/summary_all.csv",
-  "models_directory": "../../data/saved_models",
-
+  "summary_dest": "../../data/summary_all2.csv",
+  "models_directory": "../../data/saved_models2",
+  "preproc": {
+    "name": "StandardScaler",
+    "with_std": false
+  },
  "folds":
           [
             {

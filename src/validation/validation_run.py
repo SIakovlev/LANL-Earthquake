@@ -3,6 +3,7 @@ import argparse
 import pandas as pd
 import platform
 import matplotlib as mpl
+import copy
 from sklearn.model_selection import KFold, RepeatedKFold, StratifiedKFold, RepeatedStratifiedKFold
 
 from ast import literal_eval
@@ -50,10 +51,23 @@ def main(**kwargs):
     else:
         models_dest = None
 
+    # Load data
+    print(f' - Attempt to load data from {train_data}')
+    train_df = pd.read_hdf(train_data, key='table')
+    train_columns= copy.copy(train_df.columns)
+    y_data = train_df[train_columns[-1]]
+    train_df = train_df.drop([train_columns[-1]], axis=1)
+
     # 2. parse params and create a chain of preprocessors
     preprocessor = None
     if 'preproc' in kwargs:
-        preprocessor = str_to_class("src.validation.preproc", kwargs['preproc']['name'])(**kwargs['preproc'])
+        print(kwargs['preproc']['name'])
+        name_class = kwargs['preproc']['name']
+        del kwargs['preproc']['name']
+        preprocessor_class = str_to_class("src.validation.preproc", name_class)(**kwargs['preproc'])
+        print(f' - Attempt to preprocess data')
+        train_df = pd.DataFrame(preprocessor_class.fit_transform(train_df),columns=train_columns[:-1])
+        preprocessor  = {"preproc_name":name_class, "preproc_params":kwargs['preproc']}
 
     # 3. parse params and create a chain of folds
     folds_list = []
@@ -78,16 +92,15 @@ def main(**kwargs):
         validator = class_(**v)
         validators.append(validator)
 
-    # Load data
-    train_df = pd.read_hdf(train_data,key='table')
+
     # 4. train validators
     print('....................... Train models ..............................')
 
     for i_f, f in enumerate(folds_list):
         for v in tqdm(validators):
             # train models in validator and create summary for all models
-            v.train_models(train_df.drop(['time_to_failure'], axis=1),
-                           train_df['time_to_failure'],
+            v.train_models(train_df,
+                           y_data,
                            f,
                            summary_dest,
                            metrics_classes,
