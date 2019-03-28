@@ -1,22 +1,20 @@
 {
-  "train_data": "../../data/mean_100_data.h5",
-  "summary_dest": "../../data/summary_all2.csv",
-  "models_directory": "../../data/saved_models2",
+  "train_data": "../../data/proceded_train.h5",
+  "summary_dest": "../../data/summary_train.csv",
+  "predict_directory": "../../data/predict",
+  "models_directory": "../../data/saved_models",
   "preproc": {
-    "name": "StandardScaler",
-    "with_std": false
+    "name": "StandardScaler"
   },
  "folds":
           [
             {
-              "name":"RepeatedKFold",
-              "n_splits": 2,
-              "n_repeats": 1
+              "name":"TimeSeriesSplit",
+              "n_splits": 5
             },
-
             {
               "name":"KFold",
-              "n_splits": 4
+              "n_splits": 5
             }
 
           ],
@@ -32,18 +30,6 @@
                 "Ridge": {
                 }
               }
-            },
-            {
-              "model": { "CustomNN": {
-                                      "in_features": 1,
-                                      "out_features": 1,
-                                      "num_hidden": 100,
-                                      "learning_rate": 0.0001,
-                                      "num_epochs": 2,
-                                      "minibatch_size": 256
-                                    }
-                       }
-
             },
             {
               "model":{ "LinearRegression":{"n_jobs":"-1"},

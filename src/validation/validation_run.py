@@ -4,7 +4,7 @@ import pandas as pd
 import platform
 import matplotlib as mpl
 import copy
-from sklearn.model_selection import KFold, RepeatedKFold, StratifiedKFold, RepeatedStratifiedKFold
+from sklearn.model_selection import KFold, RepeatedKFold, StratifiedKFold, RepeatedStratifiedKFold, TimeSeriesSplit
 
 from ast import literal_eval
 
@@ -42,14 +42,16 @@ def main(**kwargs):
     # path to summary
     summary_dest = kwargs['summary_dest']
 
-    # path to save models (optional)
-    if 'models_directory' in kwargs:
-        models_dest = kwargs['models_directory']
-        #check if the directory exist
-        if not os.path.exists(models_dest):
-            os.makedirs(models_dest)
-    else:
-        models_dest = None
+
+    optional_save = {'models_directory':None, 'predict_directory':None}
+
+    # path to save models and output_predict(optional)
+    for opt_elem_key, _ in optional_save.items():
+        if opt_elem_key in kwargs:
+            optional_save[opt_elem_key] = kwargs[opt_elem_key]
+            #check if the directory exist
+            if not os.path.exists(optional_save[opt_elem_key]):
+                os.makedirs(optional_save[opt_elem_key])
 
     # Load data
     print(f' - Attempt to load data from {train_data}')
@@ -105,7 +107,7 @@ def main(**kwargs):
                            summary_dest,
                            metrics_classes,
                            fold_features[i_f],
-                           preprocessor,{'data_fname':train_data}, {'models_directory': models_dest})
+                           preprocessor,{'data_fname':train_data}, optional_save)
 
     print('.......................Processing finished.........................')
 
