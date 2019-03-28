@@ -15,6 +15,7 @@ import feets
 
 warnings.filterwarnings("ignore", category=feets.ExtractorWarning)
 
+
 class DumpDecorator:
     def __init__(self, f):
         self._func = f
@@ -41,7 +42,10 @@ class WindowDecorator:
 
         df = args[0]
         window_size = kwargs['window_size']
-        desc_line = kwargs['desc_line']
+        if "desc_line" in kwargs:
+            desc_line = kwargs['desc_line']
+        else:
+            desc_line = get_function_descriptor(self.unwrapped, kwargs)
 
         if window_size >= df.shape[0]:
             tqdm.write(f"{desc_line}:")
@@ -58,6 +62,35 @@ class WindowDecorator:
             tqdm.write("\t - window size: {}".format(window_size))
 
             return pd.DataFrame(temp, columns={desc_line})
+
+
+def get_function_descriptor(func, extra_params):
+
+    """
+    Parse all function args and get a complete description
+
+    Parameters
+    ----------
+    func : function reference object
+    extra_params : external params passed to decorated function (i.e. window size, desc_line, etc...)
+
+    Returns
+    -------
+    String with function name and its parameters
+    """
+
+    inspect_params = inspect.getfullargspec(func)
+    funcname_line = func.__name__
+    args_line = "{}".format(*inspect_params.args)
+    kwargs_line = ', '.join("{}={}".format(k, v) for k, v in extra_params.items())
+    kwonlydefaults_line = ', '.join("{}={}".format(k, v) for k, v in inspect_params.kwonlydefaults.items())
+
+    desc_line = funcname_line + '(' + \
+                args_line + \
+                ', ' + kwargs_line + \
+                ', ' + kwonlydefaults_line + ')'
+
+    return desc_line
 
 
 def process_df(df, routines, default_window_size, save_path=None, df_name=None):
@@ -134,12 +167,14 @@ def resample_column(df, resulted_size):
     """
     Perform resampling of dataframe df to the resulted size
 
-    :param df:
-    :type df:
-    :param resulted_size:
-    :type resulted_size:
-    :return:
-    :rtype:
+    Parameters
+    ----------
+    df : pandas DataFrame
+    resulted_size (int) : size of the resampled dataframe
+
+    Returns
+    -------
+
     """
     old_size = df.shape[0]
 
@@ -402,7 +437,7 @@ def w_count_below_mean(df, *args, **kwargs):
 
     Parameters
     ----------
-    df :
+    df : pandas DataFrame
     args :
     kwargs :
 
@@ -421,7 +456,7 @@ def w_first_location_of_maximum(df, *args, **kwargs):
 
     Parameters
     ----------
-    df :
+    df : pandas DataFrame
     args :
     kwargs :
 
@@ -440,7 +475,7 @@ def w_first_location_of_minimum(df, *args, **kwargs):
 
     Parameters
     ----------
-    df :
+    df : pandas DataFrame
     args :
     kwargs :
 
@@ -459,7 +494,7 @@ def w_kurtosis(df, *args, **kwargs):
 
     Parameters
     ----------
-    df :
+    df : pandas DataFrame
     args :
     kwargs :
 
@@ -484,7 +519,7 @@ def w_large_standard_deviation(df, *args, r=0.5, **kwargs):
 
     Parameters
     ----------
-    df :
+    df : pandas DataFrame
     args :
     r : threshold value (see description)
     kwargs :
@@ -504,7 +539,7 @@ def w_last_location_of_maximum(df, *args, **kwargs):
 
     Parameters
     ----------
-    df :
+    df : pandas DataFrame
     args :
     kwargs :
 
@@ -523,7 +558,7 @@ def w_last_location_of_minimum(df, *args, **kwargs):
 
     Parameters
     ----------
-    df :
+    df : pandas DataFrame
     args :
     kwargs :
 
@@ -542,7 +577,7 @@ def w_longest_strike_above_mean(df, *args, **kwargs):
 
     Parameters
     ----------
-    df :
+    df : pandas DataFrame
     args :
     kwargs :
 
@@ -561,7 +596,7 @@ def w_longest_strike_below_mean(df, *args, **kwargs):
 
     Parameters
     ----------
-    df :
+    df : pandas DataFrame
     args :
     kwargs :
 
@@ -582,7 +617,7 @@ def w_mean_abs_change(df, *args, **kwargs):
 
     Parameters
     ----------
-    df :
+    df : pandas DataFrame
     args :
     kwargs :
 
@@ -603,7 +638,7 @@ def w_mean_change(df, *args, **kwargs):
 
     Parameters
     ----------
-    df :
+    df : pandas DataFrame
     args :
     kwargs :
 
@@ -624,7 +659,7 @@ def w_mean_second_derivative_central(df, *args, **kwargs):
 
     Parameters
     ----------
-    df :
+    df : pandas DataFrame
     args :
     kwargs :
 
@@ -643,7 +678,7 @@ def w_median(df, *args, **kwargs):
 
     Parameters
     ----------
-    df :
+    df : pandas DataFrame
     args :
     kwargs :
 
@@ -666,7 +701,7 @@ def w_number_crossing_m(df, *args, m=0.1, **kwargs):
 
     Parameters
     ----------
-    df :
+    df : pandas DataFrame
     args :
     m : threshold value (see description)
     kwargs :
@@ -691,7 +726,7 @@ def w_number_cwt_peaks(df, *args, n=1, **kwargs):
 
     Parameters
     ----------
-    df :
+    df : pandas DataFrame
     args :
     n : max range value (see description)
     kwargs :
@@ -711,7 +746,7 @@ def w_quantile(df, *args, q=0.5, **kwargs):
 
     Parameters
     ----------
-    df :
+    df : pandas DataFrame
     args :
     q (float) : quantile value (see description)
     kwargs :
@@ -731,7 +766,7 @@ def w_ratio_beyond_r_sigma(df, *args, r=0.5, **kwargs):
 
     Parameters
     ----------
-    df :
+    df : pandas DataFrame
     args :
     r (float) : multiplier value (see description)
     kwargs :
@@ -756,7 +791,7 @@ def w_skewness(df, *args, **kwargs):
 
     Parameters
     ----------
-    df :
+    df : pandas DataFrame
     args :
     kwargs :
 
@@ -782,9 +817,9 @@ def w_time_reversal_asymmetry_statistic(df, *args, lag=100, **kwargs):
 
     Parameters
     ----------
-    df :
+    df : pandas DataFrame
     args :
-    lag : 
+    lag : the lag in samples
     kwargs :
 
     Returns
@@ -809,10 +844,7 @@ def w_savgol_filter(df, *args, window_length=101, polyorder=1, **kwargs):
 
 """
 Feets library
-"""
-import feets
 
-"""
 - API docs: https://feets.readthedocs.io/en/latest/api/feets.html
 
 
@@ -874,6 +906,7 @@ def w_eta_e(df, *args, **kwargs):
     fs = feets.FeatureSpace(only=['Eta_e'], data=['time','magnitude'])
     return fs.extract(*t_m)[1][0]
 
+
 @DumpDecorator
 @WindowDecorator
 def w_gskew(df, *args, **kwargs):
@@ -900,6 +933,7 @@ def w_gskew(df, *args, **kwargs):
     fs = feets.FeatureSpace(only=['Gskew'], data=['time','magnitude'])
     return fs.extract(*t_m)[1][0]
 
+
 @DumpDecorator
 @WindowDecorator
 def w_linear_trend(df, *args, **kwargs):
@@ -922,6 +956,7 @@ def w_linear_trend(df, *args, **kwargs):
     t_m = [time, magnitude]
     fs = feets.FeatureSpace(only=['LinearTrend'], data=['time','magnitude'])
     return fs.extract(*t_m)[1][0]
+
 
 @DumpDecorator
 @WindowDecorator
@@ -946,6 +981,7 @@ def w_median_BRP(df, *args, **kwargs):
     fs = feets.FeatureSpace(only=['MedianBRP'], data=['time','magnitude'])
     return fs.extract(*t_m)[1][0]
 
+
 @DumpDecorator
 @WindowDecorator
 def w_pair_slope_trend(df, *args, **kwargs):
@@ -969,6 +1005,7 @@ def w_pair_slope_trend(df, *args, **kwargs):
     t_m = [time, magnitude]
     fs = feets.FeatureSpace(only=['PairSlopeTrend'], data=['time','magnitude'])
     return fs.extract(*t_m)[1][0]
+
 
 @DumpDecorator
 @WindowDecorator
@@ -995,6 +1032,7 @@ def w_q31(df, *args, **kwargs):
     t_m = [time, magnitude]
     fs = feets.FeatureSpace(only=['Q31'], data=['time','magnitude'])
     return fs.extract(*t_m)[1][0]
+
 
 @DumpDecorator
 @WindowDecorator
