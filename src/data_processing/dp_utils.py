@@ -169,12 +169,39 @@ Custom routines
 @DumpDecorator
 @WindowDecorator
 def w_psd(df, *args, fs=4e6, **kwargs):
+    """
+    Calculates total power spectrum density of the dataframe and sums it up
+
+    Parameters
+    ----------
+    df : pandas DataFrame
+    args : None
+    fs : sampling frequency
+    kwargs :
+
+    Returns
+    -------
+    A sum of spectral components of the dataframe
+    """
     return np.sum(scipy.signal.periodogram(df, fs=fs)[1])
 
 
 @DumpDecorator
 @WindowDecorator
 def w_last_elem(df, *args, **kwargs):
+    """
+    Get the last element of the dataframe
+
+    Parameters
+    ----------
+    df : pandas DataFrame
+    args : None
+    kwargs : None
+
+    Returns
+    -------
+    The last element of the dataframe
+    """
     return df[-1]
 
 
@@ -384,14 +411,36 @@ def w_savgol_filter(df, *args, window_length=101, polyorder=1, **kwargs):
 Feets library
 """
 import feets
-#pip install feets
+
+"""
+- API docs: https://feets.readthedocs.io/en/latest/api/feets.html
+
+
+"""
+
 
 @DumpDecorator
 @WindowDecorator
 def w_con(df, *args, **kwargs):
+    """
+    To calculate Con, we count the number of three consecutive data points that are brighter or fainter than 2σ
+    and normalize the number by N−2.
+
+    For a normal distribution and by considering just one star, Con should take values close to 0.045
+
+    Parameters
+    ----------
+    df : pandas DataFrame
+    args :
+    kwargs :
+
+    Returns
+    -------
+
+    """
     size = df.shape[0]
     time = np.linspace(0,size-1, size)
-    magnitude =df
+    magnitude = df
     t_m = [time, magnitude]
     fs = feets.FeatureSpace(only=['Con'], data=['time','magnitude'])
     return fs.extract(*t_m)[1][0]
@@ -400,9 +449,27 @@ def w_con(df, *args, **kwargs):
 @DumpDecorator
 @WindowDecorator
 def w_eta_e(df, *args, **kwargs):
+    """
+    Variability index η is the ratio of the mean of the square of successive differences to the variance of data points.
+
+    The index was originally proposed to check whether the successive data points are independent or not.
+    In other words, the index was developed to check if any trends exist in the data (von Neumann 1941
+
+    Link: https://feets.readthedocs.io/en/latest/api/feets.extractors.html#module-feets.extractors.ext_eta_e
+
+    Parameters
+    ----------
+    df : pandas DataFrame
+    args :
+    kwargs :
+
+    Returns
+    -------
+    Variability index η
+    """
     size = df.shape[0]
     time = np.linspace(0,size-1, size)
-    magnitude =df
+    magnitude = df
     t_m = [time, magnitude]
     fs = feets.FeatureSpace(only=['Eta_e'], data=['time','magnitude'])
     return fs.extract(*t_m)[1][0]
@@ -410,9 +477,25 @@ def w_eta_e(df, *args, **kwargs):
 @DumpDecorator
 @WindowDecorator
 def w_gskew(df, *args, **kwargs):
+    """
+    Median-of-magnitudes based measure of the skew.
+
+    Formula is given here:
+    https://feets.readthedocs.io/en/latest/api/feets.extractors.html#module-feets.extractors.ext_gskew
+
+    Parameters
+    ----------
+    df : pandas DataFrame
+    args :
+    kwargs :
+
+    Returns
+    -------
+
+    """
     size = df.shape[0]
     time = np.linspace(0,size-1, size)
-    magnitude =df
+    magnitude = df
     t_m = [time, magnitude]
     fs = feets.FeatureSpace(only=['Gskew'], data=['time','magnitude'])
     return fs.extract(*t_m)[1][0]
@@ -420,9 +503,22 @@ def w_gskew(df, *args, **kwargs):
 @DumpDecorator
 @WindowDecorator
 def w_linear_trend(df, *args, **kwargs):
+    """
+    Slope of a linear fit to a signal.
+
+    Parameters
+    ----------
+    df : pandas DataFrame
+    args :
+    kwargs :
+
+    Returns
+    -------
+
+    """
     size = df.shape[0]
     time = np.linspace(0,size-1, size)
-    magnitude =df
+    magnitude = df
     t_m = [time, magnitude]
     fs = feets.FeatureSpace(only=['LinearTrend'], data=['time','magnitude'])
     return fs.extract(*t_m)[1][0]
@@ -430,9 +526,22 @@ def w_linear_trend(df, *args, **kwargs):
 @DumpDecorator
 @WindowDecorator
 def w_median_BRP(df, *args, **kwargs):
+    """
+    MedianBRP (Median buffer range percentage)
+
+    Parameters
+    ----------
+    df : pandas DataFrame
+    args :
+    kwargs :
+
+    Returns
+    -------
+    Fraction (<= 1) of points within amplitude/10 of the median magnitude
+    """
     size = df.shape[0]
     time = np.linspace(0,size-1, size)
-    magnitude =df
+    magnitude = df
     t_m = [time, magnitude]
     fs = feets.FeatureSpace(only=['MedianBRP'], data=['time','magnitude'])
     return fs.extract(*t_m)[1][0]
@@ -440,9 +549,23 @@ def w_median_BRP(df, *args, **kwargs):
 @DumpDecorator
 @WindowDecorator
 def w_pair_slope_trend(df, *args, **kwargs):
+    """
+    Considering the last 30 (time-sorted) measurements of a signal magnitude,
+    the fraction of increasing first differences minus the fraction of decreasing first differences.
+
+    Parameters
+    ----------
+    df : pandas DataFrame
+    args :
+    kwargs :
+
+    Returns
+    -------
+
+    """
     size = df.shape[0]
     time = np.linspace(0,size-1, size)
-    magnitude =df
+    magnitude = df
     t_m = [time, magnitude]
     fs = feets.FeatureSpace(only=['PairSlopeTrend'], data=['time','magnitude'])
     return fs.extract(*t_m)[1][0]
@@ -450,9 +573,25 @@ def w_pair_slope_trend(df, *args, **kwargs):
 @DumpDecorator
 @WindowDecorator
 def w_q31(df, *args, **kwargs):
+    """
+    Q3−1 is the difference between the third quartile, Q3, and the first quartile, Q1, of a signal.
+
+    Q1 is a split between the lowest 25% and the highest 75% of data.
+    Q3 is a split between the lowest 75% and the highest 25% of data.
+
+    Parameters
+    ----------
+    df :
+    args :
+    kwargs :
+
+    Returns
+    -------
+
+    """
     size = df.shape[0]
     time = np.linspace(0,size-1, size)
-    magnitude =df
+    magnitude = df
     t_m = [time, magnitude]
     fs = feets.FeatureSpace(only=['Q31'], data=['time','magnitude'])
     return fs.extract(*t_m)[1][0]
@@ -460,9 +599,27 @@ def w_q31(df, *args, **kwargs):
 @DumpDecorator
 @WindowDecorator
 def w_slottedA_length(df, *args, **kwargs):
+    """
+    In slotted autocorrelation, time lags are defined as intervals or slots instead of single values.
+    The slotted autocorrelation function at a certain time lag slot is computed by averaging the cross product between
+    samples whose time differences fall in the given slot.
+
+    TODO: add this
+    There is a parameter T: slot size in days (wtf???) (default=1).
+
+    Parameters
+    ----------
+    df : pandas DataFrame
+    args :
+    kwargs :
+
+    Returns
+    -------
+
+    """
     size = df.shape[0]
     time = np.linspace(0,size-1, size)
-    magnitude =df
+    magnitude = df
     t_m = [time, magnitude]
     fs = feets.FeatureSpace(only=['SlottedA_length'], data=['time','magnitude'])
     return fs.extract(*t_m)[1][0]
