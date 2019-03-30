@@ -37,8 +37,8 @@ def plot_data(function, params, **kwargs):
 
     # Downsampling is conducted by the last element
     signals = [function(df.s, **params).values.ravel(),  # featurised signal
-               w_labels(df.s, **params).values.ravel(),  # downsampled signal
-               100 * w_labels(df.ttf, **params).values.ravel()]  # downsample ttf
+               w_last_elem(df.s, **params).values.ravel(),  # downsampled signal
+               100 * w_last_elem(df.ttf, **params).values.ravel()]  # downsample ttf
 
     s_max = []
     for i in range(len(signals)):
@@ -84,5 +84,5 @@ def plot_data(function, params, **kwargs):
 
 if __name__ == '__main__':
     # example
-    params = {"window_size": 1000}
+    params = {"window_size": 1000, 'desc_line' : "std_1000"}
     plot_data(w_std, params, path_to_data="../../data/EQs", EQs_num=[2, 3])
