@@ -83,12 +83,12 @@ def get_function_descriptor(func, extra_params):
     funcname_line = func.__name__
     args_line = "{}".format(*inspect_params.args)
     kwargs_line = ', '.join("{}={}".format(k, v) for k, v in extra_params.items())
-    kwonlydefaults_line = ', '.join("{}={}".format(k, v) for k, v in inspect_params.kwonlydefaults.items())
-
-    desc_line = funcname_line + '(' + \
-                args_line + \
-                ', ' + kwargs_line + \
-                ', ' + kwonlydefaults_line + ')'
+    if inspect_params.kwonlydefaults is not None:
+        kwonlydefaults_line = ', ' + ', '.join("{}={}".format(k, v) for k, v in inspect_params.kwonlydefaults.items())
+    else:
+        kwonlydefaults_line = ''
+    
+    desc_line = funcname_line + '(' + args_line + kwargs_line + kwonlydefaults_line + ')'
 
     return desc_line
 
@@ -118,7 +118,6 @@ def process_df(df, routines, default_window_size, save_path=None, df_name=None):
     if df_path is not None:
         if not os.path.exists(df_path):
             os.makedirs(df_path)
-
 
     # calc all features
     # TODO: add checking if the feature was already calculated

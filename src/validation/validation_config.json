@@ -1,8 +1,8 @@
 {
-  "train_data": "../../data/proceded_train.h5",
-  "summary_dest": "../../data/summary_train.csv",
-  "predict_directory": "../../data/predict",
-  "models_directory": "../../data/saved_models",
+  "train_data": "../../data.nosync/train_processed.h5",
+  "summary_dest": "../../data.nosync/summary_train.csv",
+  "predict_directory": "../../data.nosync/predict",
+  "models_directory": "../../data.nosync/saved_models",
   "preproc": {
     "name": "StandardScaler"
   },
