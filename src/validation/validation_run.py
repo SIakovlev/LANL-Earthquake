@@ -8,7 +8,7 @@ from sklearn.model_selection import KFold, RepeatedKFold, StratifiedKFold, Repea
 
 from ast import literal_eval
 
-import src.validation.ValidationProc
+import src.validation.validation_utils
 
 import os
 import sys

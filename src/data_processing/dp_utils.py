@@ -12,6 +12,8 @@ from tqdm import tqdm
 from scipy.signal import savgol_filter
 import warnings
 import feets
+from os import listdir
+from os.path import isfile, join
 
 warnings.filterwarnings("ignore", category=feets.ExtractorWarning)
 
@@ -47,11 +49,13 @@ class WindowDecorator:
         else:
             desc_line = get_function_descriptor(self.unwrapped, kwargs)
 
+        # TODO: fix this hack
         if window_size >= df.shape[0]:
             tqdm.write(f"{desc_line}:")
             tqdm.write("\t window decorator: ")
             tqdm.write("\t - window size: {}".format(window_size))
-            return pd.DataFrame(df.values, columns={desc_line})
+            temp = self.unwrapped(df.values, *args, **kwargs)
+            return pd.DataFrame(temp, columns={desc_line})
         else:
             temp = []
             for i in tqdm(range(0, df.shape[0], window_size),
@@ -93,7 +97,7 @@ def get_function_descriptor(func, extra_params):
     return desc_line
 
 
-def process_df(df, routines, default_window_size, save_path=None, df_name=None):
+def process_df(df, routines, default_window_size, data_path=None, df_name=None):
     """
     Data processing is done in three main steps:
     1) Calculate all features listed in configuration file (dp_config.json)
@@ -111,12 +115,16 @@ def process_df(df, routines, default_window_size, save_path=None, df_name=None):
     """
     this_module_name = sys.modules[__name__]
     temp_data = {}
+    processed_features = []
 
-    # save dataframe to disk if needed (might be useful for feature visualisation)
-    # TODO: add logic with dir creation
-    df_path = save_path + df_name if save_path is not None else None
+    # Create dir with df name if it doesn't exist
+    df_path = data_path + df_name if data_path is not None else None
     if df_path is not None:
-        if not os.path.exists(df_path):
+        if os.path.exists(df_path):
+            processed_features = [os.path.splitext(f)[0] for f in listdir(df_path) if isfile(join(df_path, f))]
+            warnings.warn(f"Directory {df_path} already exists. "
+                          f"Running data processing in this directory again might lead to data loss.")
+        else:
             os.makedirs(df_path)
 
     # calc all features
@@ -124,25 +132,30 @@ def process_df(df, routines, default_window_size, save_path=None, df_name=None):
     for routine in routines:
         if not routine['on']:
             continue
+
         func = getattr(this_module_name, routine["name"])
         func_params = routine['params']
         window_size = default_window_size if 'window_size' not in routine else routine['window_size']
-        try:
-            data = df[routine['column_name']] if routine['column_name'] in df.columns \
-                else temp_data[routine['column_name']].squeeze()
-        except KeyError as e:
-            raise KeyError(f"Check your feature calculation order, key: {e} is missing")
-
         if func_params:
             desc_line = f"{func.__name__}({routine['column_name']}, window_size={window_size}, " + \
                         ', '.join("{!s}={!r}".format(key, val) for (key, val) in func_params.items()) + ')'
         else:
             desc_line = f"{func.__name__}({routine['column_name']}, window_size={window_size})"
 
+        if desc_line in processed_features:
+            print(f"File {desc_line}.h5 already exists. Skip calculations")
+            continue
+
+        try:
+            data = df[routine['column_name']] if routine['column_name'] in df.columns \
+                else temp_data[routine['column_name']].squeeze()
+        except KeyError as e:
+            raise KeyError(f"Check your feature calculation order, key: {e} is missing")
+
         data_processed = func(data,
                               window_size=window_size,
                               desc_line=desc_line,
-                              # save_path=os.path.join(df_path, desc_line + ".h5"),
+                              save_path=os.path.join(df_path, desc_line + ".h5"),
                               **func_params)
         new_col_name = data_processed.columns.values.tolist()[0]
         temp_data[new_col_name] = data_processed
@@ -838,6 +851,8 @@ Other libraries
 @DumpDecorator
 @WindowDecorator
 def w_savgol_filter(df, *args, window_length=101, polyorder=1, **kwargs):
+    if window_length > df.shape[0]:
+        raise ValueError(f"Specified window length ({window_length}) is greater than dataframe size ({df.shape[0]})")
     return savgol_filter(df, window_length=window_length, polyorder=polyorder)
 
 

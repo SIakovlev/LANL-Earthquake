@@ -23,7 +23,9 @@ def main(**kwargs):
     print(' - Run dataframe processing')
     dfp = dp.process_df(df,
                         kwargs['routines'],
-                        default_window_size)
+                        default_window_size,
+                        kwargs['data_processed_dir'],
+                        "test")
     print(' - Dataframe was successfully processed')
 
     # 3. Save modified dataframe
@@ -65,7 +67,7 @@ if __name__ == '__main__':
             for k, v in params_dict.items():
                 if v.default != inspect._empty:
                     params[k] = v.default
-            routines.append({"name": obj.__name__, "on": True, "column_name": "s", "params": params})
+            routines.append({"name": obj.__name__, "on": False, "column_name": "s", "params": params})
         dp_config["routines"] = routines
         with open(config_fname, 'w') as outfile:
             json.dump(dp_config, outfile, indent=2)
