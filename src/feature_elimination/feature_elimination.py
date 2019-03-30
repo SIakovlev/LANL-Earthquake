@@ -25,14 +25,16 @@ def eliminate_features(dataset, estimator, **kwargs):
     #STAGE 1: select percentile
     indices_mask = SelectPercentile(mutual_info_regression, percentile = percentile).fit(X, y).get_support()
     indices_left = [i for i in range(len(indices_mask)) if indices_mask[i] == True]
-    X_new = X[:,indices_left]
-    X_new_cols = X_cols[indices_left]
+    X_new = X[:,tuple(indices_left)]
+    X_new_cols = X_cols[indices_mask]
 
     #STAGE 2: Recursive Feature elimination
     selector = RFE(estimator, num_of_features, step=1)
     selector = selector.fit(X_new, y)
-    X_remaining = X_new[:,selector.support_]
-    X_remaining_cols = X_new_cols[selector.support_]
+    indices_mask =  selector.support_
+    indices_left = [i for i in range(len(indices_mask)) if indices_mask[i] == True]
+    X_remaining = X_new[:,tuple(indices_left)]
+    X_remaining_cols = X_new_cols[indices_mask]
 
     purged_dataset = pd.DataFrame(X_remaining, columns=X_remaining_cols)
 
