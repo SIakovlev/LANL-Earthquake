@@ -1,0 +1,13 @@
+{
+  "train_data_fname": "../../data.nosync/train_processed.h5",
+  "summary_dest_fname": "../../data.nosync/summary.pickle",
+
+  "folds":{
+      "name":"KFold",
+      "n_splits": 4
+            },
+
+  "metrics": ["mean_absolute_error", "mean_squared_error"],
+
+  "model": { "name": "LinearRegression", "normalize": true, "n_jobs":"-1"}
+}
