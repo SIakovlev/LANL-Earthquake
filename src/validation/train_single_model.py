@@ -77,6 +77,14 @@ def main(**kwargs):
         X_train, X_valid = train_data.iloc[train_index], train_data.iloc[valid_index]
         y_train, y_valid = y_train_data.iloc[train_index], y_train_data.iloc[valid_index]
 
+        plt.figure(figsize=(30,15))
+        plt.imshow(np.log(X_valid+1.0).T, vmax=0.001)
+        plt.savefig(f'valid_data_log_{fold_n}.png')
+        plt.figure(figsize=(30,15))
+        plt.imshow(X_valid.T, vmax=0.001)
+        plt.savefig(f'valid_data_{fold_n}.png')
+
+
         model = model_cls(**model_params)
         model.fit(X_train, y_train)
 
@@ -89,21 +97,30 @@ def main(**kwargs):
         predict = model.predict(X_train_reshaped)
 
         plt.figure()
-        plt.plot(y_train)
+        plt.plot(y_train.values)
         plt.plot(predict)
+        plt.ylim([0., 20.])
         plt.title('train')
-        plt.show(block=False)
+        # plt.show(block=False)
+        plt.savefig(f'train_{fold_n}.png')
+
+        for metric_name, metric in metrics.items():
+            score = metric(predict, y_train[15:])
+            scores[metric_name].append(score)
+            print(f"train score: {score.mean():.4f}")
 
         # temp custom reshape data for
-        X_valid = pd.DataFrame(np.stack([X_valid[i - 15:i] for i in range(15, X_valid.shape[0])]).reshape(-1, 30000))
+        X_valid_reshaped = pd.DataFrame(np.stack([X_valid[i - 15:i] for i in range(15, X_valid.shape[0])]).reshape(-1, 30000))
 
-        predict = model.predict(X_valid)
+        predict = model.predict(X_valid_reshaped)
 
         plt.figure()
-        plt.plot(y_valid)
+        plt.plot(y_valid.values)
         plt.plot(predict)
+        plt.ylim([0., 20.])
         plt.title('valid')
-        plt.show(block=False)
+        # plt.show(block=False)
+        plt.savefig(f'valid_{fold_n}.png')
 
         for metric_name, metric in metrics.items():
             score = metric(predict, y_valid[15:])

@@ -36,6 +36,7 @@ class MLP(Module, ModelBase):
         self = self.to(self.device)
 
     def forward(self, x):
+        x = torch.clamp(x, max=0.001)
         x = self.bn(x)
         x = self.dropout(x)
         for linear in self.linears:
@@ -67,11 +68,14 @@ class MLP(Module, ModelBase):
                 mae_loss = torch.abs(predict - y_batch).mean()
                 print(f"\r step: {i} | mse_loss={loss.detach().cpu():.4f} | mae_loss={mae_loss.detach().cpu():.4f}", end="")
             print()
+        del train_data
+        del train_y
 
     def predict(self, test_data):
         self.eval()
         test_data = torch.tensor(test_data.values.astype(np.float32)).to(self.device)
         y_predict = self(test_data)
+        del test_data
         return y_predict.detach().cpu().numpy()
 
 
