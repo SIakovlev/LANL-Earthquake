@@ -8,8 +8,8 @@ import platform
 
 
 def main(**kwargs):
-    data_path = kwargs['data_dir'] + kwargs["data_fname"]
-    data_processed_path = kwargs['data_processed_dir'] + kwargs["data_processed_fname"]
+    data_path = kwargs['data_dir'] + kwargs["data_fname"] + '.h5'
+    data_processed_path = kwargs['data_processed_dir'] + kwargs["data_processed_fname"] + '.h5'
 
     default_window_size = kwargs['window_size']
 
@@ -24,8 +24,7 @@ def main(**kwargs):
     dfp = dp.process_df(df,
                         kwargs['routines'],
                         default_window_size,
-                        kwargs['data_processed_dir'],
-                        "test")
+                        kwargs['data_processed_dir'] + kwargs["data_processed_fname"])
     print(' - Dataframe was successfully processed')
 
     # 3. Save modified dataframe

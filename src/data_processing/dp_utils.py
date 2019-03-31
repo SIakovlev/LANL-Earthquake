@@ -97,7 +97,74 @@ def get_function_descriptor(func, extra_params):
     return desc_line
 
 
-def process_df(df, routines, default_window_size, data_path=None, df_name=None):
+# def calc_features(df, routines, window_sizes_list, data_path=None, df_name=None):
+#     """
+#
+#     :param df: raw data
+#     :type df: pandas DataFrame
+#     :param routines: list of routines specified in dp_config.json file
+#     :type routines: list
+#     :param default_window_size:
+#     :type default_window_size:
+#     :return: dataframe with features calculated based on the list of routines
+#     :rtype: pandas DataFrame
+#     """
+#     this_module_name = sys.modules[__name__]
+#     temp_data = {}
+#     processed_features = []
+#
+#     # Create dir with df name if it doesn't exist
+#     df_path = data_path + df_name if data_path is not None else None
+#     if df_path is not None:
+#         if os.path.exists(df_path):
+#             processed_features = [os.path.splitext(f)[0] for f in listdir(df_path) if isfile(join(df_path, f))]
+#             warnings.warn(f"Directory {df_path} already exists. "
+#                           f"Running data processing in this directory again might lead to data loss.")
+#         else:
+#             os.makedirs(df_path)
+#
+#     # calc all features
+#     for routine in routines:
+#         if not routine['on']:
+#             continue
+#
+#         func = getattr(this_module_name, routine["name"])
+#         func_params = routine['params']
+#         for window_size in window_sizes_list:
+#             if func_params:
+#                 desc_line = f"{func.__name__}({routine['column_name']}, window_size={window_size}, " + \
+#                             ', '.join("{!s}={!r}".format(key, val) for (key, val) in func_params.items()) + ')'
+#             else:
+#                 desc_line = f"{func.__name__}({routine['column_name']}, window_size={window_size})"
+#
+#             if desc_line in processed_features:
+#                 print(f"File {desc_line}.h5 already exists. Skip calculations")
+#                 continue
+#
+#             try:
+#                 data = df[routine['column_name']] if routine['column_name'] in df.columns \
+#                     else temp_data[routine['column_name']].squeeze()
+#             except KeyError as e:
+#                 raise KeyError(f"Check your feature calculation order, key: {e} is missing")
+#
+#             data_processed = func(data,
+#                                   window_size=window_size,
+#                                   desc_line=desc_line,
+#                                   save_path=os.path.join(df_path, desc_line + ".h5"),
+#                                   **func_params)
+#             new_col_name = data_processed.columns.values.tolist()[0]
+#             temp_data[new_col_name] = data_processed
+#
+#     # perform resampling if needed
+#     resulted_size = temp_data['ttf'].shape[0]
+#     for k, v in temp_data.items():
+#         temp_data[k] = resample_column(v, resulted_size)
+#
+#     res = pd.concat(temp_data.values(), axis=1)
+#     return res
+
+
+def process_df(df, routines, default_window_size, df_path=None):
     """
     Data processing is done in three main steps:
     1) Calculate all features listed in configuration file (dp_config.json)
@@ -118,7 +185,6 @@ def process_df(df, routines, default_window_size, data_path=None, df_name=None):
     processed_features = []
 
     # Create dir with df name if it doesn't exist
-    df_path = data_path + df_name if data_path is not None else None
     if df_path is not None:
         if os.path.exists(df_path):
             processed_features = [os.path.splitext(f)[0] for f in listdir(df_path) if isfile(join(df_path, f))]
@@ -128,9 +194,10 @@ def process_df(df, routines, default_window_size, data_path=None, df_name=None):
             os.makedirs(df_path)
 
     # calc all features
-    # TODO: add checking if the feature was already calculated
+    print(f"Calculation of {len(routines)} features...")
     for routine in routines:
         if not routine['on']:
+            print(f"Feature {routine['name']} calcualtion is disabled")
             continue
 
         func = getattr(this_module_name, routine["name"])
@@ -152,10 +219,11 @@ def process_df(df, routines, default_window_size, data_path=None, df_name=None):
         except KeyError as e:
             raise KeyError(f"Check your feature calculation order, key: {e} is missing")
 
+        save_path = os.path.join(df_path, desc_line + ".h5")
         data_processed = func(data,
                               window_size=window_size,
                               desc_line=desc_line,
-                              save_path=os.path.join(df_path, desc_line + ".h5"),
+                              save_path=save_path,
                               **func_params)
         new_col_name = data_processed.columns.values.tolist()[0]
         temp_data[new_col_name] = data_processed

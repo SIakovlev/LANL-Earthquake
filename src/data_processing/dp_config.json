@@ -1,8 +1,8 @@
 {
   "data_dir": "../../data.nosync/",
   "data_processed_dir": "../../data.nosync/",
-  "data_fname": "train_short.h5",
-  "data_processed_fname": "train_processed_short.h5",
+  "data_fname": "train_3400000",
+  "data_processed_fname": "train_processed_short",
   "window_size": 10000,
   "routines": [
     {
@@ -247,7 +247,7 @@
       "on": true,
       "column_name": "w_psd(s, window_size=10000, fs=4000000.0)",
       "params": {
-        "window_length": 11,
+        "window_length": 101,
         "polyorder": 1
       }
     },
