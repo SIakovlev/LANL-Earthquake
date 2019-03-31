@@ -8,7 +8,7 @@ import pickle
 import os
 import xgboost as xgb
 
-from src.validation.nn_test import CustomNN
+from src.models.nn_test import CustomNN
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.tree import ExtraTreeRegressor

@@ -210,7 +210,10 @@ def process_df(df, routines, default_window_size, df_path=None):
             desc_line = f"{func.__name__}({routine['column_name']}, window_size={window_size})"
 
         if desc_line in processed_features:
-            print(f"File {desc_line}.h5 already exists. Skip calculations")
+            print(f"File {desc_line}.h5 already exists. Skip calculations and append it to the dataframe")
+            data_processed = pd.read_hdf(os.path.join(df_path, desc_line + ".h5"), key='table')
+            new_col_name = list(data_processed)[0]
+            temp_data[new_col_name] = data_processed
             continue
 
         try:

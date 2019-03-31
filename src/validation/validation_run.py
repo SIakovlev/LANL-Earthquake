@@ -66,7 +66,7 @@ def main(**kwargs):
         print(kwargs['preproc']['name'])
         name_class = kwargs['preproc']['name']
         del kwargs['preproc']['name']
-        preprocessor_class = str_to_class("src.validation.preproc", name_class)(**kwargs['preproc'])
+        preprocessor_class = str_to_class("src.preprocessing.preproc", name_class)(**kwargs['preproc'])
         print(f' - Attempt to preprocess data')
         train_df = pd.DataFrame(preprocessor_class.fit_transform(train_df),columns=train_columns[:-1])
         preprocessor  = {"preproc_name":name_class, "preproc_params":kwargs['preproc']}
@@ -90,7 +90,7 @@ def main(**kwargs):
     # 5. parse params and create a chain of validation instances
     validators = []
     for v in kwargs['validate']:
-        class_ = str_to_class('ValidationProc', 'ValidationBase')
+        class_ = str_to_class('validation_utils', 'ValidationBase')
         validator = class_(**v)
         validators.append(validator)
 
@@ -131,7 +131,7 @@ if __name__ == '__main__':
     parser.add_argument('--config_fname',
                         help='name of the config file',
                         type=str,
-                        default='validation_config.json')
+                        default='../configs/validation_config.json')
 
     args = parser.parse_args()
 

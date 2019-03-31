@@ -6,15 +6,14 @@ import numpy as np
 import matplotlib as mpl
 import pickle
 import copy
-from tqdm import tqdm
 from collections import defaultdict
 
-from src.validation.models import *
 from src.utils import str_to_class
 from src.validation.summary_utils import summarize
 
+import xgboost as xgb
 
-from src.validation.nn_test import CustomNN
+from src.models.nn_test import CustomNN
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.tree import ExtraTreeRegressor
@@ -127,7 +126,7 @@ if __name__ == '__main__':
     parser.add_argument('--config_fname',
                         help='name of the config file',
                         type=str,
-                        default="train_config.json")
+                        default="../configs/train_config.json")
 
     args = parser.parse_args()
 

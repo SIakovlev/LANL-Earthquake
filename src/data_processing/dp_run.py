@@ -41,8 +41,9 @@ def main(**kwargs):
 if __name__ == '__main__':
 
     config_fname = "dp_config.json"
+    config_path = '../configs/' + config_fname
     # build config if there is no .json file
-    if not os.path.isfile(config_fname):
+    if not os.path.isfile(config_path):
         # TODO: fix dirty hack
         func_ref_list = [obj[1] for obj in inspect.getmembers(dp) if obj[0].startswith("w_")]
 
@@ -53,8 +54,8 @@ if __name__ == '__main__':
         else:
             dp_config = {"data_dir": "../../data/",
                          "data_processed_dir": "../../data/"}
-        dp_config.update({"data_fname": "train.h5",
-                          "data_processed_fname": "train_processed.h5",
+        dp_config.update({"data_fname": "train",
+                          "data_processed_fname": "train_processed",
                           "window_size": 10000,
                           "routines": {}})
         # Create routines dict based on module structure
@@ -68,7 +69,7 @@ if __name__ == '__main__':
                     params[k] = v.default
             routines.append({"name": obj.__name__, "on": False, "column_name": "s", "params": params})
         dp_config["routines"] = routines
-        with open(config_fname, 'w') as outfile:
+        with open(config_path, 'w') as outfile:
             json.dump(dp_config, outfile, indent=2)
 
     parser = argparse.ArgumentParser()
@@ -76,7 +77,7 @@ if __name__ == '__main__':
     parser.add_argument('--config_fname',
                         help='name of the config file',
                         type=str,
-                        default=config_fname)
+                        default=config_path)
 
     args = parser.parse_args()
 
