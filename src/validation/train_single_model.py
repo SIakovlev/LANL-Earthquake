@@ -6,23 +6,14 @@ import numpy as np
 import matplotlib as mpl
 import pickle
 import copy
-from tqdm import tqdm
 from collections import defaultdict
 
-from src.validation.models import *
 from src.utils import str_to_class
 from src.validation.summary_utils import summarize
 
+import matplotlib.pyplot as plt
 
-from src.validation.nn_test import CustomNN
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.tree import DecisionTreeRegressor
-from sklearn.tree import ExtraTreeRegressor
-from sklearn.linear_model import LinearRegression
-from sklearn.linear_model import Ridge
-from xgboost import XGBRegressor
-from catboost import CatBoostRegressor
-from lightgbm import LGBMRegressor
+from src.models.mlp_net import MLP
 
 if platform.system() == 'Darwin':
     mpl.use('TkAgg')  # Mac OS specific
@@ -76,36 +67,51 @@ def main(**kwargs):
     # TODO: fix this
     if 'name' in model_params:
         model_params.pop("name")
-    model = model_cls(**model_params)
 
     # 6. train model
     print('....................... Training model ..............................')
     scores = defaultdict(list)
     for fold_n, (train_index, valid_index) in enumerate(folds.split(train_data)):
+        print(f" --------------- fold #{fold_n} out of -------------------")
         # split data
         X_train, X_valid = train_data.iloc[train_index], train_data.iloc[valid_index]
         y_train, y_valid = y_train_data.iloc[train_index], y_train_data.iloc[valid_index]
 
-        # Move this outside of the for loop
-        # # instantiate and train model
-        # model_params = copy.deepcopy(kwargs['model'])
-        #
-        #
-        # if 'name' in model_params:
-        #     model_params.pop("name")
-
-        # m = model_cls(**model_params)
+        model = model_cls(**model_params)
         model.fit(X_train, y_train)
 
         # validate
+
+        # temp custom reshape data for
+        X_train_reshaped = pd.DataFrame(np.stack([X_train[i-15:i] for i in range(15, X_train.shape[0])]).reshape(-1, 30000))
+
+
+        predict = model.predict(X_train_reshaped)
+
+        plt.figure()
+        plt.plot(y_train)
+        plt.plot(predict)
+        plt.title('train')
+        plt.show(block=False)
+
+        # temp custom reshape data for
+        X_valid = pd.DataFrame(np.stack([X_valid[i - 15:i] for i in range(15, X_valid.shape[0])]).reshape(-1, 30000))
+
         predict = model.predict(X_valid)
 
-        for metric_name, metric in metrics.items():
-            score = metric(predict, y_valid)
-            scores[metric_name].append(score)
+        plt.figure()
+        plt.plot(y_valid)
+        plt.plot(predict)
+        plt.title('valid')
+        plt.show(block=False)
 
-    with open(f"Model {model}", 'wb') as file:
-        pickle.dump(model, file)
+        for metric_name, metric in metrics.items():
+            score = metric(predict, y_valid[15:])
+            scores[metric_name].append(score)
+            print(f"validation score: {score.mean():.4f}")
+
+    # with open(f"Model {kwargs['model']['name']}", 'wb') as file:
+    #     pickle.dump(model, file)
 
     # 7. create summary
     summary_row = summarize(scores=scores, **kwargs)
@@ -127,7 +133,7 @@ if __name__ == '__main__':
     parser.add_argument('--config_fname',
                         help='name of the config file',
                         type=str,
-                        default="train_config.json")
+                        default="../configs/mlp_train_config.json")
 
     args = parser.parse_args()
 

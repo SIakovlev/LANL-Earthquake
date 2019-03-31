@@ -1,12 +1,9 @@
-import argparse
-import json
 from torch.nn import Module, Linear, MSELoss, ReLU
 from torch.optim import Adam
 import torch
 import torch.utils.data
-import pandas as pd
 import numpy as np
-from src.validation.models import ModelBase
+from models.models import ModelBase
 
 
 class CustomNN(Module, ModelBase):

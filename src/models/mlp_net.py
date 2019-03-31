@@ -1,0 +1,77 @@
+from torch.nn import Module, Linear, MSELoss, ReLU, ModuleList, Dropout, BatchNorm1d
+from torch.optim import Adam
+import torch
+import torch.utils.data
+import numpy as np
+from models.models import ModelBase
+
+
+class MLP(Module, ModelBase):
+    def __init__(self, **kwargs):
+        super(MLP, self).__init__()
+
+        # neural net params
+        self.in_features = kwargs["in_features"]
+        self.out_features = kwargs['out_features']
+        self.linears_size = kwargs['hidden_layers']
+        self.device = kwargs['device']
+
+        self.dropout = Dropout(p=0.2)
+
+        self.bn = BatchNorm1d(self.in_features)
+
+        self.linears = ModuleList([Linear(self.in_features, self.linears_size[0])])
+        self.linears.extend(
+            [Linear(self.linears_size[i - 1], self.linears_size[i]) for i in range(1, len(self.linears_size))])
+
+        self.out = Linear(self.linears_size[-1], self.out_features)
+        self.relu = ReLU()
+
+        # train params
+        self.optim = Adam(self.parameters(), lr=kwargs['learning_rate'])
+        self.minibatch_size = kwargs['minibatch_size']
+        self.num_epochs = kwargs['num_epochs']
+
+        self.loss = MSELoss()
+        self = self.to(self.device)
+
+    def forward(self, x):
+        x = self.bn(x)
+        x = self.dropout(x)
+        for linear in self.linears:
+            x = self.relu(linear(x))
+        res = self.out(x)
+        return res
+
+    def fit(self, train_data, train_y):
+        self.train()
+        train_data = torch.tensor(train_data.values.astype(np.float32)).to(self.device)
+        train_y = torch.tensor(train_y.values.astype(np.float32)).view(-1, 1).to(self.device)
+
+        n_train_steps_per_epoch = train_data.shape[0] // self.minibatch_size
+
+        n_rows_per_sample = self.in_features // train_data.shape[1]
+        for e in range(self.num_epochs):
+            print(f" epoch: {e} out of {self.num_epochs}")
+            for i in range(n_train_steps_per_epoch):
+                batch_idx = np.random.randint(low=n_rows_per_sample, high=train_data.shape[0], size=self.minibatch_size)
+                x_batch = torch.stack([train_data[idx - n_rows_per_sample: idx] for idx in batch_idx]).view(self.minibatch_size, self.in_features)
+                y_batch = train_y[batch_idx]
+                predict = self(x_batch)
+
+                self.optim.zero_grad()
+                loss = self.loss(predict, y_batch)
+                loss.backward()
+                self.optim.step()
+
+                mae_loss = torch.abs(predict - y_batch).mean()
+                print(f"\r step: {i} | mse_loss={loss.detach().cpu():.4f} | mae_loss={mae_loss.detach().cpu():.4f}", end="")
+            print()
+
+    def predict(self, test_data):
+        self.eval()
+        test_data = torch.tensor(test_data.values.astype(np.float32)).to(self.device)
+        y_predict = self(test_data)
+        return y_predict.detach().cpu().numpy()
+
+
