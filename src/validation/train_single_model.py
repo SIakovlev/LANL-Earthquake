@@ -91,7 +91,9 @@ def main(**kwargs):
         # validate
 
         # temp custom reshape data for
-        X_train_reshaped = pd.DataFrame(np.stack([X_train[i-15:i] for i in range(15, X_train.shape[0])]).reshape(-1, 30000))
+        num_samples_to_show = 20000
+
+        X_train_reshaped = pd.DataFrame(np.stack([X_train[i-15:i] for i in range(15, X_train.shape[0])]).reshape(-1, 30000)[:num_samples_to_show])
 
 
         predict = model.predict(X_train_reshaped)
@@ -105,7 +107,7 @@ def main(**kwargs):
         plt.savefig(f'train_{fold_n}.png')
 
         for metric_name, metric in metrics.items():
-            score = metric(predict, y_train[15:])
+            score = metric(predict, y_train[15: num_samples_to_show + 15])
             scores[metric_name].append(score)
             print(f"train score: {score.mean():.4f}")
 
