@@ -12,6 +12,7 @@ def main(**kwargs):
     data_processed_path = kwargs['data_processed_dir'] + kwargs["data_processed_fname"]
 
     default_window_size = kwargs['window_size']
+    default_window_stride = kwargs['window_stride']
 
     # 1. Load data
     print('.......................Processing started.........................')
@@ -23,7 +24,8 @@ def main(**kwargs):
     print(' - Run dataframe processing')
     dfp = dp.process_df(df,
                         kwargs['routines'],
-                        default_window_size)
+                        default_window_size,
+                        default_window_stride)
     print(' - Dataframe was successfully processed')
 
     # 3. Save modified dataframe

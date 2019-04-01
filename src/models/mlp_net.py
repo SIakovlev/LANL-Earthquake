@@ -16,7 +16,7 @@ class MLP(Module, ModelBase):
         self.linears_size = kwargs['hidden_layers']
         self.device = kwargs['device']
 
-        self.dropout = Dropout(p=0.2)
+        self.dropout = Dropout(p=0.4)
 
         self.bn = BatchNorm1d(self.in_features)
 
@@ -51,12 +51,11 @@ class MLP(Module, ModelBase):
 
         n_train_steps_per_epoch = train_data.shape[0] // self.minibatch_size
 
-        n_rows_per_sample = self.in_features // train_data.shape[1]
         for e in range(self.num_epochs):
             print(f" epoch: {e} out of {self.num_epochs}")
             for i in range(n_train_steps_per_epoch):
-                batch_idx = np.random.randint(low=n_rows_per_sample, high=train_data.shape[0], size=self.minibatch_size)
-                x_batch = torch.stack([train_data[idx - n_rows_per_sample: idx] for idx in batch_idx]).view(self.minibatch_size, self.in_features)
+                batch_idx = np.random.randint(low=0, high=train_data.shape[0], size=self.minibatch_size)
+                x_batch = train_data[batch_idx]
                 y_batch = train_y[batch_idx]
                 predict = self(x_batch)
 

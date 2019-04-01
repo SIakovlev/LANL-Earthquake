@@ -3,7 +3,8 @@
   "data_processed_dir": "../../data/original/",
   "data_fname": "train.h5",
   "data_processed_fname": "train_processed.h5",
-  "window_size": 10000,
+  "window_size": 150000,
+  "window_stride": 10000,
   "routines": [
     {
       "name": "w_psd",
@@ -15,9 +16,20 @@
     },
     {
       "name": "w_periodogram",
+      "on": false,
+      "column_name": "s",
+      "params": {
+        "fs": 4000000.0
+      }
+    },
+    {
+      "name": "w_spectrogramm_downsampled",
       "on": true,
       "column_name": "s",
       "params": {
+        "nperseg": 50000,
+        "noverlap": 20000,
+        "mode": "psd",
         "fs": 4000000.0
       }
     },

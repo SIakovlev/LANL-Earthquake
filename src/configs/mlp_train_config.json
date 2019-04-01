@@ -11,7 +11,7 @@
 
   "model": {
     "name": "MLP",
-    "in_features": 30000,
+    "in_features": 1568,
     "out_features": 1,
     "hidden_layers": [1024, 512, 512, 128],
     "device": "cuda",

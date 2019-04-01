@@ -83,6 +83,9 @@ def main(**kwargs):
         plt.figure(figsize=(30,15))
         plt.imshow(X_valid.T, vmax=0.001)
         plt.savefig(f'valid_data_{fold_n}.png')
+        plt.figure(figsize=(30, 15))
+        plt.plot(y_valid.values)
+        plt.savefig(f'valid_data_y_{fold_n}.png')
 
 
         model = model_cls(**model_params)
@@ -92,11 +95,10 @@ def main(**kwargs):
 
         # temp custom reshape data for
         num_samples_to_show = 20000
+        num_features = 4000
 
-        X_train_reshaped = pd.DataFrame(np.stack([X_train[i-15:i] for i in range(15, X_train.shape[0])]).reshape(-1, 30000)[:num_samples_to_show])
 
-
-        predict = model.predict(X_train_reshaped)
+        predict = model.predict(X_train)
 
         plt.figure()
         plt.plot(y_train.values)
@@ -107,14 +109,11 @@ def main(**kwargs):
         plt.savefig(f'train_{fold_n}.png')
 
         for metric_name, metric in metrics.items():
-            score = metric(predict, y_train[15: num_samples_to_show + 15])
+            score = metric(predict, y_train)
             scores[metric_name].append(score)
             print(f"train score: {score.mean():.4f}")
 
-        # temp custom reshape data for
-        X_valid_reshaped = pd.DataFrame(np.stack([X_valid[i - 15:i] for i in range(15, X_valid.shape[0])]).reshape(-1, 30000))
-
-        predict = model.predict(X_valid_reshaped)
+        predict = model.predict(X_valid)
 
         plt.figure()
         plt.plot(y_valid.values)
@@ -125,7 +124,7 @@ def main(**kwargs):
         plt.savefig(f'valid_{fold_n}.png')
 
         for metric_name, metric in metrics.items():
-            score = metric(predict, y_valid[15:])
+            score = metric(predict, y_valid)
             scores[metric_name].append(score)
             print(f"validation score: {score.mean():.4f}")
 

@@ -10,6 +10,7 @@ import json
 import os
 from tqdm import tqdm
 from scipy.signal import savgol_filter
+import scipy.signal as signal
 import warnings
 import feets
 
@@ -42,6 +43,7 @@ class WindowDecorator:
 
         df = args[0]
         window_size = kwargs['window_size']
+        window_stride = kwargs['window_stride']
         if "desc_line" in kwargs:
             desc_line = kwargs['desc_line']
         else:
@@ -54,12 +56,13 @@ class WindowDecorator:
             return pd.DataFrame(df.values, columns={desc_line})
         else:
             temp = []
-            for i in tqdm(range(0, df.shape[0], window_size),
+            for i in tqdm(range(0, df.shape[0] - window_size, window_stride),
                           desc=desc_line, file=sys.stdout):
                 batch = df.iloc[i: i + window_size].values
                 temp.append(self.unwrapped(batch, *args, **kwargs))
             tqdm.write("\t window decorator: ")
             tqdm.write("\t - window size: {}".format(window_size))
+            tqdm.write("\t - window stride: {}".format(window_stride))
             if hasattr(temp[0], 'shape') and temp[0].shape is not ():
                 out_features = temp[0].shape[0]
                 column_names = [desc_line + '_' + str(i) for i in range(out_features)]
@@ -98,7 +101,7 @@ def get_function_descriptor(func, extra_params):
     return desc_line
 
 
-def process_df(df, routines, default_window_size, save_path=None, df_name=None):
+def process_df(df, routines, default_window_size, default_window_stride, save_path=None, df_name=None):
     """
     Data processing is done in three main steps:
     1) Calculate all features listed in configuration file (dp_config.json)
@@ -132,6 +135,7 @@ def process_df(df, routines, default_window_size, save_path=None, df_name=None):
         func = getattr(this_module_name, routine["name"])
         func_params = routine['params']
         window_size = default_window_size if 'window_size' not in routine else routine['window_size']
+        window_stride = default_window_stride if 'window_stride' not in routine else routine['window_stride']
         try:
             data = df[routine['column_name']] if routine['column_name'] in df.columns \
                 else temp_data[routine['column_name']].squeeze()
@@ -146,6 +150,7 @@ def process_df(df, routines, default_window_size, save_path=None, df_name=None):
 
         data_processed = func(data,
                               window_size=window_size,
+                              window_stride=window_stride,
                               desc_line=desc_line,
                               # save_path=os.path.join(df_path, desc_line + ".h5"),
                               **func_params)
@@ -154,7 +159,7 @@ def process_df(df, routines, default_window_size, save_path=None, df_name=None):
 
     # append column with labels
     try:
-        temp_data['ttf'] = w_last_elem(df['ttf'], window_size=default_window_size, desc_line="ttf")
+        temp_data['ttf'] = w_last_elem(df['ttf'], window_size=default_window_size, window_stride=default_window_stride, desc_line="ttf")
     except KeyError as e:
         raise KeyError(f"Labels can't be calculated, key: {e} is missing")
 
@@ -242,8 +247,30 @@ def w_periodogram(df, *args, fs=4e6, **kwargs):
     -------
     A sum of spectral components of the dataframe
     """
-    return scipy.signal.periodogram(df, fs=fs)[1][:2000]
+    return scipy.signal.periodogram(df, fs=fs, scaling='spectrum')[1][:8000]
 
+
+@DumpDecorator
+@WindowDecorator
+def w_spectrogramm_downsampled(df, *args, fs=4e6, **kwargs):
+    """
+    custom spectrogramm with downsampling afterwards in freq domain
+    Parameters
+    ----------
+    df : pandas DataFrame
+    args : None
+    fs : sampling frequency
+    kwargs :
+
+    Returns
+    -------
+
+    """
+    f, t, Sxx = signal.spectrogram(df, fs, nperseg=kwargs['nperseg'], noverlap=kwargs['noverlap'], mode=kwargs['mode'])
+    smoothen = signal.convolve2d(Sxx, np.array([[0.25, 0.25, 0.25, 0.25]]).T, mode='full')[::4]
+    smoothen = signal.convolve2d(smoothen, np.array([[0.25, 0.25, 0.25, 0.25]]).T, mode='full')[::4]
+    smoothen = signal.convolve2d(smoothen, np.array([[0.25, 0.25, 0.25, 0.25]]).T, mode='full')[::4]
+    return smoothen.T.flatten()
 
 @DumpDecorator
 @WindowDecorator
