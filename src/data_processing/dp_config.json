@@ -13,6 +13,18 @@
       "params": {}
     },
     {
+      "name": "w_con",
+      "on": true,
+      "column_name": "s",
+      "params": {}
+    },
+    {
+      "name": "w_eta_e",
+      "on": true,
+      "column_name": "s",
+      "params": {}
+    },
+    {
       "name": "w_absolute_sum_of_changes",
       "on": true,
       "column_name": "s",
@@ -24,7 +36,7 @@
       "on": true,
       "column_name": "s",
       "params": {
-        "lag": 100
+        "lag": 10
       }
     },
     {
@@ -46,7 +58,7 @@
     },
     {
       "name": "w_count_above_mean",
-      "on": false,
+      "on": true,
       "column_name": "s",
       "params": {}
     },
@@ -58,19 +70,19 @@
     },
     {
       "name": "w_first_location_of_maximum",
-      "on": false,
+      "on": true,
       "column_name": "s",
       "params": {}
     },
     {
       "name": "w_first_location_of_minimum",
-      "on": false,
+      "on": true,
       "column_name": "s",
       "params": {}
     },
     {
       "name": "w_kurtosis",
-      "on": false,
+      "on": true,
       "column_name": "s",
       "params": {}
     },
@@ -96,7 +108,7 @@
     },
     {
       "name": "w_longest_strike_above_mean",
-      "on": false,
+      "on": true,
       "column_name": "s",
       "params": {}
     },
