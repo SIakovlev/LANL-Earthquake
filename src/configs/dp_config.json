@@ -1,8 +1,8 @@
 {
   "data_dir": "../../data.nosync/",
   "data_processed_dir": "../../data.nosync/",
-  "data_fname": "train_short",
-  "data_processed_fname": "train_processed_short",
+  "data_fname": "train_short.h5",
+  "data_processed_fname": "train_processed_short.h5",
   "window_size": 10000,
   "routines": [
     {
@@ -28,15 +28,15 @@
     },
     {
       "name": "w_autocorrelation",
-      "on": true,
+      "on": false,
       "column_name": "s",
       "params": {
-        "lag": 10
+        "lag": 100
       }
     },
     {
       "name": "w_binned_entropy",
-      "on": true,
+      "on": false,
       "column_name": "s",
       "params": {
         "max_bins": 10
@@ -44,10 +44,10 @@
     },
     {
       "name": "w_c3",
-      "on": true,
+      "on": false,
       "column_name": "s",
       "params": {
-        "lag": 10
+        "lag": 100
       }
     },
     {
@@ -58,141 +58,141 @@
     },
     {
       "name": "w_count_above_mean",
-      "on": true,
+      "on": false,
       "column_name": "s",
       "params": {}
     },
     {
       "name": "w_count_below_mean",
-      "on": true,
+      "on": false,
       "column_name": "s",
       "params": {}
     },
     {
       "name": "w_eta_e",
-      "on": true,
+      "on": false,
       "column_name": "s",
       "params": {}
     },
     {
       "name": "w_first_location_of_maximum",
-      "on": true,
+      "on": false,
       "column_name": "s",
       "params": {}
     },
     {
       "name": "w_first_location_of_minimum",
-      "on": true,
+      "on": false,
       "column_name": "s",
       "params": {}
     },
     {
       "name": "w_gskew",
-      "on": true,
+      "on": false,
       "column_name": "s",
       "params": {}
     },
     {
       "name": "w_kurtosis",
-      "on": true,
+      "on": false,
       "column_name": "s",
       "params": {}
     },
     {
       "name": "w_large_standard_deviation",
-      "on": true,
+      "on": false,
       "column_name": "s",
       "params": {
-        "r": 2
+        "r": 0.5
       }
     },
     {
       "name": "w_last_elem",
-      "on": true,
+      "on": false,
       "column_name": "s",
       "params": {}
     },
     {
       "name": "w_last_location_of_maximum",
-      "on": true,
+      "on": false,
       "column_name": "s",
       "params": {}
     },
     {
       "name": "w_last_location_of_minimum",
-      "on": true,
+      "on": false,
       "column_name": "s",
       "params": {}
     },
     {
       "name": "w_linear_trend",
-      "on": true,
+      "on": false,
       "column_name": "s",
       "params": {}
     },
     {
       "name": "w_longest_strike_above_mean",
-      "on": true,
+      "on": false,
       "column_name": "s",
       "params": {}
     },
     {
       "name": "w_longest_strike_below_mean",
-      "on": true,
+      "on": false,
       "column_name": "s",
       "params": {}
     },
     {
       "name": "w_max",
-      "on": true,
+      "on": false,
       "column_name": "s",
       "params": {}
     },
     {
       "name": "w_mean",
-      "on": true,
+      "on": false,
       "column_name": "s",
       "params": {}
     },
     {
       "name": "w_mean_abs_change",
-      "on": true,
+      "on": false,
       "column_name": "s",
       "params": {}
     },
     {
       "name": "w_mean_change",
-      "on": true,
+      "on": false,
       "column_name": "s",
       "params": {}
     },
     {
       "name": "w_mean_second_derivative_central",
-      "on": true,
+      "on": false,
       "column_name": "s",
       "params": {}
     },
     {
       "name": "w_median",
-      "on": true,
+      "on": false,
       "column_name": "s",
       "params": {}
     },
     {
       "name": "w_median_BRP",
-      "on": true,
+      "on": false,
       "column_name": "s",
       "params": {}
     },
     {
       "name": "w_min",
-      "on": true,
+      "on": false,
       "column_name": "s",
       "params": {}
     },
     {
       "name": "w_number_crossing_m",
-      "on": true,
+      "on": false,
       "column_name": "s",
       "params": {
         "m": 0.1
@@ -208,7 +208,7 @@
     },
     {
       "name": "w_pair_slope_trend",
-      "on": true,
+      "on": false,
       "column_name": "s",
       "params": {}
     },
@@ -222,13 +222,13 @@
     },
     {
       "name": "w_q31",
-      "on": true,
+      "on": false,
       "column_name": "s",
       "params": {}
     },
     {
       "name": "w_quantile",
-      "on": true,
+      "on": false,
       "column_name": "s",
       "params": {
         "q": 0.5
@@ -236,25 +236,15 @@
     },
     {
       "name": "w_ratio_beyond_r_sigma",
-      "on": true,
+      "on": false,
       "column_name": "s",
       "params": {
-        "r": 2
-      }
-    },
-    {
-      "name": "w_savgol_filter",
-      "on": true,
-      "window_size": 10000000,
-      "column_name": "w_psd(s, window_size=10000, fs=4000000.0)",
-      "params": {
-        "window_length": 11,
-        "polyorder": 1
+        "r": 0.5
       }
     },
     {
       "name": "w_skewness",
-      "on": true,
+      "on": false,
       "column_name": "s",
       "params": {}
     },
@@ -266,9 +256,35 @@
     },
     {
       "name": "w_std",
-      "on": true,
+      "on": false,
       "column_name": "s",
       "params": {}
+    },
+    {
+      "name": "w_time_reversal_asymmetry_statistic",
+      "on": false,
+      "column_name": "s",
+      "params": {
+        "lag": 100
+      }
+    },
+    {
+      "name": "df_savgol_filter",
+      "on": true,
+      "column_name": "w_psd(s, window_size=10000, fs=4000000.0)",
+      "params": {
+        "window_length": 11,
+        "polyorder": 1
+      }
+    },
+    {
+      "name": "df_sta_lta",
+      "on": false,
+      "column_name": "s",
+      "params": {
+        "sta_window": 100,
+        "lta_window": 1000
+      }
     }
   ]
 }

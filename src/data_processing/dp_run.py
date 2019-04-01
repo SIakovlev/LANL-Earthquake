@@ -3,13 +3,14 @@ import json
 import argparse
 import inspect
 import dp_utils as dp
+import dp_features
 import pandas as pd
 import platform
 
 
 def main(**kwargs):
-    data_path = kwargs['data_dir'] + kwargs["data_fname"] + '.h5'
-    data_processed_path = kwargs['data_processed_dir'] + kwargs["data_processed_fname"] + '.h5'
+    data_path = kwargs['data_dir'] + kwargs["data_fname"]
+    data_processed_path = kwargs['data_processed_dir'] + kwargs["data_processed_fname"]
 
     default_window_size = kwargs['window_size']
 
@@ -24,7 +25,7 @@ def main(**kwargs):
     dfp = dp.process_df(df,
                         kwargs['routines'],
                         default_window_size,
-                        kwargs['data_processed_dir'] + kwargs["data_processed_fname"])
+                        kwargs['data_processed_dir'] + os.path.splitext(kwargs["data_processed_fname"])[0])
     print(' - Dataframe was successfully processed')
 
     # 3. Save modified dataframe
@@ -44,9 +45,6 @@ if __name__ == '__main__':
     config_path = '../configs/' + config_fname
     # build config if there is no .json file
     if not os.path.isfile(config_path):
-        # TODO: fix dirty hack
-        func_ref_list = [obj[1] for obj in inspect.getmembers(dp) if obj[0].startswith("w_")]
-
         # MacOS specific
         if platform.system() == 'Darwin':
             dp_config = {"data_dir": "../../data.nosync/",
@@ -54,13 +52,16 @@ if __name__ == '__main__':
         else:
             dp_config = {"data_dir": "../../data/",
                          "data_processed_dir": "../../data/"}
-        dp_config.update({"data_fname": "train",
-                          "data_processed_fname": "train_processed",
+        dp_config.update({"data_fname": "train.h5",
+                          "data_processed_fname": "train_processed.h5",
                           "window_size": 10000,
                           "routines": {}})
         # Create routines dict based on module structure
         routines = []
-        for obj in func_ref_list[:-1]:
+
+        # TODO: fix dirty hack
+        window_func_list = [obj[1] for obj in inspect.getmembers(dp_features) if obj[0].startswith("w_")]
+        for obj in window_func_list:
             inspect_obj = inspect.signature(obj)
             params_dict = dict(inspect_obj.parameters)
             params = {}
@@ -68,6 +69,18 @@ if __name__ == '__main__':
                 if v.default != inspect._empty:
                     params[k] = v.default
             routines.append({"name": obj.__name__, "on": False, "column_name": "s", "params": params})
+
+        # TODO: fix dirty hack
+        df_func_list = [obj[1] for obj in inspect.getmembers(dp_features) if obj[0].startswith("df_")]
+        for obj in df_func_list:
+            inspect_obj = inspect.signature(obj)
+            params_dict = dict(inspect_obj.parameters)
+            params = {}
+            for k, v in params_dict.items():
+                if v.default != inspect._empty:
+                    params[k] = v.default
+            routines.append({"name": obj.__name__, "on": False, "column_name": "s", "params": params})
+
         dp_config["routines"] = routines
         with open(config_path, 'w') as outfile:
             json.dump(dp_config, outfile, indent=2)
