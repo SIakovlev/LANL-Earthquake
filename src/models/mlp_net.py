@@ -16,7 +16,7 @@ class MLP(Module, ModelBase):
         self.linears_size = kwargs['hidden_layers']
         self.device = kwargs['device']
 
-        self.dropout = Dropout(p=0.4)
+        self.dropout = Dropout(p=0.2)
 
         self.bn = BatchNorm1d(self.in_features)
 

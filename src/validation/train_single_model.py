@@ -33,6 +33,9 @@ def main(**kwargs):
     # 1. load data
     train_data_fname = kwargs['train_data_fname']
     train_df = pd.read_hdf(train_data_fname, key='table')
+
+    # train_df
+
     train_data = train_df.drop(['ttf'], axis=1)
     y_train_data = train_df['ttf']
 
@@ -53,7 +56,7 @@ def main(**kwargs):
     # 3. create folds
     folds_kwargs = copy.deepcopy(kwargs['folds'])
     del folds_kwargs['name']
-    folds = str_to_class('sklearn.model_selection', kwargs['folds']['name'])(**folds_kwargs)
+    folds = str_to_class('sklearn.model_selection', kwargs['folds']['name'])(**folds_kwargs, shuffle=True)
 
     # 4. create metrics
     metrics_classes = [str_to_class('sklearn.metrics', m) for m in kwargs['metrics']]
@@ -92,11 +95,6 @@ def main(**kwargs):
         model.fit(X_train, y_train)
 
         # validate
-
-        # temp custom reshape data for
-        num_samples_to_show = 20000
-        num_features = 4000
-
 
         predict = model.predict(X_train)
 
