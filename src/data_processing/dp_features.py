@@ -55,6 +55,28 @@ def w_periodogram(df, *args, fs=4e6, **kwargs):
     return scipy.signal.periodogram(df, fs=fs)[1][:2000]
 
 
+@DumpDecorator
+@WindowDecorator
+def w_spectrogramm_downsampled(df, *args, fs=4e6, **kwargs):
+    """
+    custom spectrogramm with downsampling afterwards in freq domain
+    Parameters
+    ----------
+    df : pandas DataFrame
+    args : None
+    fs : sampling frequency
+    kwargs :
+
+    Returns
+    -------
+
+    """
+    f, t, Sxx = scipy.signal.spectrogram(df, fs, nperseg=kwargs['nperseg'], noverlap=kwargs['noverlap'], mode=kwargs['mode'])
+    smoothen = scipy.signal.convolve2d(Sxx, np.array([[0.25, 0.25, 0.25, 0.25]]).T, mode='full')[::4]
+    smoothen = scipy.signal.convolve2d(smoothen, np.array([[0.25, 0.25, 0.25, 0.25]]).T, mode='full')[::4]
+    smoothen = scipy.signal.convolve2d(smoothen, np.array([[0.25, 0.25, 0.25, 0.25]]).T, mode='full')[::4]
+    return smoothen.T.flatten()
+
 
 @DumpDecorator
 @WindowDecorator

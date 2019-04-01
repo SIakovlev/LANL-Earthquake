@@ -46,6 +46,9 @@ def main(**kwargs):
     # 1. load data
     train_data_fname = kwargs['train_data_fname']
     train_df = pd.read_hdf(train_data_fname, key='table')
+
+    # train_df
+
     train_data = train_df.drop(['ttf'], axis=1)
     y_train_data = train_df['ttf']
 
@@ -66,7 +69,7 @@ def main(**kwargs):
     # 3. create folds
     folds_kwargs = copy.deepcopy(kwargs['folds'])
     del folds_kwargs['name']
-    folds = str_to_class('sklearn.model_selection', kwargs['folds']['name'])(**folds_kwargs)
+    folds = str_to_class('sklearn.model_selection', kwargs['folds']['name'])(**folds_kwargs, shuffle=True)
 
     # 4. create metrics
     metrics_classes = [str_to_class('sklearn.metrics', m) for m in kwargs['metrics']]
@@ -96,6 +99,9 @@ def main(**kwargs):
         plt.figure(figsize=(30,15))
         plt.imshow(X_valid.T, vmax=0.001)
         plt.savefig(f'valid_data_{fold_n}.png')
+        plt.figure(figsize=(30, 15))
+        plt.plot(y_valid.values)
+        plt.savefig(f'valid_data_y_{fold_n}.png')
 
 
         model = model_cls(**model_params)
@@ -103,13 +109,7 @@ def main(**kwargs):
 
         # validate
 
-        # temp custom reshape data for
-        num_samples_to_show = 20000
-
-        X_train_reshaped = pd.DataFrame(np.stack([X_train[i-15:i] for i in range(15, X_train.shape[0])]).reshape(-1, 30000)[:num_samples_to_show])
-
-
-        predict = model.predict(X_train_reshaped)
+        predict = model.predict(X_train)
 
         plt.figure()
         plt.plot(y_train.values)
@@ -120,14 +120,11 @@ def main(**kwargs):
         plt.savefig(f'train_{fold_n}.png')
 
         for metric_name, metric in metrics.items():
-            score = metric(predict, y_train[15: num_samples_to_show + 15])
+            score = metric(predict, y_train)
             scores[metric_name].append(score)
             print(f"train score: {score.mean():.4f}")
 
-        # temp custom reshape data for
-        X_valid_reshaped = pd.DataFrame(np.stack([X_valid[i - 15:i] for i in range(15, X_valid.shape[0])]).reshape(-1, 30000))
-
-        predict = model.predict(X_valid_reshaped)
+        predict = model.predict(X_valid)
 
         plt.figure()
         plt.plot(y_valid.values)
@@ -138,7 +135,7 @@ def main(**kwargs):
         plt.savefig(f'valid_{fold_n}.png')
 
         for metric_name, metric in metrics.items():
-            score = metric(predict, y_valid[15:])
+            score = metric(predict, y_valid)
             scores[metric_name].append(score)
             print(f"validation score: {score.mean():.4f}")
 
@@ -160,7 +157,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--i', dest = "info", help = 'print info about usage of script' , action='store_true', default=False)
+    parser.add_argument('--i', dest="info", help='print info about usage of script', action='store_true', default=False)
 
     parser.add_argument('--config_fname',
                         help='name of the config file',
