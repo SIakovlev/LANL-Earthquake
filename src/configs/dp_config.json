@@ -15,7 +15,7 @@
     },
     {
       "name": "w_periodogram",
-      "on": true,
+      "on": false,
       "column_name": "s",
       "params": {
         "fs": 4000000.0
@@ -23,14 +23,15 @@
     },
     {
       "name": "w_abs_energy",
-      "on": false,
+      "on": true,
       "column_name": "s",
       "params": {}
     },
     {
       "name": "w_absolute_sum_of_changes",
-      "on": false,
+      "on": true,
       "column_name": "s",
+      "window_length" : 15000,
       "params": {}
     },
     {
@@ -44,23 +45,31 @@
     },
     {
       "name": "w_autocorrelation",
-      "on": false,
+      "on": true,
       "column_name": "s",
       "params": {
         "lag": 100
       }
     },
     {
+      "name": "w_autocorrelation",
+      "on": true,
+      "column_name": "s",
+      "params": {
+        "lag": 10
+      }
+    },
+    {
       "name": "w_binned_entropy",
       "on": false,
-      "column_name": "s",
+      "column_name": "w_absolute_sum_of_changes",
       "params": {
         "max_bins": 10
       }
     },
     {
       "name": "w_c3",
-      "on": false,
+      "on": true,
       "column_name": "s",
       "params": {
         "lag": 100
@@ -68,13 +77,13 @@
     },
     {
       "name": "w_con",
-      "on": false,
+      "on": true,
       "column_name": "s",
       "params": {}
     },
     {
       "name": "w_count_above_mean",
-      "on": false,
+      "on": true,
       "column_name": "s",
       "params": {}
     },
@@ -86,19 +95,19 @@
     },
     {
       "name": "w_eta_e",
-      "on": false,
+      "on": true,
       "column_name": "s",
       "params": {}
     },
     {
       "name": "w_first_location_of_maximum",
-      "on": false,
+      "on": true,
       "column_name": "s",
       "params": {}
     },
     {
       "name": "w_first_location_of_minimum",
-      "on": false,
+      "on": true,
       "column_name": "s",
       "params": {}
     },
@@ -110,7 +119,7 @@
     },
     {
       "name": "w_kurtosis",
-      "on": false,
+      "on": true,
       "column_name": "s",
       "params": {}
     },
@@ -148,7 +157,7 @@
     },
     {
       "name": "w_longest_strike_above_mean",
-      "on": false,
+      "on": true,
       "column_name": "s",
       "params": {}
     },
