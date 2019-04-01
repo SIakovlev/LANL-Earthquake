@@ -3,7 +3,7 @@ from torch.optim import Adam
 import torch
 import torch.utils.data
 import numpy as np
-from models import ModelBase
+from models.models import ModelBase
 
 
 class CustomNN(Module, ModelBase):

@@ -1,11 +1,9 @@
 import pandas as pd
 import numpy as np
 
-from sklearn import metrics as sklearn_metrics
-from sklearn.metrics import get_scorer
-from sklearn.metrics import SCORERS
 import pickle
 import os
+
 import xgboost as xgb
 
 from src.models.nn_test import CustomNN
@@ -19,6 +17,7 @@ from catboost import CatBoostRegressor
 from lightgbm import LGBMRegressor
 
 import copy
+
 from src.utils import str_to_class
 import re
 import ast

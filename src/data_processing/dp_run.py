@@ -41,10 +41,9 @@ def main(**kwargs):
 
 if __name__ == '__main__':
 
-    config_fname = "dp_config.json"
-    config_path = '../configs/' + config_fname
+    config_fname = "../configs/dp_config.json"
     # build config if there is no .json file
-    if not os.path.isfile(config_path):
+    if not os.path.isfile(config_fname):
         # MacOS specific
         if platform.system() == 'Darwin':
             dp_config = {"data_dir": "../../data.nosync/",
@@ -82,7 +81,7 @@ if __name__ == '__main__':
             routines.append({"name": obj.__name__, "on": False, "column_name": "s", "params": params})
 
         dp_config["routines"] = routines
-        with open(config_path, 'w') as outfile:
+        with open(config_fname, 'w') as outfile:
             json.dump(dp_config, outfile, indent=2)
 
     parser = argparse.ArgumentParser()
@@ -90,7 +89,7 @@ if __name__ == '__main__':
     parser.add_argument('--config_fname',
                         help='name of the config file',
                         type=str,
-                        default=config_path)
+                        default=config_fname)
 
     args = parser.parse_args()
 

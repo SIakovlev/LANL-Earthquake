@@ -77,8 +77,13 @@ class WindowDecorator:
                 temp.append(self.unwrapped(batch, *args, **kwargs))
             tqdm.write("\t window decorator: ")
             tqdm.write("\t - window size: {}".format(window_size))
+            if hasattr(temp[0], 'shape') and temp[0].shape is not ():
+                out_features = temp[0].shape[0]
+                column_names = [desc_line + '_' + str(i) for i in range(out_features)]
+            else:
+                column_names = [desc_line]
 
-            return pd.DataFrame(temp, columns={desc_line})
+            return pd.DataFrame(temp, columns=column_names)
 
 
 def get_function_descriptor(func, extra_params):

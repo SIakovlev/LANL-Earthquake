@@ -37,6 +37,27 @@ def w_psd(df, *args, fs=4e6, **kwargs):
 
 @DumpDecorator
 @WindowDecorator
+def w_periodogram(df, *args, fs=4e6, **kwargs):
+    """
+    Calculates power spectrum density of the dataframe
+
+    Parameters
+    ----------
+    df : pandas DataFrame
+    args : None
+    fs : sampling frequency
+    kwargs :
+
+    Returns
+    -------
+    A sum of spectral components of the dataframe
+    """
+    return scipy.signal.periodogram(df, fs=fs)[1][:2000]
+
+
+
+@DumpDecorator
+@WindowDecorator
 def w_last_elem(df, *args, **kwargs):
     """
     Get the last element of the dataframe

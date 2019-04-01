@@ -1,0 +1,22 @@
+{
+  "train_data_fname": "../../data.nosync/train_processed_nn_test.h5",
+  "summary_dest_fname": "../../data.nosync/summary.pickle",
+
+  "folds":{
+      "name":"KFold",
+      "n_splits": 8
+            },
+
+  "metrics": ["mean_absolute_error", "mean_squared_error"],
+
+  "model": {
+    "name": "MLP",
+    "in_features": 30000,
+    "out_features": 1,
+    "hidden_layers": [1024, 512, 512, 128],
+    "device": "cpu",
+    "learning_rate": 0.0005,
+    "minibatch_size": 256,
+    "num_epochs": 30
+  }
+}

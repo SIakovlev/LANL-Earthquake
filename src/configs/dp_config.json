@@ -1,19 +1,35 @@
 {
   "data_dir": "../../data.nosync/",
   "data_processed_dir": "../../data.nosync/",
-  "data_fname": "train_short.h5",
-  "data_processed_fname": "train_processed_short.h5",
+  "data_fname": "train.h5",
+  "data_processed_fname": "train_processed_nn_test.h5",
   "window_size": 10000,
   "routines": [
     {
-      "name": "w_abs_energy",
+      "name": "w_psd",
+      "on": false,
+      "column_name": "s",
+      "params": {
+        "fs": 4000000.0
+      }
+    },
+    {
+      "name": "w_periodogram",
       "on": true,
+      "column_name": "s",
+      "params": {
+        "fs": 4000000.0
+      }
+    },
+    {
+      "name": "w_abs_energy",
+      "on": false,
       "column_name": "s",
       "params": {}
     },
     {
       "name": "w_absolute_sum_of_changes",
-      "on": true,
+      "on": false,
       "column_name": "s",
       "params": {}
     },
@@ -212,14 +228,7 @@
       "column_name": "s",
       "params": {}
     },
-    {
-      "name": "w_psd",
-      "on": true,
-      "column_name": "s",
-      "params": {
-        "fs": 4000000.0
-      }
-    },
+
     {
       "name": "w_q31",
       "on": false,
@@ -270,7 +279,7 @@
     },
     {
       "name": "df_savgol_filter",
-      "on": true,
+      "on": false,
       "column_name": "w_psd(s, window_size=10000, fs=4000000.0)",
       "params": {
         "window_length": 11,
