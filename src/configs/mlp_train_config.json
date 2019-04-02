@@ -1,12 +1,12 @@
 {
   "train_data_fname": "../../data/original/train_processed.h5",
-  "summary_dest_fname": "../../data.nosync/summary.pickle",
+  "summary_dest_fname": "../../data/summary/summary.pickle",
 
   "folds":{
       "name":"CustomFold",
       "n_splits": 10,
-      "pad": 0,
-      "fragmentation": 1.0,
+      "pad": 15,
+      "fragmentation": 0.01,
       "shuffle": true
             },
 
@@ -20,6 +20,6 @@
     "device": "cuda",
     "learning_rate": 0.0005,
     "minibatch_size": 256,
-    "num_epochs": 100
+    "num_epochs": 1
   }
 }

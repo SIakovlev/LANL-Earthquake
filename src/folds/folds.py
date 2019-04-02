@@ -18,7 +18,6 @@ class CustomFold:
     """
     def __init__(self, n_splits=10, shuffle=True, fragmentation=0.1, pad=15):
         """
-
         :param n_splits: number of splits
         :param shuffle: shuffle
         :param fragmentation: float value in range(0,1) defining whether test sample should be consecutive or not
