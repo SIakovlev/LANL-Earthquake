@@ -37,7 +37,7 @@ def w_psd(df, *args, fs=4e6, **kwargs):
 
 @DumpDecorator
 @WindowDecorator
-def w_periodogram(df, *args, fs=4e6, **kwargs):
+def w_periodogram(df, *args, fs=4e6, N=2000, **kwargs):
     """
     Calculates power spectrum density of the dataframe
 
@@ -50,14 +50,15 @@ def w_periodogram(df, *args, fs=4e6, **kwargs):
 
     Returns
     -------
-    A sum of spectral components of the dataframe
+    Spectral components of the dataframe
     """
-    return scipy.signal.periodogram(df, fs=fs)[1][:2000]
+    # TODO: remove NaNs
+    return scipy.signal.periodogram(df, fs=fs)[1][:N]
 
 
 @DumpDecorator
 @WindowDecorator
-def w_spectrogramm_downsampled(df, *args, fs=4e6, **kwargs):
+def w_spectrogramm_downsampled(df, *args, fs=4e6, nperseg=50000, noverlap=20000, mode='psd', **kwargs):
     """
     custom spectrogramm with downsampling afterwards in freq domain
     Parameters
@@ -71,7 +72,7 @@ def w_spectrogramm_downsampled(df, *args, fs=4e6, **kwargs):
     -------
 
     """
-    f, t, Sxx = scipy.signal.spectrogram(df, fs, nperseg=kwargs['nperseg'], noverlap=kwargs['noverlap'], mode=kwargs['mode'])
+    f, t, Sxx = scipy.signal.spectrogram(df, fs, nperseg=nperseg, noverlap=noverlap, mode=mode)
     smoothen = scipy.signal.convolve2d(Sxx, np.array([[0.25, 0.25, 0.25, 0.25]]).T, mode='full')[::4]
     smoothen = scipy.signal.convolve2d(smoothen, np.array([[0.25, 0.25, 0.25, 0.25]]).T, mode='full')[::4]
     smoothen = scipy.signal.convolve2d(smoothen, np.array([[0.25, 0.25, 0.25, 0.25]]).T, mode='full')[::4]

@@ -136,14 +136,11 @@ def process_df(df, routines, default_window_size, default_window_stride, df_path
     :return: dataframe with features calculated based on the list of routines
     :rtype: pandas DataFrame
     """
-    import dp_features
     temp_data = {}
-    processed_features = []
 
     # Create dir with df name if it doesn't exist
     if df_path is not None:
         if os.path.exists(df_path):
-            processed_features = [os.path.splitext(f)[0] for f in listdir(df_path) if isfile(join(df_path, f))]
             warnings.warn(f"Directory {df_path} already exists. "
                           f"Running data processing in this directory again might lead to data loss.")
         else:
@@ -155,42 +152,18 @@ def process_df(df, routines, default_window_size, default_window_stride, df_path
         if not routine['on']:
             print(f"Feature {routine['name']} calcualtion is disabled")
             continue
+        data_processed = execute_routine(df.drop(['ttf'], axis=1),
+                                         routine,
+                                         routines,
+                                         default_window_size,
+                                         default_window_stride,
+                                         df_path)
 
-        func = getattr(dp_features, routine["name"])
-        func_params = routine['params']
-        window_size = default_window_size if 'window_size' not in routine else routine['window_size']
-        window_stride = default_window_stride if 'window_stride' not in routine else routine['window_stride']
-
-        if func_params:
-            desc_line = f"{func.__name__}({routine['column_name']}, window_size={window_size}, " + \
-                        ', '.join("{!s}={!r}".format(key, val) for (key, val) in func_params.items()) + ')'
-        else:
-            desc_line = f"{func.__name__}({routine['column_name']}, window_size={window_size})"
-
-        if desc_line in processed_features:
-            print(f"File {desc_line}.h5 already exists. Skip calculations and append it to the dataframe")
-            data_processed = pd.read_hdf(os.path.join(df_path, desc_line + ".h5"), key='table')
-            new_col_name = list(data_processed)[0]
-            temp_data[new_col_name] = data_processed
-            continue
-
-        try:
-            data = df[routine['column_name']] if routine['column_name'] in df.columns \
-                else temp_data[routine['column_name']].squeeze()
-        except KeyError as e:
-            raise KeyError(f"Check your feature calculation order, key: {e} is missing")
-
-        save_path = os.path.join(df_path, desc_line + ".h5")
-        data_processed = func(data,
-                              window_size=window_size,
-                              window_stride=window_stride,
-                              desc_line=desc_line,
-                              save_path=save_path,
-                              **func_params)
-        new_col_name = data_processed.columns.values.tolist()[0]
+        new_col_name = list(data_processed)[0]
         temp_data[new_col_name] = data_processed
 
     # append column with labels
+    import dp_features
     try:
         temp_data['ttf'] = dp_features.w_last_elem(df['ttf'],
                                                    window_size=default_window_size,
@@ -206,6 +179,51 @@ def process_df(df, routines, default_window_size, default_window_stride, df_path
 
     res = pd.concat(temp_data.values(), axis=1)
     return res
+
+
+def execute_routine(df, routine, routines, default_window_size, default_window_stride, df_path):
+    import dp_features
+
+    if routine['ancestor']:
+        # get routine ancestor dict
+        ancestor_routine = next(item for item in routines if item["name"] == routine['ancestor'])
+        routine['ancestor'] = ''
+        temp = execute_routine(df,
+                               ancestor_routine,
+                               routines,
+                               default_window_size,
+                               default_window_stride,
+                               df_path)
+        return execute_routine(temp,
+                               routine,
+                               routines,
+                               default_window_size,
+                               default_window_stride,
+                               df_path)
+    else:
+        func = getattr(dp_features, routine["name"])
+        func_params = routine['params']
+        window_size = default_window_size if 'window_size' not in routine else routine['window_size']
+        window_stride = default_window_stride if 'window_stride' not in routine else routine['window_stride']
+
+        df_name = df.columns.values.tolist()[0]
+        if func_params:
+            col_name = f"{func.__name__}({df_name}, window_size={window_size}, " + \
+                        ', '.join("{!s}={!r}".format(key, val) for (key, val) in func_params.items()) + ')'
+        else:
+            col_name = f"{func.__name__}({df_name}, window_size={window_size})"
+
+        processed_routines = [os.path.splitext(f)[0] for f in listdir(df_path) if isfile(join(df_path, f))]
+        save_path = os.path.join(df_path, col_name + ".h5")
+        if col_name in processed_routines:
+            return pd.read_hdf(save_path, key='table')
+        else:
+            return func(df.squeeze(),
+                        window_size=window_size,
+                        window_stride=window_stride,
+                        desc_line=col_name,
+                        save_path=save_path,
+                        **func_params)
 
 
 def resample_column(df, resulted_size):

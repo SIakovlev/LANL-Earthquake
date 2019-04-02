@@ -3,52 +3,43 @@
   "data_processed_dir": "../../data/",
   "data_fname": "train.h5",
   "data_processed_fname": "train_processed.h5",
-  "window_size": 150000,
-  "window_stride": 10000,
+  "window_size": 10000,
+  "window_stride": 1000,
   "routines": [
     {
-      "name": "w_psd",
+      "name": "df_savgol_filter",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {
-        "fs": 4000000.0
+        "window_length": 101,
+        "polyorder": 1
       }
     },
     {
-      "name": "w_periodogram",
+      "name": "df_sta_lta",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {
-        "fs": 4000000.0
-      }
-    },
-    {
-      "name": "w_spectrogramm_downsampled",
-      "on": true,
-      "column_name": "s",
-      "params": {
-        "nperseg": 50000,
-        "noverlap": 20000,
-        "mode": "psd",
-        "fs": 4000000.0
+        "sta_window": 100,
+        "lta_window": 1000
       }
     },
     {
       "name": "w_abs_energy",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {}
     },
     {
       "name": "w_absolute_sum_of_changes",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {}
     },
     {
       "name": "w_approximate_entropy",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {
         "m": 3,
         "r": 3
@@ -57,7 +48,7 @@
     {
       "name": "w_autocorrelation",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {
         "lag": 100
       }
@@ -65,7 +56,7 @@
     {
       "name": "w_binned_entropy",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {
         "max_bins": 10
       }
@@ -73,7 +64,7 @@
     {
       "name": "w_c3",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {
         "lag": 100
       }
@@ -81,55 +72,55 @@
     {
       "name": "w_con",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {}
     },
     {
       "name": "w_count_above_mean",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {}
     },
     {
       "name": "w_count_below_mean",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {}
     },
     {
       "name": "w_eta_e",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {}
     },
     {
       "name": "w_first_location_of_maximum",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {}
     },
     {
       "name": "w_first_location_of_minimum",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {}
     },
     {
       "name": "w_gskew",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {}
     },
     {
       "name": "w_kurtosis",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {}
     },
     {
       "name": "w_large_standard_deviation",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {
         "r": 0.5
       }
@@ -137,91 +128,91 @@
     {
       "name": "w_last_elem",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {}
     },
     {
       "name": "w_last_location_of_maximum",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {}
     },
     {
       "name": "w_last_location_of_minimum",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {}
     },
     {
       "name": "w_linear_trend",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {}
     },
     {
       "name": "w_longest_strike_above_mean",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {}
     },
     {
       "name": "w_longest_strike_below_mean",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {}
     },
     {
       "name": "w_max",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {}
     },
     {
       "name": "w_mean",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {}
     },
     {
       "name": "w_mean_abs_change",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {}
     },
     {
       "name": "w_mean_change",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {}
     },
     {
       "name": "w_mean_second_derivative_central",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {}
     },
     {
       "name": "w_median",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {}
     },
     {
       "name": "w_median_BRP",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {}
     },
     {
       "name": "w_min",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {}
     },
     {
       "name": "w_number_crossing_m",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {
         "m": 0.1
       }
@@ -229,7 +220,7 @@
     {
       "name": "w_number_cwt_peaks",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {
         "n": 1
       }
@@ -237,20 +228,36 @@
     {
       "name": "w_pair_slope_trend",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {}
     },
-
+    {
+      "name": "w_periodogram",
+      "on": false,
+      "ancestor": "",
+      "params": {
+        "fs": 4000000.0,
+        "N": 2000
+      }
+    },
+    {
+      "name": "w_psd",
+      "on": false,
+      "ancestor": "",
+      "params": {
+        "fs": 4000000.0
+      }
+    },
     {
       "name": "w_q31",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {}
     },
     {
       "name": "w_quantile",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {
         "q": 0.5
       }
@@ -258,7 +265,7 @@
     {
       "name": "w_ratio_beyond_r_sigma",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {
         "r": 0.5
       }
@@ -266,45 +273,38 @@
     {
       "name": "w_skewness",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {}
     },
     {
       "name": "w_slottedA_length",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {}
+    },
+    {
+      "name": "w_spectrogramm_downsampled",
+      "on": false,
+      "ancestor": "",
+      "params": {
+        "fs": 4000000.0,
+        "nperseg": 50000,
+        "noverlap": 20000,
+        "mode": "psd"
+      }
     },
     {
       "name": "w_std",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {}
     },
     {
       "name": "w_time_reversal_asymmetry_statistic",
       "on": false,
-      "column_name": "s",
+      "ancestor": "",
       "params": {
         "lag": 100
-      }
-    },
-    {
-      "name": "df_savgol_filter",
-      "on": false,
-      "column_name": "w_psd(s, window_size=10000, fs=4000000.0)",
-      "params": {
-        "window_length": 11,
-        "polyorder": 1
-      }
-    },
-    {
-      "name": "df_sta_lta",
-      "on": false,
-      "column_name": "s",
-      "params": {
-        "sta_window": 100,
-        "lta_window": 1000
       }
     }
   ]

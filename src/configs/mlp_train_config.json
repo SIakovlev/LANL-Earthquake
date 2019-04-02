@@ -1,6 +1,6 @@
 {
-  "train_data_fname": "../../data.nosync/train_processed_nn_test.h5",
-  "summary_dest_fname": "../../data.nosync/summary.pickle",
+  "train_data_fname": "../../data/train_processed_2.h5",
+  "summary_dest_fname": "../../data/summary.pickle",
 
   "folds":{
       "name":"KFold",
@@ -17,6 +17,6 @@
     "device": "cuda",
     "learning_rate": 0.0005,
     "minibatch_size": 256,
-    "num_epochs": 80
+    "num_epochs": 200
   }
 }

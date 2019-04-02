@@ -1,4 +1,4 @@
-from torch.nn import Module, Linear, MSELoss, ReLU, ModuleList, Dropout, BatchNorm1d
+from torch.nn import Module, Linear, MSELoss, L1Loss, ReLU, ModuleList, Dropout, BatchNorm1d
 from torch.optim import Adam
 import torch
 import torch.utils.data
@@ -33,7 +33,7 @@ class MLP(Module, ModelBase):
         self.num_epochs = kwargs['num_epochs']
 
         # TODO: check this
-        self.loss = MSELoss()
+        self.loss = L1Loss()
         self = self.to(self.device)
 
     def forward(self, x):

@@ -21,7 +21,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import Ridge
 from xgboost import XGBRegressor
 from catboost import CatBoostRegressor
-from lightgbm import LGBMRegressor
+# from lightgbm import LGBMRegressor
 
 import matplotlib as mpl
 if platform.system() == 'Darwin':
@@ -93,16 +93,15 @@ def main(**kwargs):
         X_train, X_valid = train_data.iloc[train_index], train_data.iloc[valid_index]
         y_train, y_valid = y_train_data.iloc[train_index], y_train_data.iloc[valid_index]
 
-        plt.figure(figsize=(30,15))
+        plt.figure(figsize=(30, 15))
         plt.imshow(np.log(X_valid+1.0).T, vmax=0.001)
         plt.savefig(f'valid_data_log_{fold_n}.png')
-        plt.figure(figsize=(30,15))
+        plt.figure(figsize=(30, 15))
         plt.imshow(X_valid.T, vmax=0.001)
         plt.savefig(f'valid_data_{fold_n}.png')
         plt.figure(figsize=(30, 15))
         plt.plot(y_valid.values)
         plt.savefig(f'valid_data_y_{fold_n}.png')
-
 
         model = model_cls(**model_params)
         model.fit(X_train, y_train)

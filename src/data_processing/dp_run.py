@@ -56,31 +56,24 @@ if __name__ == '__main__':
         dp_config.update({"data_fname": "train.h5",
                           "data_processed_fname": "train_processed.h5",
                           "window_size": 10000,
+                          "window_stride": 1000,
                           "routines": {}})
         # Create routines dict based on module structure
         routines = []
 
-        # TODO: fix dirty hack
-        window_func_list = [obj[1] for obj in inspect.getmembers(dp_features) if obj[0].startswith("w_")]
-        for obj in window_func_list:
+        # TODO: fix hack with function names
+        func_list = [obj[1] for obj in inspect.getmembers(dp_features) if obj[0].startswith(("w_", "df_"))]
+        for obj in func_list:
             inspect_obj = inspect.signature(obj)
             params_dict = dict(inspect_obj.parameters)
             params = {}
             for k, v in params_dict.items():
                 if v.default != inspect._empty:
                     params[k] = v.default
-            routines.append({"name": obj.__name__, "on": False, "column_name": "s", "params": params})
-
-        # TODO: fix dirty hack
-        df_func_list = [obj[1] for obj in inspect.getmembers(dp_features) if obj[0].startswith("df_")]
-        for obj in df_func_list:
-            inspect_obj = inspect.signature(obj)
-            params_dict = dict(inspect_obj.parameters)
-            params = {}
-            for k, v in params_dict.items():
-                if v.default != inspect._empty:
-                    params[k] = v.default
-            routines.append({"name": obj.__name__, "on": False, "column_name": "s", "params": params})
+            routines.append({"name": obj.__name__,
+                             "on": False,
+                             "ancestor": '',
+                             "params": params})
 
         dp_config["routines"] = routines
         with open(config_fname, 'w') as outfile:
