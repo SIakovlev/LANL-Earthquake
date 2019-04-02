@@ -20,6 +20,6 @@
     "device": "cuda",
     "learning_rate": 0.0005,
     "minibatch_size": 256,
-    "num_epochs": 80
+    "num_epochs": 50
   }
 }

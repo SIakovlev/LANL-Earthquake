@@ -1,7 +1,21 @@
 import numpy as np
 
 class CustomFold:
+    """
+    This fold split is ensure that test data doesn't leak into train data. This behaviour is typical
+    for datasets calculated with the running window when stride is smaller than the window size
+    (2 consequtive windows are getting overlapped)
+    """
     def __init__(self, n_splits=10, shuffle=True, fragmentation=0.1, pad=15):
+        """
+
+        :param n_splits: number of splits
+        :param shuffle: shuffle
+        :param fragmentation: float value in range(0,1) defining whether test sample should be consecutive or not
+        (0. corresponds to only chunk, 1. to completely fragmented samples across dataset)
+        :param pad: int value showing how many samples shoud be droppped from training set following
+        by last sample of each test chunk
+        """
         if not isinstance(n_splits, int):
             raise ValueError("n_splits should be integer value")
         self.n_splits = n_splits
@@ -16,7 +30,7 @@ class CustomFold:
             # how many samples in test subset
             test_len = int(data_len / self.n_splits)
 
-            # how many consequitive chunks in test subset
+            # how many consecutive chunks in test subset
             num_test_fragments = max(1, int(test_len * self.frag))
             seq_lens = np.random.rand(num_test_fragments)
             sum_seq_len = test_len / sum(seq_lens)
