@@ -1,8 +1,9 @@
 import numpy as np
 
+
 class CustomFold:
     """
-    This fold split is ensure that test data doesn't leak into train data. This behaviour is typical
+    This fold split ensures that test data doesn't leak into the train data and visa versa. This behaviour is typical
     for datasets calculated with the running window when stride is smaller than the window size
     (2 consequtive windows are getting overlapped)
 
@@ -10,10 +11,10 @@ class CustomFold:
     Value of 1 means that test samples are randomly sampled across the whole dataset and thus come from the same
     distribution.
     Value of 0 means that test subset is drawn as a single consecutive chunk from randomly chosen position in
-    the original dataset which doesn't ensure hypothesis of same distribution.
+    the original dataset which doesn't ensure the hypothesis of the same distribution.
 
     Parameter "pad" tells how many samples should be dropped after each drawn test sample to ensure that
-    "test information" doesn't leak into train data. (i.e. for window_size=150k and stride=10k pad should be 15)
+    "test information" doesn't leak into the train data. (i.e. for window_size=150k and stride=10k pad should be 15)
 
     """
     def __init__(self, n_splits=10, shuffle=True, fragmentation=0.1, pad=15):
@@ -21,12 +22,12 @@ class CustomFold:
         :param n_splits: number of splits
         :param shuffle: shuffle
         :param fragmentation: float value in range(0,1) defining whether test sample should be consecutive or not
-        (0. corresponds to only chunk, 1. to completely fragmented samples across dataset)
-        :param pad: int value showing how many samples shoud be droppped from training set following
+        (0. corresponds to chunk only, 1. to completely fragmented samples across dataset)
+        :param pad: int value showing how many samples should be dropped from training set following
         by last sample of each test chunk
         """
         if not isinstance(n_splits, int):
-            raise ValueError("n_splits should be integer value")
+            raise ValueError("n_splits should be an integer value")
         self.n_splits = n_splits
         self.shuffle = shuffle
         self.frag = fragmentation
@@ -50,6 +51,7 @@ class CustomFold:
 
             for seq_len in seq_lens:
                 seq_begin_idx = np.random.randint(0, data_len-1, 1)
+                # TODO: fix padding for seq_begin_idx
                 seq_end_idx = min(seq_begin_idx + seq_len, data_len-1)
                 seq_end_idx_padded = min(seq_end_idx + self.pad, data_len-1)
                 seq_idx_padded = np.arange(seq_begin_idx, seq_end_idx_padded)

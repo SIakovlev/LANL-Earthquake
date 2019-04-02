@@ -6,7 +6,7 @@
       "name":"CustomFold",
       "n_splits": 10,
       "pad": 15,
-      "fragmentation": 0.01,
+      "fragmentation": 0,
       "shuffle": true
             },
 
