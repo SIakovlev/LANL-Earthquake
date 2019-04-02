@@ -3,15 +3,18 @@
   "summary_dest_fname": "../../data.nosync/summary.pickle",
 
   "folds":{
-      "name":"KFold",
-      "n_splits": 8
+      "name":"CustomFold",
+      "n_splits": 10,
+      "pad": 15,
+      "fragmentation": 0.1,
+      "shuffle": true
             },
 
   "metrics": ["mean_absolute_error", "mean_squared_error"],
 
   "model": {
     "name": "MLP",
-    "in_features": 1568,
+    "in_features": 4312,
     "out_features": 1,
     "hidden_layers": [1024, 512, 512, 128],
     "device": "cuda",

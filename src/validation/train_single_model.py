@@ -14,6 +14,7 @@ from src.validation.summary_utils import summarize
 import matplotlib.pyplot as plt
 
 from src.models.mlp_net import MLP
+from src.folds.folds import CustomFold
 
 if platform.system() == 'Darwin':
     mpl.use('TkAgg')  # Mac OS specific
@@ -56,7 +57,8 @@ def main(**kwargs):
     # 3. create folds
     folds_kwargs = copy.deepcopy(kwargs['folds'])
     del folds_kwargs['name']
-    folds = str_to_class('sklearn.model_selection', kwargs['folds']['name'])(**folds_kwargs, shuffle=True)
+    folds = str_to_class(__name__, kwargs['folds']['name'])(**folds_kwargs)
+    # folds = str_to_class('sklearn.model_selection', kwargs['folds']['name'])(**folds_kwargs, shuffle=True)
 
     # 4. create metrics
     metrics_classes = [str_to_class('sklearn.metrics', m) for m in kwargs['metrics']]

@@ -1,6 +1,5 @@
 import numpy as np
 
-
 class CustomFold:
     def __init__(self, n_splits=10, shuffle=True, fragmentation=0.1, pad=15):
         if not isinstance(n_splits, int):
@@ -18,8 +17,7 @@ class CustomFold:
             test_len = int(data_len / self.n_splits)
 
             # how many consequitive chunks in test subset
-            num_test_fragments = int(test_len * max(self.frag, 0.00001))
-
+            num_test_fragments = max(1, int(test_len * self.frag))
             seq_lens = np.random.rand(num_test_fragments)
             sum_seq_len = test_len / sum(seq_lens)
             seq_lens = [max(1, int(seq_len * sum_seq_len)) for seq_len in seq_lens]
@@ -46,7 +44,7 @@ if __name__ == '__main__':
 
     train_data = np.arange(int(1000))
 
-    kwargs = {"n_splits": 10, "shuffle": True, "fragmentation": .1, "pad": 15}
+    kwargs = {"n_splits": 10, "shuffle": True, "fragmentation": 0.1, "pad": 5}
 
     folds = CustomFold(**kwargs)
     for fold_n, (train_index, valid_index) in enumerate(folds.split(train_data)):
@@ -58,9 +56,11 @@ if __name__ == '__main__':
 
         diff = set(all_idx).difference(split_union)
 
-        print("Diff", diff)
+        print("Diff between union(train_idx, test_idx) and all_data_idx")
+        # print("Diff", diff)
         print("Diff len", len(diff))
         print("Train len", len(train_index))
         print("Test len", len(valid_index))
+        # print("Test", valid_index)
         print()
 
