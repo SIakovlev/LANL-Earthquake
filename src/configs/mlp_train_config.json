@@ -5,8 +5,8 @@
   "folds":{
       "name":"CustomFold",
       "n_splits": 10,
-      "pad": 15,
-      "fragmentation": 0.1,
+      "pad": 0,
+      "fragmentation": 1.0,
       "shuffle": true
             },
 
@@ -20,6 +20,6 @@
     "device": "cuda",
     "learning_rate": 0.0005,
     "minibatch_size": 256,
-    "num_epochs": 50
+    "num_epochs": 100
   }
 }

@@ -5,6 +5,16 @@ class CustomFold:
     This fold split is ensure that test data doesn't leak into train data. This behaviour is typical
     for datasets calculated with the running window when stride is smaller than the window size
     (2 consequtive windows are getting overlapped)
+
+    Parameter "fragmentation" controls whether your test and train split come from the same distribution.
+    Value of 1 means that test samples are randomly sampled across the whole dataset and thus come from the same
+    distribution.
+    Value of 0 means that test subset is drawn as a single consecutive chunk from randomly chosen position in
+    the original dataset which doesn't ensure hypothesis of same distribution.
+
+    Parameter "pad" tells how many samples should be dropped after each drawn test sample to ensure that
+    "test information" doesn't leak into train data. (i.e. for window_size=150k and stride=10k pad should be 15)
+
     """
     def __init__(self, n_splits=10, shuffle=True, fragmentation=0.1, pad=15):
         """
