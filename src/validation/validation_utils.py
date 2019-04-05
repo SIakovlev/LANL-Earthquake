@@ -125,7 +125,7 @@ class ValidationBase:
                     self.score_data[metric_name].append(score_d)
             #save predict data
             if predict_data is not None:
-                save_predict_path = os.path.join(models_directory_dict[0]['predict_directory'],"{0}_{1}_{2}.h5".format(
+                save_predict_path = os.path.join(models_directory_dict[0]['predict_directory'],"{0}_{1}_{2}.pickle".format(
                                                                                     self.models_features[num_model]["model_name"],
                                                                                     self.models_features[num_model]["model_params"],
                                                                                     fold_data["folds_name"]
@@ -136,11 +136,12 @@ class ValidationBase:
 
             #save model
             if models_directory_dict[0]['models_directory'] is not None:
-                model_name = "Model_{0}_{1}_train_on_last_{2}".format(self.models_features[num_model]["model_name"],
+                model_name = "Model_{0}_{1}_train_on_last_{2}.pickle".format(self.models_features[num_model]["model_name"],
                                                                       self.models_features[num_model]["model_params"],
                                                                       fold_data["folds_name"])
 
                 save_model_path = os.path.join(models_directory_dict[0]['models_directory'], model_name)
+
                 read_write_summary(save_model_path, '.pickle', 'wb', model)
 
             # save summary

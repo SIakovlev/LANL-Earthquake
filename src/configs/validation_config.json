@@ -1,6 +1,8 @@
 {
-  "train_data": "data/train_processed.h5",
-  "summary_dest": "data/summary_train_only.csv",
+  "train_data": "data/train_good_smoothed.h5",
+  "summary_dest": "data/summary_train_.csv",
+  "predict_directory": "data/predict",
+  "models_directory": "data/saved_models",
   "preproc": {
     "name": "StandardScaler"
   },
@@ -21,7 +23,8 @@
   "validate":
           [
             {
-              "model": { "RandomForestRegressor": {"criterion":"mse",
+              "model": { "Ridge": {},
+                          "RandomForestRegressor": {"criterion":"mse",
                                                    "max_depth": 9,
                                                    "n_estimators":1000
                                                   }
