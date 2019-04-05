@@ -42,19 +42,18 @@ class CustomFold:
 
             # how many consecutive chunks in test subset
             num_test_fragments = max(1, int(test_len * self.frag))
-            seq_lens = np.random.rand(num_test_fragments)
-            sum_seq_len = test_len / sum(seq_lens)
-            seq_lens = [max(1, int(seq_len * sum_seq_len)) for seq_len in seq_lens]
+            seq_lens = [max(1, test_len // num_test_fragments)] * num_test_fragments
 
             test_idx = []
             test_idx_padded = []
 
             for seq_len in seq_lens:
-                seq_begin_idx = np.random.randint(0, data_len-1, 1)
+                seq_begin_idx = np.random.randint(self.pad, data_len-1, 1)
+                seq_begin_idx_padded = max(seq_begin_idx - self.pad, 0)
                 # TODO: fix padding for seq_begin_idx
                 seq_end_idx = min(seq_begin_idx + seq_len, data_len-1)
                 seq_end_idx_padded = min(seq_end_idx + self.pad, data_len-1)
-                seq_idx_padded = np.arange(seq_begin_idx, seq_end_idx_padded)
+                seq_idx_padded = np.arange(seq_begin_idx_padded, seq_end_idx_padded)
                 seq_idx = np.arange(seq_begin_idx, seq_end_idx)
                 test_idx.extend(seq_idx)
                 test_idx_padded.extend(seq_idx_padded)
@@ -69,7 +68,7 @@ if __name__ == '__main__':
 
     train_data = np.arange(int(1000))
 
-    kwargs = {"n_splits": 10, "shuffle": True, "fragmentation": 0.1, "pad": 5}
+    kwargs = {"n_splits": 10, "shuffle": True, "fragmentation": 0.0, "pad": 5}
 
     folds = CustomFold(**kwargs)
     for fold_n, (train_index, valid_index) in enumerate(folds.split(train_data)):

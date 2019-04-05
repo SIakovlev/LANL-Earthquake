@@ -268,7 +268,7 @@ def w_spectrogramm_downsampled(df, *args, fs=4e6, **kwargs):
     """
     f, t, Sxx = signal.spectrogram(df, fs, nperseg=kwargs['nperseg'], noverlap=kwargs['noverlap'], mode=kwargs['mode'])
     smoothen = signal.convolve2d(Sxx, np.array([[0.25, 0.25, 0.25, 0.25]]).T, mode='full')[::4]
-    smoothen = signal.convolve2d(smoothen, np.array([[0.25, 0.25, 0.25, 0.25]]).T, mode='full')[::4]
+    # smoothen = signal.convolve2d(smoothen, np.array([[0.25, 0.25, 0.25, 0.25]]).T, mode='full')[::4]
     smoothen = signal.convolve2d(smoothen, np.array([[0.25, 0.25, 0.25, 0.25]]).T, mode='full')[::4]
     return smoothen.T.flatten()
 

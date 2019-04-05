@@ -1,4 +1,4 @@
-from torch.nn import Module, Linear, MSELoss, ReLU, ModuleList, Dropout, BatchNorm1d
+from torch.nn import Module, Linear, MSELoss, ReLU, ModuleList, Dropout, BatchNorm1d, LSTM
 from torch.optim import Adam
 import torch
 import torch.utils.data
@@ -6,13 +6,12 @@ import numpy as np
 from models.models import ModelBase
 
 
-class MLP(Module, ModelBase):
+class LstmNet(Module, ModelBase):
     def __init__(self, **kwargs):
-        super(MLP, self).__init__()
+        super(LstmNet, self).__init__()
 
         # neural net params
         self.in_features_shape = kwargs["in_features"]
-
         if isinstance(self.in_features_shape, list) and len(self.in_features_shape) == 2:
             self.in_features = self.in_features_shape[1]
             self.in_seq_len = self.in_features_shape[0]
@@ -21,16 +20,18 @@ class MLP(Module, ModelBase):
             self.in_seq_len = 1
         else:
             raise TypeError("input features must either int either list of ints")
-
         self.out_features = kwargs['out_features']
         self.linears_size = kwargs['hidden_layers']
         self.device = kwargs['device']
+        self.lstm_size = kwargs['lstm_hidden_size']
 
         self.dropout = Dropout(p=kwargs['dropout'])
 
         self.bn = BatchNorm1d(self.in_features)
 
-        self.linears = ModuleList([Linear(self.in_features * self.in_seq_len, self.linears_size[0])])
+        self.lstm = LSTM(self.in_features, self.lstm_size, batch_first=True)
+
+        self.linears = ModuleList([Linear(self.lstm_size, self.linears_size[0])])
         self.linears.extend(
             [Linear(self.linears_size[i - 1], self.linears_size[i]) for i in range(1, len(self.linears_size))])
 
@@ -47,11 +48,14 @@ class MLP(Module, ModelBase):
 
     def forward(self, x):
         x = torch.clamp(x, max=0.001)
-        orig_shape = x.shape
+        original_shape = x.shape
         x = x.view(-1, self.in_features)
         x = self.bn(x)
-        x = x.view(orig_shape)
+        x = x.view(-1, self.in_seq_len, self.in_features)
         x = self.dropout(x)
+        hidden = None
+        x, hidden = self.lstm(x, hidden)
+        x = x[:, -1, :]
         for linear in self.linears:
             x = self.relu(linear(x))
         res = self.out(x)

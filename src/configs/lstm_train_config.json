@@ -6,21 +6,22 @@
       "name":"CustomFold",
       "n_splits": 10,
       "pad": 15,
-      "fragmentation": 0.1,
+      "fragmentation": 0.01,
       "shuffle": true
             },
 
   "metrics": ["mean_absolute_error", "mean_squared_error"],
 
   "model": {
-    "name": "MLP",
+    "name": "LstmNet",
     "in_features": [11, 392],
     "out_features": 1,
-    "hidden_layers": [512, 256, 128],
+    "hidden_layers": [512, 128],
+    "lstm_hidden_size" : 256,
     "dropout": 0.3,
     "device": "cuda",
     "learning_rate": 0.001,
-    "minibatch_size": 256,
+    "minibatch_size": 128,
     "num_epochs": 40
   }
 }

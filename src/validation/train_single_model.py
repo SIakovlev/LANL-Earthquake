@@ -14,6 +14,7 @@ from src.validation.summary_utils import summarize
 import matplotlib.pyplot as plt
 
 from src.models.mlp_net import MLP
+from src.models.lstm_net import LstmNet
 from src.folds.folds import CustomFold
 
 if platform.system() == 'Darwin':
@@ -125,7 +126,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--i', dest = "info", help = 'print info about usage of script' , action='store_true', default=False)
+    parser.add_argument('--i', dest="info", help='print info about usage of script', action='store_true', default=False)
 
     parser.add_argument('--config_fname',
                         help='name of the config file',
