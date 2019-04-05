@@ -1146,3 +1146,228 @@ def w_slottedA_length(df, *args, **kwargs):
     t_m = [time, magnitude]
     fs = feets.FeatureSpace(only=['SlottedA_length'], data=['time','magnitude'])
     return fs.extract(*t_m)[1][0]
+
+
+@DumpDecorator
+@WindowDecorator
+def w_percent_difference_flux_percentile(df, *args, **kwargs):
+    """
+    Ratio of F5,95 over the median magnitude.
+
+    Parameters
+    ----------
+    df : pandas DataFrame
+    args :
+    kwargs :
+
+    Returns
+    -------
+
+    """
+    size = df.shape[0]
+    time = np.linspace(0, size - 1, size)
+    magnitude = df
+    t_m = [time, magnitude]
+    fs = feets.FeatureSpace(only=['PercentDifferenceFluxPercentile'], data=['time', 'magnitude'])
+    return fs.extract(*t_m)[1][0]
+
+
+@DumpDecorator
+@WindowDecorator
+def w_flux_percentile_ratio_mid80(df, *args, **kwargs):
+    """
+    flux_percentile_ratio_mid80: ratio F10,90/F5,95
+
+    Parameters
+    ----------
+    df : pandas DataFrame
+    args :
+    kwargs :
+
+    Returns
+    -------
+
+    """
+    size = df.shape[0]
+    time = np.linspace(0, size - 1, size)
+    magnitude = df
+    t_m = [time, magnitude]
+    fs = feets.FeatureSpace(only=['FluxPercentileRatioMid80'], data=['time', 'magnitude'])
+    return fs.extract(*t_m)[1][0]
+
+@DumpDecorator
+@WindowDecorator
+def w_flux_percentile_ratio_mid50(df, *args, **kwargs):
+    """
+    flux_percentile_ratio_mid50: ratio F25,75/F5,95
+
+    Parameters
+    ----------
+    df : pandas DataFrame
+    args :
+    kwargs :
+
+    Returns
+    -------
+
+    """
+    size = df.shape[0]
+    time = np.linspace(0, size - 1, size)
+    magnitude = df
+    t_m = [time, magnitude]
+    fs = feets.FeatureSpace(only=['FluxPercentileRatioMid50'], data=['time', 'magnitude'])
+    return fs.extract(*t_m)[1][0]
+
+@DumpDecorator
+@WindowDecorator
+def w_flux_percentile_ratio_mid20(df, *args, **kwargs):
+    """
+    flux_percentile_ratio_mid50: ratio F40,60/F5,95
+
+    Parameters
+    ----------
+    df : pandas DataFrame
+    args :
+    kwargs :
+
+    Returns
+    -------
+
+    """
+    size = df.shape[0]
+    time = np.linspace(0, size - 1, size)
+    magnitude = df
+    t_m = [time, magnitude]
+    fs = feets.FeatureSpace(only=['FluxPercentileRatioMid20'], data=['time', 'magnitude'])
+    return fs.extract(*t_m)[1][0]
+
+@DumpDecorator
+@WindowDecorator
+def w_flux_percentile_ratio_sum(df, *args, **kwargs):
+    """
+    Sum of flux_percentile_ratio_mid20+flux_percentile_ratio_mid50+flux_percentile_ratio_mid80
+
+    Parameters
+    ----------
+    df : pandas DataFrame
+    args :
+    kwargs :
+
+    Returns
+    -------
+
+    """
+    size = df.shape[0]
+    time = np.linspace(0, size - 1, size)
+    magnitude = df
+    t_m = [time, magnitude]
+    fs = feets.FeatureSpace(only=['FluxPercentileRatioMid20', 'FluxPercentileRatioMid50', 'FluxPercentileRatioMid80'], data=['time', 'magnitude'])
+    return np.sum(fs.extract(*t_m)[1])
+
+
+
+
+@DumpDecorator
+@WindowDecorator
+def w_freq2_harmonics_rel_phase_2(df, *args, **kwargs):
+    """
+    Freq2_harmonics_rel_phase_2
+
+    Parameters
+    ----------
+    df : pandas DataFrame
+    args :
+    kwargs :
+
+    Returns
+    -------
+
+    """
+    size = df.shape[0]
+    time = np.linspace(0, size - 1, size)
+    magnitude = df
+    t_m = [time, magnitude]
+    fs = feets.FeatureSpace(only=['Freq2_harmonics_rel_phase_2'], data=['time', 'magnitude'])
+    return fs.extract(*t_m)[1][0]
+
+@DumpDecorator
+@WindowDecorator
+def w_max_slope(df, *args, **kwargs):
+    """
+    Maximum absolute magnitude slope between two consecutive observations.
+
+    Examining successive (time-sorted) magnitudes, the maximal first difference (value of delta magnitude over delta time)
+
+    Parameters
+    ----------
+    df : pandas DataFrame
+    args :
+    kwargs :
+
+    Returns
+    -------
+
+    """
+    size = df.shape[0]
+    time = np.linspace(0, size - 1, size)
+    magnitude = df
+    t_m = [time, magnitude]
+    fs = feets.FeatureSpace(only=['MaxSlope'], data=['time', 'magnitude'])
+    return fs.extract(*t_m)[1][0]
+
+@DumpDecorator
+@WindowDecorator
+def w_rcs(df, *args, **kwargs):
+    """
+    Rcs - Range of cumulative sum (Rcs)
+
+    Rcs is the range of a cumulative sum (Ellaway 1978) of each light-curve and is defined as:
+    Rcs=max(S)−min(S)
+
+    S=1/Nσ ∑(mi−mean(m))
+
+    where max(min) is the maximum (minimum) value of S and l=1,2,…,N.
+
+    Parameters
+    ----------
+    df : pandas DataFrame
+    args :
+    kwargs :
+
+    Returns
+    -------
+
+    """
+    size = df.shape[0]
+    time = np.linspace(0, size - 1, size)
+    magnitude = df
+    t_m = [time, magnitude]
+    fs = feets.FeatureSpace(only=['Rcs'], data=['time', 'magnitude'])
+    return fs.extract(*t_m)[1][0]
+
+@DumpDecorator
+@WindowDecorator
+def w_percent_amplitude(df, *args, **kwargs):
+    """
+    Largest percentage difference between either the max or min magnitude and the median.
+
+    Parameters
+    ----------
+    df : pandas DataFrame
+    args :
+    kwargs :
+
+    Returns
+    -------
+
+    """
+    size = df.shape[0]
+    time = np.linspace(0, size - 1, size)
+    magnitude = df
+    t_m = [time, magnitude]
+    fs = feets.FeatureSpace(only=['PercentAmplitude'], data=['time', 'magnitude'])
+    return fs.extract(*t_m)[1][0]
+
+
+
+

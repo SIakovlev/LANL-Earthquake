@@ -158,7 +158,7 @@ class ValidationBase:
         :param path:
         :param kwargs: columns in summary
         '''
-        print(args)
+
         #that all columns have existed in output
         columns_in_summary = ["data_fname", "preproc_name","preproc_params",
                         "folds_name", "folds_params", "model_name", "model_params"]
