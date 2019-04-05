@@ -46,7 +46,7 @@ class MLP(Module, ModelBase):
         self = self.to(self.device)
 
     def forward(self, x):
-        x = torch.clamp(x, max=0.001)
+        # x = torch.clamp(x, max=0.001)
         orig_shape = x.shape
         x = x.view(-1, self.in_features)
         x = self.bn(x)
@@ -57,10 +57,12 @@ class MLP(Module, ModelBase):
         res = self.out(x)
         return res
 
-    def fit(self, train_data, train_y):
+    def fit(self, train_data, train_y, valid_data, valid_y):
         self.train()
         train_data = torch.tensor(train_data.values.astype(np.float32)).to(self.device)
         train_y = torch.tensor(train_y.values.astype(np.float32)).view(-1, 1).to(self.device)
+
+        valid_y = torch.tensor(valid_y.values.astype(np.float32)).view(-1, 1).to(self.device)
 
         n_train_steps_per_epoch = train_data.shape[0] // self.minibatch_size
 
@@ -80,6 +82,12 @@ class MLP(Module, ModelBase):
                 mae_loss = torch.abs(predict - y_batch).mean()
                 print(f"\r step: {i} | mse_loss={loss.detach().cpu():.4f} | mae_loss={mae_loss.detach().cpu():.4f}", end="")
             print()
+            # validate
+            pred = torch.tensor(self.predict(valid_data)).to(self.device)
+            loss = self.loss(pred, valid_y)
+            mae_loss = torch.abs(pred - valid_y).mean()
+            self.train()
+            print(f"validation score: mse_loss={loss.detach().cpu():.4f} | mae_loss={mae_loss.detach().cpu():.4f}")
         del train_data
         del train_y
 

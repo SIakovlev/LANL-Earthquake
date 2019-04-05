@@ -6,7 +6,7 @@
       "name":"CustomFold",
       "n_splits": 10,
       "pad": 15,
-      "fragmentation": 0.01,
+      "fragmentation": 0.1,
       "shuffle": true
             },
 
@@ -14,14 +14,14 @@
 
   "model": {
     "name": "LstmNet",
-    "in_features": [11, 392],
+    "in_features": [11, 1564],
     "out_features": 1,
-    "hidden_layers": [512, 128],
+    "hidden_layers": [128, 32],
     "lstm_hidden_size" : 256,
     "dropout": 0.3,
     "device": "cuda",
     "learning_rate": 0.001,
     "minibatch_size": 128,
-    "num_epochs": 40
+    "num_epochs": 20
   }
 }

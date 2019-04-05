@@ -89,13 +89,14 @@ def main(**kwargs):
         y_train, y_valid = y_train_data.iloc[train_index], y_train_data.iloc[valid_index]
 
         model = model_cls(**model_params)
-        model.fit(X_train, y_train)
+        model.fit(X_train, y_train, X_valid, y_valid)
 
         # validate
 
-        predict = model.predict(X_train)
+        rand_train_idx = np.random.randint(0, X_train.shape[0], 1024)
+        predict = model.predict(X_train.iloc[rand_train_idx])
         for metric_name, metric in metrics.items():
-            score = metric(predict, y_train)
+            score = metric(predict, y_train.iloc[rand_train_idx])
             scores[metric_name].append(score)
             print(f"train score: {score.mean():.4f}")
 

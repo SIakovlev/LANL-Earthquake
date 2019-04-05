@@ -266,10 +266,11 @@ def w_spectrogramm_downsampled(df, *args, fs=4e6, **kwargs):
     -------
 
     """
-    f, t, Sxx = signal.spectrogram(df, fs, nperseg=kwargs['nperseg'], noverlap=kwargs['noverlap'], mode=kwargs['mode'])
-    smoothen = signal.convolve2d(Sxx, np.array([[0.25, 0.25, 0.25, 0.25]]).T, mode='full')[::4]
-    # smoothen = signal.convolve2d(smoothen, np.array([[0.25, 0.25, 0.25, 0.25]]).T, mode='full')[::4]
-    smoothen = signal.convolve2d(smoothen, np.array([[0.25, 0.25, 0.25, 0.25]]).T, mode='full')[::4]
+    sig = signal.savgol_filter(df, 129, 5, mode='nearest')
+    f, t, Sxx = signal.spectrogram(sig, fs, nperseg=kwargs['nperseg'], noverlap=kwargs['noverlap'], mode=kwargs['mode'], scaling=kwargs['scaling'])
+    smoothen = signal.convolve2d(Sxx, np.array([[0.25] * 2, [0.25] * 2]).T, mode='full')[::2]
+    smoothen = signal.convolve2d(smoothen, np.array([[0.25] * 2, [0.25] * 2]).T, mode='full')[::2]
+    smoothen = signal.convolve2d(smoothen, np.array([[0.25] * 2, [0.25] * 2]).T, mode='full')[::2][:750]
     return smoothen.T.flatten()
 
 @DumpDecorator

@@ -14,13 +14,13 @@
 
   "model": {
     "name": "MLP",
-    "in_features": [11, 392],
+    "in_features": [11, 1564],
     "out_features": 1,
-    "hidden_layers": [512, 256, 128],
+    "hidden_layers": [256, 64],
     "dropout": 0.3,
     "device": "cuda",
     "learning_rate": 0.001,
     "minibatch_size": 256,
-    "num_epochs": 40
+    "num_epochs": 80
   }
 }
