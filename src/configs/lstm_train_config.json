@@ -14,14 +14,14 @@
 
   "model": {
     "name": "LstmNet",
-    "in_features": [11, 1564],
+    "in_features": [24, 750],
     "out_features": 1,
     "hidden_layers": [128, 32],
     "lstm_hidden_size" : 256,
-    "dropout": 0.3,
+    "dropout": 0.7,
     "device": "cuda",
-    "learning_rate": 0.001,
+    "learning_rate": 0.0005,
     "minibatch_size": 128,
-    "num_epochs": 20
+    "num_epochs": 60
   }
 }

@@ -17,6 +17,8 @@ from src.models.mlp_net import MLP
 from src.models.lstm_net import LstmNet
 from src.folds.folds import CustomFold
 
+from xgboost import XGBRegressor
+
 if platform.system() == 'Darwin':
     mpl.use('TkAgg')  # Mac OS specific
 
@@ -35,6 +37,8 @@ def main(**kwargs):
     # 1. load data
     train_data_fname = kwargs['train_data_fname']
     train_df = pd.read_hdf(train_data_fname, key='table')
+
+    train_df = train_df.iloc[:int(6e4)]
 
     # train_df
     train_data = train_df.drop(['ttf'], axis=1)
@@ -89,7 +93,8 @@ def main(**kwargs):
         y_train, y_valid = y_train_data.iloc[train_index], y_train_data.iloc[valid_index]
 
         model = model_cls(**model_params)
-        model.fit(X_train, y_train, X_valid, y_valid)
+        # model.fit(X_train, y_train, X_valid, y_valid)
+        model.fit(X_train, y_train)
 
         # validate
 
@@ -132,7 +137,7 @@ if __name__ == '__main__':
     parser.add_argument('--config_fname',
                         help='name of the config file',
                         type=str,
-                        default="../configs/mlp_train_config.json")
+                        default="../configs/train_config.json")
 
     args = parser.parse_args()
 

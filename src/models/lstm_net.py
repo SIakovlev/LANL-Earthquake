@@ -47,7 +47,7 @@ class LstmNet(Module, ModelBase):
         self = self.to(self.device)
 
     def forward(self, x):
-        x = torch.clamp(x, max=0.001)
+        x = torch.clamp(x, max=0.1)
         original_shape = x.shape
         x = x.view(-1, self.in_features)
         x = self.bn(x)
@@ -58,6 +58,7 @@ class LstmNet(Module, ModelBase):
         x = x[:, -1, :]
         for linear in self.linears:
             x = self.relu(linear(x))
+            x = self.dropout(x)
         res = self.out(x)
         return res
 
