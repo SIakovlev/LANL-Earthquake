@@ -5,9 +5,7 @@ import plotly.graph_objs as go
 import plotly
 plotly.tools.set_credentials_file(username='ptolmachev', api_key='Fs5sBFAg7YuBn52rzy6n')
 import sys
-sys.path.insert(0, '../.')
-import os, fnmatch
-from dp_utils import *
+from dp_features import *
 
 
 def nice_plot(series):
@@ -19,26 +17,26 @@ def nice_plot(series):
         plt.plot(series.tolist(), 'r-',linewidth = 2, alpha = 0.7)
     plt.show()
 
-def plot_data(function, params, **kwargs):
-    size_of_slice = 150000
-    data_path = kwargs['path_to_data']
-    list_of_EQs_to_plot = kwargs['EQs_num']
+def plot_data(list_of_dataframes, feature_name, window_size):
 
-    if os.path.isdir(data_path) == False:
-        raise ValueError("{} is no such directory!".format(data_path))
+    if not np.all([dataframe.shape[1] == list_of_dataframes[0].shape[1] for dataframe in list_of_dataframes] ):
+        raise ValueError("The number of columns in dataframes in 'list_of_dataframes' should be the same! ")
+
+    size_of_slice = int(150000/window_size)
+    num_EQs = len(list_of_dataframes)
 
     # plotting part
-    dataframes = [pd.read_hdf(data_path + "/EQ_" + str(EQ) + ".h5", key='table') for EQ in list_of_EQs_to_plot]
-    for i in range(len(dataframes)):
-        dataframes[i].columns = ["s", "ttf"]
-    df = pd.concat(dataframes)
-    df.columns = ["s", "ttf"]
-    names = [function.__name__, "downsampled_signal", 'ttf']
+    for i in range(num_EQs):
+        list_of_dataframes[i].columns = [feature_name,"s", "ttf"]
+
+    df = pd.concat(list_of_dataframes)
+    names = [feature_name, "downsampled_signal", 'downsampled_ttf']
+    df.columns = names
 
     # Downsampling is conducted by the last element
-    signals = [function(df.s, **params).values.ravel(),  # featurised signal
-               w_last_elem(df.s, **params).values.ravel(),  # downsampled signal
-               100 * w_last_elem(df.ttf, **params).values.ravel()]  # downsample ttf
+    signals = [df[feature_name].ravel(),  # featurised signal
+               df["downsampled_signal"].ravel(),  # downsampled signal
+               df["downsampled_ttf"].ravel()]  # downsample ttf
 
     s_max = []
     for i in range(len(signals)):
@@ -49,7 +47,7 @@ def plot_data(function, params, **kwargs):
              range(len(signals))]
 
     layout1 = dict(
-        title='Eathquakes ' + function.__name__
+        title='Eathquakes ' + feature_name
     )
 
     fig1 = dict(data=data1, layout=layout1)
@@ -57,12 +55,12 @@ def plot_data(function, params, **kwargs):
 
     #####################################################################################################
     # takes the first of specified EQs and plots data related to first, middle and last 150000 samples
-    b = int((len(dataframes[0].s) - size_of_slice) / 2)
-    e = int((len(dataframes[0].s) + size_of_slice) / 2)
+    b = int((len(list_of_dataframes[0].s) - size_of_slice) / 2)
+    e = int((len(list_of_dataframes[0].s) + size_of_slice) / 2)
 
-    samples = [function(dataframes[0].s[:size_of_slice], **params).values.ravel(),
-               function(dataframes[0].s[b:e], **params).values.ravel(),
-               function(dataframes[0].s[len(dataframes[0]) - size_of_slice:], **params).values.ravel()]
+    samples = [list_of_dataframes[0][feature_name][:int(size_of_slice)].values.ravel(),
+               list_of_dataframes[0][feature_name][b:e].values.ravel(),
+               list_of_dataframes[0][feature_name][len(list_of_dataframes[0]) - size_of_slice:].values.ravel()]
 
     s_max = []
     for i in range(len(samples)):
@@ -74,7 +72,7 @@ def plot_data(function, params, **kwargs):
              range(len(samples))]
 
     layout2 = dict(
-        title='Earthquakes ' + function.__name__
+        title='Earthquakes ' + feature_name
     )
 
     fig2 = dict(data=data2, layout=layout2)
@@ -84,5 +82,17 @@ def plot_data(function, params, **kwargs):
 
 if __name__ == '__main__':
     # example
-    params = {"window_size": 1000, 'desc_line' : "std_1000"}
-    plot_data(w_std, params, path_to_data="../../data/EQs", EQs_num=[2, 3])
+    #list of dataframes
+    list_of_dataframes = []
+    window_size = 15000
+    feature_name = 'quantile'
+    params = {'q' : 0.05}
+    for i in [3,4,5,7]: # which eqs to take
+        df = pd.read_hdf('../../data/EQs/EQ_'+str(i)+'.h5', key='table')
+        feature = eval("w_"+feature_name + "(df.s, window_size = window_size, **params)")
+        downsampled_s = w_last_elem(df.s, window_size = window_size)
+        downsampled_ttf = w_last_elem(df.ttf, window_size = window_size)
+        processed_df = pd.DataFrame(np.array([feature.values.ravel(), downsampled_s.values.ravel(), downsampled_ttf.values.ravel()]).T)
+        processed_df.columns = [feature_name,"downsampled_signal", "downsampled_ttf"]
+        list_of_dataframes.append(processed_df)
+    plot_data(list_of_dataframes, feature_name, window_size)

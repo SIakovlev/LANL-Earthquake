@@ -64,9 +64,9 @@ class WindowDecorator:
 
         # TODO: fix this hack
         if window_size >= df.shape[0]:
-            tqdm.write(f"{desc_line}:")
-            tqdm.write("\t window decorator: ")
-            tqdm.write("\t - window size: {}".format(window_size))
+            # tqdm.write(f"{desc_line}:")
+            # tqdm.write("\t window decorator: ")
+            # tqdm.write("\t - window size: {}".format(window_size))
             temp = self.unwrapped(df.values, *args, **kwargs)
             return pd.DataFrame(temp, columns={desc_line})
         else:
@@ -75,8 +75,8 @@ class WindowDecorator:
                           desc=desc_line, file=sys.stdout):
                 batch = df.iloc[i: i + window_size].values
                 temp.append(self.unwrapped(batch, *args, **kwargs))
-            tqdm.write("\t window decorator: ")
-            tqdm.write("\t - window size: {}".format(window_size))
+            # tqdm.write("\t window decorator: ")
+            # tqdm.write("\t - window size: {}".format(window_size))
             if hasattr(temp[0], 'shape') and temp[0].shape is not ():
                 out_features = temp[0].shape[0]
                 column_names = [desc_line + '_' + str(i) for i in range(out_features)]

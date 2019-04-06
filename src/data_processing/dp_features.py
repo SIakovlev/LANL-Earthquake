@@ -646,7 +646,7 @@ def w_number_cwt_peaks(df, *args, n=1, **kwargs):
 
 @DumpDecorator
 @WindowDecorator
-def w_quantile(df, *args, q=0.5, **kwargs):
+def w_quantile(df, *args, q=0.75, **kwargs):
     """
     Calculates the q quantile of x. This is the value of x greater than q% of the ordered values from x.
 
