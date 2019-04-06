@@ -23,11 +23,11 @@ def main(**kwargs):
 
     # 2. Run processing
     print(' - Run dataframe processing')
-    dfp = dp.process_df(df,
-                        kwargs['routines'],
+    dfp = dp.process_df_v2(df,
+                        kwargs['features'],
                         default_window_size,
                         default_window_stride,
-                        kwargs['data_processed_dir'] + os.path.splitext(kwargs["data_processed_fname"])[0])
+                        kwargs['data_processed_dir'] + os.path.splitext(kwargs["data_processed_fname"])[0] + '/')
     print(' - Dataframe was successfully processed')
 
     # 3. Save modified dataframe
@@ -43,7 +43,7 @@ def main(**kwargs):
 
 if __name__ == '__main__':
 
-    config_fname = "../configs/dp_config.json"
+    config_fname = "../configs/dp_config_v2.json"
     # build config if there is no .json file
     if not os.path.isfile(config_fname):
         # MacOS specific

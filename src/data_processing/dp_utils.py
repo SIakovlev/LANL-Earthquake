@@ -119,6 +119,87 @@ def get_function_descriptor(func, extra_params):
     return desc_line
 
 
+def process_df_v2(df, features, default_window_size, default_window_stride, df_path=None):
+
+    """
+    Data processing is done in three main steps:
+    1) Calculate all features listed in configuration file (dp_config.json)
+    2) Append labels
+    3) Perform data resampling in case different window sizes are used
+
+    :param df: raw data
+    :type df: pandas DataFrame
+    :param features: list of routines specified in dp_config.json file
+    :type features: list
+    :param default_window_size:
+    :type default_window_size:
+    :return: dataframe with features calculated based on the list of routines
+    :rtype: pandas DataFrame
+    """
+    from feature import Feature
+
+    temp_data = {}
+
+    # Create dir with df name if it doesn't exist
+    if df_path is not None:
+        if os.path.exists(df_path):
+            warnings.warn(f"Directory {df_path} already exists. "
+                          f"Running data processing in this directory again might lead to data loss.")
+        else:
+            os.makedirs(df_path)
+
+    # calc all features
+    print(f"Calculation of {len(features)} features...")
+    general_params = (default_window_size, default_window_stride, df_path)
+    for feature in features:
+        if not feature['on']:
+            print(f"Feature {feature['name']} calcualtion is disabled")
+            continue
+        data_processed = calculate_feature(df.drop(['ttf'], axis=1), feature, *general_params)
+        new_col_name = list(data_processed)[0]
+        temp_data[new_col_name] = data_processed
+
+    # append column with labels
+    try:
+        temp_data['ttf'] = Feature(df=df['ttf'], save_dir=df_path).w_last_elem(df['ttf'],
+                                                                               window_size=default_window_size,
+                                                                               window_stride=default_window_stride,
+                                                                               desc_line="ttf")
+    except KeyError as e:
+        raise KeyError(f"Labels can't be calculated, key: {e} is missing")
+
+    # perform resampling if needed
+    resulted_size = temp_data['ttf'].shape[0]
+    for k, v in temp_data.items():
+        temp_data[k] = resample_column(v, resulted_size)
+
+    res = pd.concat(temp_data.values(), axis=1)
+    return res
+
+
+def calculate_feature(df, feature, default_window_size, default_window_stride, save_dir):
+
+    from feature import Feature
+
+    feature_obj = Feature(df=df, save_dir=save_dir)
+
+    for func_name, func_params in feature['functions'].items():
+        window_size = default_window_size if 'window_size' not in feature else feature['window_size']
+        window_stride = default_window_stride if 'window_stride' not in feature else feature['window_stride']
+        if func_params:
+            desc_line = f"{func_name}(self, window_size={window_size}, window_stride={window_stride}, " + \
+                        ', '.join("{!s}={!r}".format(key, val) for (key, val) in func_params.items()) + ')'
+        else:
+            desc_line = f"{func_name}(self, window_size={window_size}, window_stride={window_stride})"
+        feature_obj = getattr(feature_obj, func_name)(window_size=window_size,
+                                                      window_stride=window_stride,
+                                                      desc_line=desc_line,
+                                                      **func_params)
+        feature_obj = feature_obj.dump()
+
+    return feature_obj.data
+
+
 def process_df(df, routines, default_window_size, default_window_stride, df_path=None):
 
     """
@@ -256,3 +337,50 @@ def resample_column(df, resulted_size):
         x_new = np.linspace(0, old_size - 1, resulted_size)
         y_new = f(x_new)
         return pd.DataFrame(y_new, columns={col_name})
+
+
+def window_decorator(func):
+    @functools.wraps(func)
+    def wrapper(self, *args, **kwargs):
+        window_size = kwargs['window_size']
+        window_stride = kwargs['window_stride']
+
+        df = self.data
+        assert df.shape[0] >= window_size, "Dataframe size is too small for a chosen window"
+
+        if "verbose" in kwargs:
+            verbose = kwargs['verbose']
+        else:
+            verbose = True
+        if "desc_line" in kwargs:
+            desc_line = kwargs['desc_line']
+        else:
+            desc_line = get_function_descriptor(func, kwargs)
+
+        self.name.append(desc_line)
+
+        if self.name + '.h5' in os.listdir(self.save_dir):
+            self.data = pd.read_hdf(self.save_dir + desc_line + '.h5', key='table')
+            return self
+
+        temp = []
+        for i in tqdm(range(0, df.shape[0] - window_size, window_stride),
+                      desc=desc_line, file=sys.stdout, disable=not verbose):
+            batch = df.iloc[i: i + window_size].values
+            temp.append(func(self, batch, *args, **kwargs).data)
+
+        if verbose:
+            tqdm.write(f"\t window decorator for {func.__name__}: ")
+            tqdm.write("\t - window size: {}".format(window_size))
+            tqdm.write("\t - window stride: {}".format(window_stride))
+
+        if hasattr(temp[0], 'shape') and temp[0].shape is not ():
+            out_features = temp[0].shape[0]
+            column_names = ['-'.join(self.name) + '_' + str(i) for i in range(out_features)]
+        else:
+            column_names = ['-'.join(self.name)]
+
+        self.data = pd.DataFrame(temp, columns=column_names)
+        return self
+
+    return wrapper
