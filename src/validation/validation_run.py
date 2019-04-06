@@ -3,11 +3,12 @@ import argparse
 import pandas as pd
 import platform
 import matplotlib as mpl
-from sklearn.model_selection import KFold, RepeatedKFold, StratifiedKFold, RepeatedStratifiedKFold
+import copy
+from sklearn.model_selection import KFold, RepeatedKFold, StratifiedKFold, RepeatedStratifiedKFold, TimeSeriesSplit
 
 from ast import literal_eval
 
-import src.validation.ValidationProc
+import src.validation.validation_utils
 
 import os
 import sys
@@ -41,19 +42,34 @@ def main(**kwargs):
     # path to summary
     summary_dest = kwargs['summary_dest']
 
-    # path to save models (optional)
-    if 'models_directory' in kwargs:
-        models_dest = kwargs['models_directory']
-        #check if the directory exist
-        if not os.path.exists(models_dest):
-            os.makedirs(models_dest)
-    else:
-        models_dest = None
+
+    optional_save = {'models_directory':None, 'predict_directory':None}
+
+    # path to save models and output_predict(optional)
+    for opt_elem_key, _ in optional_save.items():
+        if opt_elem_key in kwargs:
+            optional_save[opt_elem_key] = kwargs[opt_elem_key]
+            #check if the directory exist
+            if not os.path.exists(optional_save[opt_elem_key]):
+                os.makedirs(optional_save[opt_elem_key])
+
+    # Load data
+    print(f' - Attempt to load data from {train_data}')
+    train_df = pd.read_hdf(train_data, key='table')
+    train_columns= copy.copy(train_df.columns)
+    y_data = train_df[train_columns[-1]]
+    train_df = train_df.drop([train_columns[-1]], axis=1)
 
     # 2. parse params and create a chain of preprocessors
     preprocessor = None
     if 'preproc' in kwargs:
-        preprocessor = str_to_class("src.validation.preproc", kwargs['preproc']['name'])(**kwargs['preproc'])
+        print(kwargs['preproc']['name'])
+        name_class = kwargs['preproc']['name']
+        del kwargs['preproc']['name']
+        preprocessor_class = str_to_class("src.preprocessing.preproc", name_class)(**kwargs['preproc'])
+        print(f' - Attempt to preprocess data')
+        train_df = pd.DataFrame(preprocessor_class.fit_transform(train_df),columns=train_columns[:-1])
+        preprocessor  = {"preproc_name":name_class, "preproc_params":kwargs['preproc']}
 
     # 3. parse params and create a chain of folds
     folds_list = []
@@ -74,25 +90,24 @@ def main(**kwargs):
     # 5. parse params and create a chain of validation instances
     validators = []
     for v in kwargs['validate']:
-        class_ = str_to_class('ValidationProc', 'ValidationBase')
+        class_ = str_to_class('validation_utils', 'ValidationBase')
         validator = class_(**v)
         validators.append(validator)
 
-    # Load data
-    train_df = pd.read_hdf(train_data,key='table')
+
     # 4. train validators
     print('....................... Train models ..............................')
 
     for i_f, f in enumerate(folds_list):
         for v in tqdm(validators):
             # train models in validator and create summary for all models
-            v.train_models(train_df.drop(['time_to_failure'], axis=1),
-                           train_df['time_to_failure'],
+            v.train_models(train_df,
+                           y_data,
                            f,
                            summary_dest,
                            metrics_classes,
                            fold_features[i_f],
-                           preprocessor,{'data_fname':train_data}, {'models_directory': models_dest})
+                           preprocessor,{'data_fname':train_data}, optional_save)
 
     print('.......................Processing finished.........................')
 
@@ -116,7 +131,7 @@ if __name__ == '__main__':
     parser.add_argument('--config_fname',
                         help='name of the config file',
                         type=str,
-                        default='validation_config.json')
+                        default='../configs/validation_config.json')
 
     args = parser.parse_args()
 

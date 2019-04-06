@@ -1,13 +1,13 @@
 import numpy as np
 from matplotlib import pyplot as plt
 import pandas as pd
-import plotly
 import plotly.graph_objs as go
-import dp_utils as dp
 import plotly
 plotly.tools.set_credentials_file(username='ptolmachev', api_key='Fs5sBFAg7YuBn52rzy6n')
+import sys
+from dp_features import *
 
-#simple function for plotting small datasets in matplotlib
+
 def nice_plot(series):
     fig = plt.figure(figsize = (16,4))
     plt.grid(True)
@@ -17,68 +17,82 @@ def nice_plot(series):
         plt.plot(series.tolist(), 'r-',linewidth = 2, alpha = 0.7)
     plt.show()
 
+def plot_data(list_of_dataframes, feature_name, window_size):
 
-# TODO: def plot_func(data, func, params)
+    if not np.all([dataframe.shape[1] == list_of_dataframes[0].shape[1] for dataframe in list_of_dataframes] ):
+        raise ValueError("The number of columns in dataframes in 'list_of_dataframes' should be the same! ")
 
-def plot_data(data, feature_name, params, list_of_EQs, downsample = False):
-    dataframes = [pd.read_hdf(path_to_data + "/EQ_" + str(list_of_EQs[i]) + ".h5") for i in range(len(list_of_EQs))]
+    size_of_slice = int(150000/window_size)
+    num_EQs = len(list_of_dataframes)
 
-    df = pd.concat(dataframes)
+    # plotting part
+    for i in range(num_EQs):
+        list_of_dataframes[i].columns = [feature_name,"s", "ttf"]
 
-    signals = [rolling_window(df.s, window_size, stride, feature_name, params = params), #featurised signal
-               rolling_window(df.s, window_size, stride, downsample_by, params = None), #downsampled signal
-               100*rolling_window(df.y, window_size, stride, downsample_by, params = None)] # downsample ttf
+    df = pd.concat(list_of_dataframes)
+    names = [feature_name, "downsampled_signal", 'downsampled_ttf']
+    df.columns = names
+
+    # Downsampling is conducted by the last element
+    signals = [df[feature_name].ravel(),  # featurised signal
+               df["downsampled_signal"].ravel(),  # downsampled signal
+               df["downsampled_ttf"].ravel()]  # downsample ttf
+
     s_max = []
-    for i in range(3):
-        s_max.append(max(signals[i]))
+    for i in range(len(signals)):
+        s_max.append(abs(signals[i]).max())
     s_max.append(0)
 
-    names = [feature_name, "downsampled_signal", 'ttf']
-    data1 = [go.Scatter(y=(signals[i] - 0.7*sum(s_max[:i+1])), opacity = 0.7, name  = names[i]) for i in range(3)]
+    data1 = [go.Scatter(y=(signals[i] - 0.7 * sum(s_max[:i + 1])), opacity=0.7, name=names[i]) for i in
+             range(len(signals))]
 
     layout1 = dict(
         title='Eathquakes ' + feature_name
     )
 
     fig1 = dict(data=data1, layout=layout1)
-    plotly.offline.plot(fig1, filename = "Earthquakes.html", auto_open=True)
+    plotly.offline.plot(fig1, filename="Earthquakes.html", auto_open=True)
 
     #####################################################################################################
     # takes the first of specified EQs and plots data related to first, middle and last 150000 samples
-    b = int( (len(dataframes[0].s) - 150000) / 2)
-    e = int( (len(dataframes[0].s) + 150000) / 2)
+    b = int((len(list_of_dataframes[0].s) - size_of_slice) / 2)
+    e = int((len(list_of_dataframes[0].s) + size_of_slice) / 2)
 
-    samples = [rolling_window(dataframes[0].s[:150000], window_size, stride, feature_name, params = params),
-               rolling_window(dataframes[0].s[b:e], window_size, stride, feature_name, params = params),
-               rolling_window(dataframes[0].s[-150000:], window_size, stride, feature_name, params = params)]
+    samples = [list_of_dataframes[0][feature_name][:int(size_of_slice)].values.ravel(),
+               list_of_dataframes[0][feature_name][b:e].values.ravel(),
+               list_of_dataframes[0][feature_name][len(list_of_dataframes[0]) - size_of_slice:].values.ravel()]
 
     s_max = []
-    for i in range(3):
-        s_max.append(max(samples[i]))
+    for i in range(len(samples)):
+        s_max.append(abs(samples[i]).max())
     s_max.append(0)
 
-    names = ["first 150000","middle 150000","last 150000"]
-    data2 = [go.Scatter(y= (samples[i] - 0.7*sum(s_max[:i+1])), opacity = 0.7, name  = names[i]) for i in range(3)]
+    names = ["first " + str(size_of_slice), "middle " + str(size_of_slice), "last " + str(size_of_slice)]
+    data2 = [go.Scatter(y=(samples[i] - 0.7 * sum(s_max[:i + 1])), opacity=0.7, name=names[i]) for i in
+             range(len(samples))]
 
     layout2 = dict(
         title='Earthquakes ' + feature_name
     )
 
     fig2 = dict(data=data2, layout=layout2)
-    plotly.offline.plot(fig2, filename = "Earthquakes samples (first, middle, last 150 000 dp).html", auto_open=True)
+    plotly.offline.plot(fig2,
+                        filename="Earthquakes samples (first, middle, last " + str(size_of_slice) + " dp).html",
+                        auto_open=True)
 
-
-if __name__ == "__main__":
-    #you can define your own fucntion or just pick one from here:
-    # https://tsfresh.readthedocs.io/en/latest/api/tsfresh.feature_extraction.html#tsfresh.feature_extraction.feature_calculators.absolute_sum_of_changes
-    #alternatively you may put other fucntions like "np.std"
-    #example
-    path_to_data = "/home/pavel/Documents/0Research/Projects/LANL-Earthquake/data/EQs"
-    feature_name = "quantile"
-    params = {"q" : 0.7}
-    window_size = 1000
-    stride = 500
-    list_of_EQs = [3,6]
-    plot_feature_series(path_to_data, feature_name, params, window_size, stride, list_of_EQs)
-
-
+if __name__ == '__main__':
+    # example
+    #list of dataframes
+    list_of_dataframes = []
+    window_size = 15000
+    feature_name = 'quantile'
+    params = {'q' : 0.05}
+    for i in [3,4,5,7]: # which eqs to take
+        df = pd.read_hdf('../../data/EQs/EQ_'+str(i)+'.h5', key='table')
+        feature = eval("w_"+feature_name + "(df.s, window_size = window_size, **params)")
+        downsampled_s = w_last_elem(df.s, window_size = window_size)
+        downsampled_ttf = w_last_elem(df.ttf, window_size = window_size)
+        processed_df = pd.DataFrame(np.array([feature.values.ravel(), downsampled_s.values.ravel(), downsampled_ttf.values.ravel()]).T)
+        processed_df.columns = [feature_name,"downsampled_signal", "downsampled_ttf"]
+        list_of_dataframes.append(processed_df)
+    plot_data(list_of_dataframes, feature_name, window_size)

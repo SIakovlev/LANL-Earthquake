@@ -1,19 +1,20 @@
 {
-  "train_data": "../../data/mean_100_data.h5",
-  "summary_dest": "../../data/summary_all.csv",
-  "models_directory": "../../data/saved_models",
-
+  "train_data": "../../data.nosync/train_processed.h5",
+  "summary_dest": "../../data.nosync/summary_train.csv",
+  "predict_directory": "../../data.nosync/predict",
+  "models_directory": "../../data.nosync/saved_models",
+  "preproc": {
+    "name": "StandardScaler"
+  },
  "folds":
           [
             {
-              "name":"RepeatedKFold",
-              "n_splits": 2,
-              "n_repeats": 1
+              "name":"TimeSeriesSplit",
+              "n_splits": 5
             },
-
             {
               "name":"KFold",
-              "n_splits": 4
+              "n_splits": 5
             }
 
           ],
@@ -29,18 +30,6 @@
                 "Ridge": {
                 }
               }
-            },
-            {
-              "model": { "CustomNN": {
-                                      "in_features": 1,
-                                      "out_features": 1,
-                                      "num_hidden": 100,
-                                      "learning_rate": 0.0001,
-                                      "num_epochs": 2,
-                                      "minibatch_size": 256
-                                    }
-                       }
-
             },
             {
               "model":{ "LinearRegression":{"n_jobs":"-1"},
