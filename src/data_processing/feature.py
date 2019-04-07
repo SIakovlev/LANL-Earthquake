@@ -99,7 +99,7 @@ class Feature:
         A sum of spectral components of the dataframe
         """
         data = self.data if df is None else df
-        self.data = np.sum(scipy.signal.periodogram(data, fs=fs)[1])
+        self.data = np.sum(scipy.signal.periodogram(data.values.squeeze(), fs=fs)[1])
         return self
 
     @window_decorator
@@ -275,7 +275,7 @@ class Feature:
         return self
 
     @window_decorator
-    def w_approximate_entropy(df, *args, m=3, r=3, **kwargs):
+    def w_approximate_entropy(self, df=None, *args, m=3, r=3, **kwargs):
         """
         Implements a vectorized Approximate entropy algorithm.
 
@@ -295,11 +295,14 @@ class Feature:
         -------
         Approximate entropy of the dataframe
         """
-        return tsfresh.feature_extraction.feature_calculators.approximate_entropy(df, m, r)
+        data = self.data if df is None else df
+        self.data = tsfresh.feature_extraction.feature_calculators.approximate_entropy(data.values.squeeze(),
+                                                                                       m=m,
+                                                                                       r=r)
+        return self
 
-    
     @window_decorator
-    def w_autocorrelation(df, *args, lag=100, **kwargs):
+    def w_autocorrelation(self, df=None, *args, lag=100, **kwargs):
         """
         Calculates the autocorrelation of the specified lag
 
@@ -314,11 +317,13 @@ class Feature:
         -------
 
         """
-        return tsfresh.feature_extraction.feature_calculators.autocorrelation(df, lag=lag)
+        data = self.data if df is None else df
+        self.data = tsfresh.feature_extraction.feature_calculators.autocorrelation(data.values.squeeze(),
+                                                                                   lag=lag)
+        return self
 
-    
     @window_decorator
-    def w_binned_entropy(df, *args, max_bins=10, **kwargs):
+    def w_binned_entropy(self, df=None, *args, max_bins=10, **kwargs):
         """
 
         Performs entropy based discretisation
@@ -337,12 +342,13 @@ class Feature:
         -------
 
         """
+        data = self.data if df is None else df
+        self.data = tsfresh.feature_extraction.feature_calculators.binned_entropy(data.values.squeeze(),
+                                                                                  max_bins=max_bins)
+        return self
 
-        return tsfresh.feature_extraction.feature_calculators.binned_entropy(df, max_bins=max_bins)
-
-    
     @window_decorator
-    def w_c3(df, *args, lag=100, **kwargs):
+    def w_c3(self, df=None, *args, lag=100, **kwargs):
         """
         c3 measure was proposed in [1] as a measure of non linearity in the time series.
 
@@ -360,11 +366,13 @@ class Feature:
         -------
 
         """
-        return tsfresh.feature_extraction.feature_calculators.c3(df, lag=lag)
+        data = self.data if df is None else df
+        self.data = tsfresh.feature_extraction.feature_calculators.c3(data.values.squeeze(),
+                                                                      lag=lag)
+        return self
 
-    
     @window_decorator
-    def w_count_above_mean(df, *args, **kwargs):
+    def w_count_above_mean(self, df=None, *args, **kwargs):
         """
         Returns the number of values in x that are higher than the mean of x
 
@@ -378,11 +386,12 @@ class Feature:
         -------
 
         """
-        return tsfresh.feature_extraction.feature_calculators.count_above_mean(df)
+        data = self.data if df is None else df
+        self.data = tsfresh.feature_extraction.feature_calculators.count_above_mean(data.values.squeeze())
+        return self
 
-    
     @window_decorator
-    def w_count_below_mean(df, *args, **kwargs):
+    def w_count_below_mean(self, df=None, *args, **kwargs):
         """
         Returns the number of values in x that are lower than the mean of x
 
@@ -396,11 +405,12 @@ class Feature:
         -------
 
         """
-        return tsfresh.feature_extraction.feature_calculators.count_below_mean(df)
-
+        data = self.data if df is None else df
+        self.data = tsfresh.feature_extraction.feature_calculators.count_below_mean(data)
+        return self
     
     @window_decorator
-    def w_first_location_of_maximum(df, *args, **kwargs):
+    def w_first_location_of_maximum(self, df=None, *args, **kwargs):
         """
         Returns the first location of the maximum value of x. The position is calculated relatively to the length of x.
 
@@ -414,11 +424,12 @@ class Feature:
         -------
 
         """
-        return tsfresh.feature_extraction.feature_calculators.first_location_of_maximum(df)
-
+        data = self.data if df is None else df
+        self.data = tsfresh.feature_extraction.feature_calculators.first_location_of_maximum(data.values.squeeze())
+        return self
     
     @window_decorator
-    def w_first_location_of_minimum(df, *args, **kwargs):
+    def w_first_location_of_minimum(self, df=None, *args, **kwargs):
         """
         Returns the first location of the minimal value of x. The position is calculated relatively to the length of x.
 
@@ -432,11 +443,12 @@ class Feature:
         -------
 
         """
-        return tsfresh.feature_extraction.feature_calculators.first_location_of_minimum(df)
-
+        data = self.data if df is None else df
+        self.data = tsfresh.feature_extraction.feature_calculators.first_location_of_minimum(data.values.squeeze())
+        return self
     
     @window_decorator
-    def w_kurtosis(df, *args, **kwargs):
+    def w_kurtosis(self, df=None, *args, **kwargs):
         """
         Returns the kurtosis of x (calculated with the adjusted Fisher-Pearson standardized moment coefficient G2).
 
@@ -450,11 +462,12 @@ class Feature:
         -------
 
         """
-        return tsfresh.feature_extraction.feature_calculators.kurtosis(df)
+        data = self.data if df is None else df
+        self.data = tsfresh.feature_extraction.feature_calculators.kurtosis(data.values.squeeze())
+        return self
 
-    
     @window_decorator
-    def w_large_standard_deviation(df, *args, r=0.5, **kwargs):
+    def w_large_standard_deviation(self, df=None, *args, r=0.5, **kwargs):
         """
         Boolean variable denoting if the standard dev of x is higher than ‘r’ times the range = difference between max and min of x.
 
@@ -475,11 +488,13 @@ class Feature:
         -------
 
         """
-        return tsfresh.feature_extraction.feature_calculators.large_standard_deviation(df, r=r)
+        data = self.data if df is None else df
+        self.data = tsfresh.feature_extraction.feature_calculators.large_standard_deviation(data.values.squeeze(), 
+                                                                                            r=r)
+        return self
 
-    
     @window_decorator
-    def w_last_location_of_maximum(df, *args, **kwargs):
+    def w_last_location_of_maximum(self, df=None, *args, **kwargs):
         """
         Returns the relative last location of the maximum value of x. The position is calculated relatively to the length of x.
 
@@ -493,11 +508,12 @@ class Feature:
         -------
 
         """
-        return tsfresh.feature_extraction.feature_calculators.last_location_of_maximum(df)
+        data = self.data if df is None else df
+        self.data = tsfresh.feature_extraction.feature_calculators.last_location_of_maximum(data.values.squeeze())
+        return self
 
-    
     @window_decorator
-    def w_last_location_of_minimum(df, *args, **kwargs):
+    def w_last_location_of_minimum(self, df=None, *args, **kwargs):
         """
         Returns the relative last location of the minimum value of x. The position is calculated relatively to the length of x.
 
@@ -511,11 +527,12 @@ class Feature:
         -------
 
         """
-        return tsfresh.feature_extraction.feature_calculators.last_location_of_minimum(df)
+        data = self.data if df is None else df
+        self.data = tsfresh.feature_extraction.feature_calculators.last_location_of_minimum(data.values.squeeze())
+        return self
 
-    
     @window_decorator
-    def w_longest_strike_above_mean(df, *args, **kwargs):
+    def w_longest_strike_above_mean(self, df=None, *args, **kwargs):
         """
         Returns the length of the longest consecutive subsequence in x that is larger than the mean of x
 
@@ -529,11 +546,13 @@ class Feature:
         -------
 
         """
-        return tsfresh.feature_extraction.feature_calculators.longest_strike_above_mean(df)
+        data = self.data if df is None else df
+        self.data = tsfresh.feature_extraction.feature_calculators.longest_strike_above_mean(data.values.squeeze())
+        return self
 
     
     @window_decorator
-    def w_longest_strike_below_mean(df, *args, **kwargs):
+    def w_longest_strike_below_mean(self, df=None, *args, **kwargs):
         """
         Returns the length of the longest consecutive subsequence in x that is smaller than the mean of x
 
@@ -547,11 +566,12 @@ class Feature:
         -------
 
         """
-        return tsfresh.feature_extraction.feature_calculators.longest_strike_below_mean(df)
+        data = self.data if df is None else df
+        self.data = tsfresh.feature_extraction.feature_calculators.longest_strike_below_mean(data.values.squeeze())
+        return self
 
-    
     @window_decorator
-    def w_mean_abs_change(df, *args, **kwargs):
+    def w_mean_abs_change(self, df=None, *args, **kwargs):
         """
         Returns the mean over the absolute differences between subsequent time series values which is
 
@@ -567,11 +587,12 @@ class Feature:
         -------
 
         """
-        return tsfresh.feature_extraction.feature_calculators.mean_abs_change(df)
+        data = self.data if df is None else df
+        self.data = tsfresh.feature_extraction.feature_calculators.mean_abs_change(data.values.squeeze())
+        return self
 
-    
     @window_decorator
-    def w_mean_change(df, *args, **kwargs):
+    def w_mean_change(self, df=None, *args, **kwargs):
         """
         Returns the mean over the differences between subsequent time series values which is
 
@@ -587,11 +608,12 @@ class Feature:
         -------
 
         """
-        return tsfresh.feature_extraction.feature_calculators.mean_change(df)
+        data = self.data if df is None else df
+        self.data = tsfresh.feature_extraction.feature_calculators.mean_change(data.values.squeeze())
+        return self
 
-    
     @window_decorator
-    def w_mean_second_derivative_central(df, *args, **kwargs):
+    def w_mean_second_derivative_central(self, df=None, *args, **kwargs):
         """
         Returns the mean value of a central approximation of the second derivative
 
@@ -607,11 +629,12 @@ class Feature:
         -------
 
         """
-        return tsfresh.feature_extraction.feature_calculators.mean_second_derivative_central(df)
+        data = self.data if df is None else df
+        self.data = tsfresh.feature_extraction.feature_calculators.mean_second_derivative_central(data.values.squeeze())
+        return self
 
-    
     @window_decorator
-    def w_median(df, *args, **kwargs):
+    def w_median(self, df=None, *args, **kwargs):
         """
         Returns the median of x
 
@@ -625,12 +648,12 @@ class Feature:
         -------
 
         """
+        data = self.data if df is None else df
+        self.data = tsfresh.feature_extraction.feature_calculators.median(data.values.squeeze())
+        return self
 
-        return tsfresh.feature_extraction.feature_calculators.median(df)
-
-    
     @window_decorator
-    def w_number_crossing_m(df, *args, m=0.1, **kwargs):
+    def w_number_crossing_m(self, df=None, *args, m=0.1, **kwargs):
         """
         Calculates the number of crossings of x on m. A crossing is defined as two sequential values where the first value
         is lower than m and the next is greater, or vice-versa.
@@ -648,11 +671,12 @@ class Feature:
         -------
 
         """
-        return tsfresh.feature_extraction.feature_calculators.number_crossing_m(df, m=m)
+        data = self.data if df is None else df
+        self.data = tsfresh.feature_extraction.feature_calculators.number_crossing_m(data.values.squeeze(), m=m)
+        return self
 
-    
     @window_decorator
-    def w_number_cwt_peaks(df, *args, n=1, **kwargs):
+    def w_number_cwt_peaks(self, df=None, *args, n=1, **kwargs):
         """
         This feature calculator searches for different peaks in x.
 
@@ -672,7 +696,9 @@ class Feature:
         -------
 
         """
-        return tsfresh.feature_extraction.feature_calculators.number_cwt_peaks(df, n=n)
+        data = self.data if df is None else df
+        self.data = tsfresh.feature_extraction.feature_calculators.number_cwt_peaks(data.values.squeeze(), n=n)
+        return self
 
     @window_decorator
     def w_quantile(self, df=None, *args, q=0.5, **kwargs):
@@ -716,11 +742,11 @@ class Feature:
 
     # TODO: fix (freezes for some reason)
     # @window_decorator
-    # def w_sample_entropy(df, *args, **kwargs):
+    # def w_sample_entropy(self, df=None, *args, **kwargs):
     #     return tsfresh.feature_extraction.feature_calculators.sample_entropy(df)
 
     @window_decorator
-    def w_skewness(df, *args, **kwargs):
+    def w_skewness(self, df=None, *args, **kwargs):
         """
         Returns the sample skewness of x (calculated with the adjusted Fisher-Pearson standardized moment coefficient G1).
 
@@ -734,15 +760,17 @@ class Feature:
         -------
 
         """
-        return tsfresh.feature_extraction.feature_calculators.skewness(df)
+        data = self.data if df is None else df
+        self.data = tsfresh.feature_extraction.feature_calculators.skewness(data.values.squeeze())
+        return self
 
     # TODO: fix param r (does not make sense)
-    # @window_decorator()
-    # def w_symmetry_looking(df, *args, r=0.1, **kwargs):
-    #     return tsfresh.feature_extraction.feature_calculators.symmetry_looking(df, r=r)
+    # @window_decorator
+    # def w_symmetry_looking(self, df=None, *args, r=0.1, **kwargs):
+    #     pass
 
     @window_decorator
-    def w_time_reversal_asymmetry_statistic(df, *args, lag=100, **kwargs):
+    def w_time_reversal_asymmetry_statistic(self, df=None, *args, lag=100, **kwargs):
         """
         Boolean variable denoting if the distribution of x looks symmetric. This is the case if
 
@@ -760,7 +788,10 @@ class Feature:
         (bool)
 
         """
-        return tsfresh.feature_extraction.feature_calculators.time_reversal_asymmetry_statistic(df, lag=lag)
+        data = self.data if df is None else df
+        self.data = tsfresh.feature_extraction.feature_calculators.\
+            time_reversal_asymmetry_statistic(data.values.squeeze(), lag=lag)
+        return self
 
     """
     Feets library
@@ -791,14 +822,14 @@ class Feature:
         data = self.data if df is None else df
         size = data.shape[0]
         time = np.linspace(0, size - 1, size)
-        magnitude = data.values
+        magnitude = data.values.squeeze()
         t_m = [time, magnitude]
         fs = feets.FeatureSpace(only=['Con'], data=['time', 'magnitude'])
         self.data = fs.extract(*t_m)[1][0]
         return self
 
     @window_decorator
-    def w_eta_e(df, *args, **kwargs):
+    def w_eta_e(self, df=None, *args, **kwargs):
         """
         Variability index η is the ratio of the mean of the square of successive differences to the variance of data points.
 
@@ -815,17 +846,19 @@ class Feature:
 
         Returns
         -------
-        Variability index η
+
         """
+        data = self.data if df is None else df
         size = df.shape[0]
         time = np.linspace(0, size - 1, size)
-        magnitude = df
+        magnitude = data.values.squeeze()
         t_m = [time, magnitude]
         fs = feets.FeatureSpace(only=['Eta_e'], data=['time', 'magnitude'])
-        return fs.extract(*t_m)[1][0]
+        self.data = fs.extract(*t_m)[1][0]
+        return self
     
     @window_decorator
-    def w_gskew(df, *args, **kwargs):
+    def w_gskew(self, df=None, *args, **kwargs):
         """
         Median-of-magnitudes based measure of the skew.
 
@@ -842,15 +875,17 @@ class Feature:
         -------
 
         """
+        data = self.data if df is None else df
         size = df.shape[0]
         time = np.linspace(0, size - 1, size)
-        magnitude = df
+        magnitude = data.values.squeeze()
         t_m = [time, magnitude]
         fs = feets.FeatureSpace(only=['Gskew'], data=['time', 'magnitude'])
-        return fs.extract(*t_m)[1][0]
+        self.data = fs.extract(*t_m)[1][0]
+        return self
 
     @window_decorator
-    def w_linear_trend(df, *args, **kwargs):
+    def w_linear_trend(self, df=None, *args, **kwargs):
         """
         Slope of a linear fit to a signal.
 
@@ -864,17 +899,20 @@ class Feature:
         -------
 
         """
+        data = self.data if df is None else df
         size = df.shape[0]
         time = np.linspace(0, size - 1, size)
-        magnitude = df
+        magnitude = data.values.squeeze()
         t_m = [time, magnitude]
         fs = feets.FeatureSpace(only=['LinearTrend'], data=['time', 'magnitude'])
-        return fs.extract(*t_m)[1][0]
+        self.data = fs.extract(*t_m)[1][0]
+        return self
 
     @window_decorator
-    def w_median_BRP(df, *args, **kwargs):
+    def w_median_BRP(self, df=None, *args, **kwargs):
         """
-        MedianBRP (Median buffer range percentage)
+        MedianBRP (Median buffer range percentage). Calculates fraction (<= 1) of points
+        within amplitude/10 of the median magnitude
 
         Parameters
         ----------
@@ -884,17 +922,19 @@ class Feature:
 
         Returns
         -------
-        Fraction (<= 1) of points within amplitude/10 of the median magnitude
+
         """
+        data = self.data if df is None else df
         size = df.shape[0]
         time = np.linspace(0, size - 1, size)
-        magnitude = df
+        magnitude = data.values.squeeze()
         t_m = [time, magnitude]
         fs = feets.FeatureSpace(only=['MedianBRP'], data=['time', 'magnitude'])
-        return fs.extract(*t_m)[1][0]
+        self.data = fs.extract(*t_m)[1][0]
+        return self
 
     @window_decorator
-    def w_pair_slope_trend(df, *args, **kwargs):
+    def w_pair_slope_trend(self, df=None, *args, **kwargs):
         """
         Considering the last 30 (time-sorted) measurements of a signal magnitude,
         the fraction of increasing first differences minus the fraction of decreasing first differences.
@@ -909,15 +949,17 @@ class Feature:
         -------
 
         """
+        data = self.data if df is None else df
         size = df.shape[0]
         time = np.linspace(0, size - 1, size)
-        magnitude = df
+        magnitude = data.values.squeeze()
         t_m = [time, magnitude]
         fs = feets.FeatureSpace(only=['PairSlopeTrend'], data=['time', 'magnitude'])
-        return fs.extract(*t_m)[1][0]
+        self.data = fs.extract(*t_m)[1][0]
+        return self
 
     @window_decorator
-    def w_q31(df, *args, **kwargs):
+    def w_q31(self, df=None, *args, **kwargs):
         """
         Q3−1 is the difference between the third quartile, Q3, and the first quartile, Q1, of a signal.
 
@@ -934,15 +976,17 @@ class Feature:
         -------
 
         """
+        data = self.data if df is None else df
         size = df.shape[0]
         time = np.linspace(0, size - 1, size)
-        magnitude = df
+        magnitude = data.values.squeeze()
         t_m = [time, magnitude]
         fs = feets.FeatureSpace(only=['Q31'], data=['time', 'magnitude'])
-        return fs.extract(*t_m)[1][0]
+        self.data = fs.extract(*t_m)[1][0]
+        return self
 
     @window_decorator
-    def w_slottedA_length(df, *args, **kwargs):
+    def w_slottedA_length(self, df=None, *args, **kwargs):
         """
         In slotted autocorrelation, time lags are defined as intervals or slots instead of single values.
         The slotted autocorrelation function at a certain time lag slot is computed by averaging the cross product between
@@ -961,12 +1005,14 @@ class Feature:
         -------
 
         """
+        data = self.data if df is None else df
         size = df.shape[0]
         time = np.linspace(0, size - 1, size)
-        magnitude = df
+        magnitude = data.values.squeeze()
         t_m = [time, magnitude]
         fs = feets.FeatureSpace(only=['SlottedA_length'], data=['time', 'magnitude'])
-        return fs.extract(*t_m)[1][0]
+        self.data = fs.extract(*t_m)[1][0]
+        return self
 
     """
     Pandas based methods

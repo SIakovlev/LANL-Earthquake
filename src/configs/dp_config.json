@@ -1,6 +1,6 @@
 {
-  "data_dir": "../../data.nosync/",
-  "data_processed_dir": "../../data.nosync/",
+  "data_dir": "../../data/",
+  "data_processed_dir": "../../data/",
   "data_fname": "train_short.h5",
   "data_processed_fname": "train_processed_short.h5",
   "window_size": 150000,
@@ -8,15 +8,15 @@
   "features": [
     {
       "name": "q_05_std_rolling_50",
-      "on": true,
+      "on": false,
       "functions": {
-        "w_abs_energy": {"window_size": 50, "window_stride": 10},
+        "r_std": {"window_size": 50, "window_stride": null},
         "w_quantile": {"q": 0.05}
       }
     },
     {
       "name": "q_05_std_rolling_200",
-      "on": true,
+      "on": false,
       "functions": {
         "r_std": {"window_size": 200, "window_stride": null},
         "w_quantile": {"q": 0.05}
@@ -24,10 +24,18 @@
     },
     {
       "name": "q_05_std_rolling_1000",
-      "on": true,
+      "on": false,
       "functions": {
         "r_std": {"window_size": 1000, "window_stride": null},
         "w_quantile": {"q": 0.05}
+      }
+    },
+    {
+      "name": "test",
+      "on": true,
+      "functions": {
+        "r_savgol_filter": {"window_length": 101},
+        "w_psd": {"window_size": 1000, "window_stride": 500}
       }
     }
   ]

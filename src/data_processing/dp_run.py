@@ -55,27 +55,19 @@ if __name__ == '__main__':
                          "data_processed_dir": "../../data/"}
         dp_config.update({"data_fname": "train.h5",
                           "data_processed_fname": "train_processed.h5",
-                          "window_size": 10000,
+                          "window_size": 150000,
                           "window_stride": 1000,
                           "features": {}})
-        # Create routines dict based on module structure
-        routines = []
 
-        # TODO: fix hack with function names
-        func_list = [obj[1] for obj in inspect.getmembers(dp_features) if obj[0].startswith(("w_", "df_"))]
-        for obj in func_list:
-            inspect_obj = inspect.signature(obj)
-            params_dict = dict(inspect_obj.parameters)
-            params = {}
-            for k, v in params_dict.items():
-                if v.default != inspect._empty:
-                    params[k] = v.default
-            routines.append({"name": obj.__name__,
-                             "on": False,
-                             "ancestor": '',
-                             "params": params})
+        # Create features dict with a feature example
+        features = [{"name": "example",
+                     "on": True,
+                     "functions": {
+                         "r_std": {"window_size": 100, "window_stride": None},
+                         "w_quantile": {"q": 0.05}
+                     }}]
 
-        dp_config["routines"] = routines
+        dp_config["features"] = features
         with open(config_fname, 'w') as outfile:
             json.dump(dp_config, outfile, indent=2)
 
