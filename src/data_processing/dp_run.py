@@ -3,7 +3,7 @@ import json
 import argparse
 import inspect
 import dp_utils as dp
-import dp_features
+# import dp_features
 import pandas as pd
 import platform
 
@@ -23,7 +23,7 @@ def main(**kwargs):
 
     # 2. Run processing
     print(' - Run dataframe processing')
-    dfp = dp.process_df_v2(df,
+    dfp = dp.process_df(df,
                         kwargs['features'],
                         default_window_size,
                         default_window_stride,
@@ -43,7 +43,7 @@ def main(**kwargs):
 
 if __name__ == '__main__':
 
-    config_fname = "../configs/dp_config_v2.json"
+    config_fname = "../configs/dp_config.json"
     # build config if there is no .json file
     if not os.path.isfile(config_fname):
         # MacOS specific
@@ -57,7 +57,7 @@ if __name__ == '__main__':
                           "data_processed_fname": "train_processed.h5",
                           "window_size": 10000,
                           "window_stride": 1000,
-                          "routines": {}})
+                          "features": {}})
         # Create routines dict based on module structure
         routines = []
 

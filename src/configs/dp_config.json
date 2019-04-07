@@ -1,310 +1,33 @@
 {
-  "data_dir": "../../data/",
-  "data_processed_dir": "../../data/",
-  "data_fname": "train.h5",
-  "data_processed_fname": "train_processed.h5",
-  "window_size": 10000,
+  "data_dir": "../../data.nosync/",
+  "data_processed_dir": "../../data.nosync/",
+  "data_fname": "train_short.h5",
+  "data_processed_fname": "train_processed_short.h5",
+  "window_size": 150000,
   "window_stride": 1000,
-  "routines": [
+  "features": [
     {
-      "name": "df_savgol_filter",
-      "on": false,
-      "ancestor": "",
-      "params": {
-        "window_length": 101,
-        "polyorder": 1
+      "name": "q_05_std_rolling_50",
+      "on": true,
+      "functions": {
+        "w_abs_energy": {"window_size": 50, "window_stride": 10},
+        "w_quantile": {"q": 0.05}
       }
     },
     {
-      "name": "df_sta_lta",
-      "on": false,
-      "ancestor": "",
-      "params": {
-        "sta_window": 100,
-        "lta_window": 1000
+      "name": "q_05_std_rolling_200",
+      "on": true,
+      "functions": {
+        "r_std": {"window_size": 200, "window_stride": null},
+        "w_quantile": {"q": 0.05}
       }
     },
     {
-      "name": "w_abs_energy",
-      "on": false,
-      "ancestor": "",
-      "params": {}
-    },
-    {
-      "name": "w_absolute_sum_of_changes",
-      "on": false,
-      "ancestor": "",
-      "params": {}
-    },
-    {
-      "name": "w_approximate_entropy",
-      "on": false,
-      "ancestor": "",
-      "params": {
-        "m": 3,
-        "r": 3
-      }
-    },
-    {
-      "name": "w_autocorrelation",
-      "on": false,
-      "ancestor": "",
-      "params": {
-        "lag": 100
-      }
-    },
-    {
-      "name": "w_binned_entropy",
-      "on": false,
-      "ancestor": "",
-      "params": {
-        "max_bins": 10
-      }
-    },
-    {
-      "name": "w_c3",
-      "on": false,
-      "ancestor": "",
-      "params": {
-        "lag": 100
-      }
-    },
-    {
-      "name": "w_con",
-      "on": false,
-      "ancestor": "",
-      "params": {}
-    },
-    {
-      "name": "w_count_above_mean",
-      "on": false,
-      "ancestor": "",
-      "params": {}
-    },
-    {
-      "name": "w_count_below_mean",
-      "on": false,
-      "ancestor": "",
-      "params": {}
-    },
-    {
-      "name": "w_eta_e",
-      "on": false,
-      "ancestor": "",
-      "params": {}
-    },
-    {
-      "name": "w_first_location_of_maximum",
-      "on": false,
-      "ancestor": "",
-      "params": {}
-    },
-    {
-      "name": "w_first_location_of_minimum",
-      "on": false,
-      "ancestor": "",
-      "params": {}
-    },
-    {
-      "name": "w_gskew",
-      "on": false,
-      "ancestor": "",
-      "params": {}
-    },
-    {
-      "name": "w_kurtosis",
-      "on": false,
-      "ancestor": "",
-      "params": {}
-    },
-    {
-      "name": "w_large_standard_deviation",
-      "on": false,
-      "ancestor": "",
-      "params": {
-        "r": 0.5
-      }
-    },
-    {
-      "name": "w_last_elem",
-      "on": false,
-      "ancestor": "",
-      "params": {}
-    },
-    {
-      "name": "w_last_location_of_maximum",
-      "on": false,
-      "ancestor": "",
-      "params": {}
-    },
-    {
-      "name": "w_last_location_of_minimum",
-      "on": false,
-      "ancestor": "",
-      "params": {}
-    },
-    {
-      "name": "w_linear_trend",
-      "on": false,
-      "ancestor": "",
-      "params": {}
-    },
-    {
-      "name": "w_longest_strike_above_mean",
-      "on": false,
-      "ancestor": "",
-      "params": {}
-    },
-    {
-      "name": "w_longest_strike_below_mean",
-      "on": false,
-      "ancestor": "",
-      "params": {}
-    },
-    {
-      "name": "w_max",
-      "on": false,
-      "ancestor": "",
-      "params": {}
-    },
-    {
-      "name": "w_mean",
-      "on": false,
-      "ancestor": "",
-      "params": {}
-    },
-    {
-      "name": "w_mean_abs_change",
-      "on": false,
-      "ancestor": "",
-      "params": {}
-    },
-    {
-      "name": "w_mean_change",
-      "on": false,
-      "ancestor": "",
-      "params": {}
-    },
-    {
-      "name": "w_mean_second_derivative_central",
-      "on": false,
-      "ancestor": "",
-      "params": {}
-    },
-    {
-      "name": "w_median",
-      "on": false,
-      "ancestor": "",
-      "params": {}
-    },
-    {
-      "name": "w_median_BRP",
-      "on": false,
-      "ancestor": "",
-      "params": {}
-    },
-    {
-      "name": "w_min",
-      "on": false,
-      "ancestor": "",
-      "params": {}
-    },
-    {
-      "name": "w_number_crossing_m",
-      "on": false,
-      "ancestor": "",
-      "params": {
-        "m": 0.1
-      }
-    },
-    {
-      "name": "w_number_cwt_peaks",
-      "on": false,
-      "ancestor": "",
-      "params": {
-        "n": 1
-      }
-    },
-    {
-      "name": "w_pair_slope_trend",
-      "on": false,
-      "ancestor": "",
-      "params": {}
-    },
-    {
-      "name": "w_periodogram",
-      "on": false,
-      "ancestor": "",
-      "params": {
-        "fs": 4000000.0,
-        "N": 2000
-      }
-    },
-    {
-      "name": "w_psd",
-      "on": false,
-      "ancestor": "",
-      "params": {
-        "fs": 4000000.0
-      }
-    },
-    {
-      "name": "w_q31",
-      "on": false,
-      "ancestor": "",
-      "params": {}
-    },
-    {
-      "name": "w_quantile",
-      "on": false,
-      "ancestor": "",
-      "params": {
-        "q": 0.5
-      }
-    },
-    {
-      "name": "w_ratio_beyond_r_sigma",
-      "on": false,
-      "ancestor": "",
-      "params": {
-        "r": 0.5
-      }
-    },
-    {
-      "name": "w_skewness",
-      "on": false,
-      "ancestor": "",
-      "params": {}
-    },
-    {
-      "name": "w_slottedA_length",
-      "on": false,
-      "ancestor": "",
-      "params": {}
-    },
-    {
-      "name": "w_spectrogramm_downsampled",
-      "on": false,
-      "ancestor": "",
-      "params": {
-        "fs": 4000000.0,
-        "nperseg": 50000,
-        "noverlap": 20000,
-        "mode": "psd"
-      }
-    },
-    {
-      "name": "w_std",
-      "on": false,
-      "ancestor": "",
-      "params": {}
-    },
-    {
-      "name": "w_time_reversal_asymmetry_statistic",
-      "on": false,
-      "ancestor": "",
-      "params": {
-        "lag": 100
+      "name": "q_05_std_rolling_1000",
+      "on": true,
+      "functions": {
+        "r_std": {"window_size": 1000, "window_stride": null},
+        "w_quantile": {"q": 0.05}
       }
     }
   ]

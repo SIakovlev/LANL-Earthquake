@@ -5,6 +5,7 @@ import tsfresh
 import feets
 from dp_utils import DumpDecorator, WindowDecorator, DataFrameDecorator
 import warnings
+import pandas as pd
 
 warnings.filterwarnings("ignore", category=feets.ExtractorWarning)
 
@@ -167,6 +168,24 @@ def classic_sta_lta(x, length_sta, length_lta):
     idx = lta < dtiny
     lta[idx] = dtiny
     return sta / lta
+
+
+def df_roll_std(df, *args, window_length=100, **kwargs):
+    """
+
+    Parameters
+    ----------
+    df :
+    args :
+    sta_window :
+    lta_window :
+    kwargs :
+
+    Returns
+    -------
+
+    """
+    return pd.DataFrame(df.rolling(window_length, min_periods=1).std(ddof=0))
 
 
 """
