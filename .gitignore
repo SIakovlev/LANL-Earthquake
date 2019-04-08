@@ -20,6 +20,4 @@
 **/data
 **/data.nosync
 *.h5
-
-# ignore Drafts.ipynb
-Drafts.ipynb
+*.html
