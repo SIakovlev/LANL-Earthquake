@@ -5,17 +5,19 @@ import plotly.graph_objs as go
 import plotly
 plotly.tools.set_credentials_file(username='ptolmachev', api_key='Fs5sBFAg7YuBn52rzy6n')
 import sys
-from dp_features import *
+# TODO: fix this, dp_features does not exist
+# from dp_features import *
 
-
+# TODO: delete
 def nice_plot(series):
     fig = plt.figure(figsize = (16,4))
     plt.grid(True)
     try:
-        plt.plot(series.compute().tolist(), 'r-',linewidth = 2, alpha = 0.7)
+        plt.plot(series.compute().tolist(), 'r-',linewidth=2, alpha=0.7)
     except:
-        plt.plot(series.tolist(), 'r-',linewidth = 2, alpha = 0.7)
+        plt.plot(series.tolist(), 'r-', linewidth=2, alpha=0.7)
     plt.show()
+
 
 def plot_data(list_of_dataframes, feature_name, window_size):
 
@@ -80,6 +82,7 @@ def plot_data(list_of_dataframes, feature_name, window_size):
                         filename="Earthquakes samples (first, middle, last " + str(size_of_slice) + " dp).html",
                         auto_open=True)
 
+
 if __name__ == '__main__':
     # example
     #list of dataframes
@@ -90,9 +93,10 @@ if __name__ == '__main__':
     for i in [3,4,5,7]: # which eqs to take
         df = pd.read_hdf('../../data/EQs/EQ_'+str(i)+'.h5', key='table')
         feature = eval("w_"+feature_name + "(df.s, window_size = window_size, **params)")
-        downsampled_s = w_last_elem(df.s, window_size = window_size)
-        downsampled_ttf = w_last_elem(df.ttf, window_size = window_size)
-        processed_df = pd.DataFrame(np.array([feature.values.ravel(), downsampled_s.values.ravel(), downsampled_ttf.values.ravel()]).T)
-        processed_df.columns = [feature_name,"downsampled_signal", "downsampled_ttf"]
-        list_of_dataframes.append(processed_df)
+        # TODO: fix this, dp_features does not exist, w_last_elem should be called from feature.py
+        # downsampled_s = w_last_elem(df.s, window_size = window_size)
+        # downsampled_ttf = w_last_elem(df.ttf, window_size = window_size)
+        # processed_df = pd.DataFrame(np.array([feature.values.ravel(), downsampled_s.values.ravel(), downsampled_ttf.values.ravel()]).T)
+        # processed_df.columns = [feature_name,"downsampled_signal", "downsampled_ttf"]
+        # list_of_dataframes.append(processed_df)
     plot_data(list_of_dataframes, feature_name, window_size)
