@@ -3,6 +3,7 @@ import inspect
 import sys
 import os
 import warnings
+import json
 import numpy as np
 import pandas as pd
 
@@ -151,6 +152,44 @@ def process_df(df, features, default_window_size, default_window_stride, df_path
 def calculate_feature(df, feature, default_window_size, default_window_stride, save_dir):
 
     from feature import Feature
+
+    feature_obj = Feature(df=df, save_dir=save_dir)
+
+    for func_name, func_params in feature['functions'].items():
+        window_size = default_window_size if 'window_size' not in func_params \
+            else func_params['window_size']
+        if window_size is None:
+            window_stride = None
+        else:
+            window_stride = default_window_stride if 'window_stride' not in func_params \
+                else func_params['window_stride']
+        func_params["window_size"] = window_size
+        func_params["window_stride"] = window_stride
+        desc_line = f"{func_name}(self, " + \
+                    ', '.join("{!s}={!r}".format(key, val) for (key, val) in func_params.items()) + ')'
+        func_params["desc_line"] = desc_line
+        feature_obj = getattr(feature_obj, func_name)(**func_params)
+        feature_obj = feature_obj.dump()
+
+    return feature_obj.data, feature_obj.get_name()
+
+
+def calculate_feature_by_name(df, feature_name, save_dir, config_name='../configs/dp_config.json'):
+
+    from feature import Feature
+
+    with open(config_name) as config:
+        params = json.load(config)
+
+    default_window_size = params['window_size']
+    default_window_stride = params['window_stride']
+    features = params["features"]
+    print(features)
+    for obj in features:
+        print(obj['name'])
+        if obj['name'] == feature_name:
+            feature = obj
+            break
 
     feature_obj = Feature(df=df, save_dir=save_dir)
 
