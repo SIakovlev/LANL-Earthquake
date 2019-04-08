@@ -153,7 +153,7 @@ def calculate_feature(df, feature, default_window_size, default_window_stride, s
     from feature import Feature
 
     feature_obj = Feature(df=df, save_dir=save_dir)
-    
+
     for func_name, func_params in feature['functions'].items():
         window_size = default_window_size if 'window_size' not in func_params \
             else func_params['window_size']

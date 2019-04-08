@@ -8,7 +8,7 @@
   "features": [
     {
       "name": "q_05_std_rolling_50",
-      "on": false,
+      "on": true,
       "functions": {
         "r_std": {
           "window_size": 50,
@@ -21,7 +21,7 @@
     },
     {
       "name": "q_05_std_rolling_200",
-      "on": false,
+      "on": true,
       "functions": {
         "r_std": {
           "window_size": 200,
@@ -34,7 +34,7 @@
     },
     {
       "name": "q_05_std_rolling_1000",
-      "on": false,
+      "on": true,
       "functions": {
         "r_std": {
           "window_size": 1000,
