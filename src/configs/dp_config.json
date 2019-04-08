@@ -1,6 +1,6 @@
 {
-  "data_dir": "../../data/",
-  "data_processed_dir": "../../data/",
+  "data_dir": "../../data.nosync/",
+  "data_processed_dir": "../../data.nosync/",
   "data_fname": "train_short.h5",
   "data_processed_fname": "train_processed_short.h5",
   "window_size": 150000,
@@ -34,8 +34,8 @@
       "name": "test",
       "on": true,
       "functions": {
-        "r_savgol_filter": {"window_length": 101},
-        "w_psd": {"window_size": 1000, "window_stride": 500}
+        "w_periodogram": {"window_size": 150000, "window_stride": 1000},
+        "w_mean": {"window_size": 1, "window_stride": 1, "axis": 1}
       }
     }
   ]

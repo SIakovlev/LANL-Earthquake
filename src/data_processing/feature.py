@@ -219,15 +219,15 @@ class Feature:
     """
 
     @window_decorator
-    def w_mean(self, df=None, *args, **kwargs):
+    def w_mean(self, df=None, *args, axis=0, **kwargs):
         data = self.data if df is None else df
-        self.data = np.mean(data.values, axis=0)
+        self.data = np.mean(data.values, axis=axis)
         return self
 
     @window_decorator
-    def w_std(self, df=None, *args, **kwargs):
+    def w_std(self, df=None, *args, axis=0, **kwargs):
         data = self.data if df is None else df
-        self.data = np.std(data.values, axis=0)
+        self.data = np.std(data.values, axis=axis)
         return self
     
     """

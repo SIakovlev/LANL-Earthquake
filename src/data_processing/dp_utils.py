@@ -15,21 +15,20 @@ def window_decorator(func):
     @functools.wraps(func)
     def wrapper(self, *args, **kwargs):
 
-        window_size = None if "window_size" not in kwargs else kwargs['window_size']
-        window_stride = None if window_size is None else kwargs['window_stride']
+        window_size = kwargs['window_size']
+        window_stride = kwargs['window_stride']
         verbose = True if "verbose" not in kwargs else kwargs['verbose']
         desc_line = get_function_descriptor(func, kwargs) if "desc_line" not in kwargs else kwargs['desc_line']
 
+        assert self.data.shape[0] >= window_size, "Dataframe size is too small for a chosen window size"
         if not isinstance(verbose, bool):
             raise TypeError("verbose parameter must be a bool type!")
         if not isinstance(desc_line, str):
             raise TypeError("desc_line parameter must be a string type!")
-        if window_size is not None:
-            assert self.data.shape[0] >= window_size, "Dataframe size is too small for a chosen window size"
-            if not isinstance(window_size, int):
-                raise TypeError("window_size parameter must be an integer type!")
-            if not isinstance(window_stride, int):
-                raise TypeError("window_stride parameter must be an integer type!")
+        if not isinstance(window_size, int):
+            raise TypeError("window_size parameter must be an integer type!")
+        if not isinstance(window_stride, int):
+            raise TypeError("window_stride parameter must be an integer type!")
 
         feature_name = self.update_name(desc_line)
         self.update_path()
@@ -41,7 +40,7 @@ def window_decorator(func):
         if window_size is None:
             temp = func(self, df, *args, **kwargs).data
         else:
-            for i in tqdm(range(0, df.shape[0] - window_size, window_stride),
+            for i in tqdm(range(0, df.shape[0] - window_size + window_stride, window_stride),
                           desc=desc_line, file=sys.stdout, disable=not verbose):
                 batch = df.iloc[i: i + window_size]
                 temp.append(func(self, batch, *args, **kwargs).data)
