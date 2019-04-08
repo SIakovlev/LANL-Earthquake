@@ -11,16 +11,28 @@ from collections import defaultdict
 from src.utils import str_to_class
 from src.validation.summary_utils import summarize
 
-import matplotlib.pyplot as plt
+import xgboost as xgb
 
 from src.models.mlp_net import MLP
 from src.models.lstm_net import LstmNet
 from src.folds.folds import CustomFold
-
+from src.models.nn_test import CustomNN
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.tree import ExtraTreeRegressor
+from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import Ridge
 from xgboost import XGBRegressor
+from catboost import CatBoostRegressor
+# from lightgbm import LGBMRegressor
 
+import matplotlib as mpl
 if platform.system() == 'Darwin':
     mpl.use('TkAgg')  # Mac OS specific
+
+import matplotlib.pyplot as plt
+
+from src.models.mlp_net import MLP
 
 
 def main(**kwargs):
@@ -93,7 +105,6 @@ def main(**kwargs):
         y_train, y_valid = y_train_data.iloc[train_index], y_train_data.iloc[valid_index]
 
         model = model_cls(**model_params)
-        # model.fit(X_train, y_train, X_valid, y_valid)
         model.fit(X_train, y_train)
 
         # validate

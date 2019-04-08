@@ -18,6 +18,7 @@
 
 # ignore data folder and all .h5 files
 **/data
+**/data.nosync
 *.h5
 
 # ignore Drafts.ipynb

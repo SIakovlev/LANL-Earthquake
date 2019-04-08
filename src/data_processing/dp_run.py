@@ -3,6 +3,7 @@ import json
 import argparse
 import inspect
 import dp_utils as dp
+# import dp_features
 import pandas as pd
 import platform
 
@@ -23,9 +24,10 @@ def main(**kwargs):
     # 2. Run processing
     print(' - Run dataframe processing')
     dfp = dp.process_df(df,
-                        kwargs['routines'],
+                        kwargs['features'],
                         default_window_size,
-                        default_window_stride)
+                        default_window_stride,
+                        kwargs['data_processed_dir'] + os.path.splitext(kwargs["data_processed_fname"])[0] + '/')
     print(' - Dataframe was successfully processed')
 
     # 3. Save modified dataframe
@@ -44,9 +46,6 @@ if __name__ == '__main__':
     config_fname = "../configs/dp_config.json"
     # build config if there is no .json file
     if not os.path.isfile(config_fname):
-        # TODO: fix dirty hack
-        func_ref_list = [obj[1] for obj in inspect.getmembers(dp) if obj[0].startswith("w_")]
-
         # MacOS specific
         if platform.system() == 'Darwin':
             dp_config = {"data_dir": "../../data.nosync/",
@@ -56,19 +55,19 @@ if __name__ == '__main__':
                          "data_processed_dir": "../../data/"}
         dp_config.update({"data_fname": "train.h5",
                           "data_processed_fname": "train_processed.h5",
-                          "window_size": 10000,
-                          "routines": {}})
-        # Create routines dict based on module structure
-        routines = []
-        for obj in func_ref_list[:-1]:
-            inspect_obj = inspect.signature(obj)
-            params_dict = dict(inspect_obj.parameters)
-            params = {}
-            for k, v in params_dict.items():
-                if v.default != inspect._empty:
-                    params[k] = v.default
-            routines.append({"name": obj.__name__, "on": True, "column_name": "s", "params": params})
-        dp_config["routines"] = routines
+                          "window_size": 150000,
+                          "window_stride": 1000,
+                          "features": {}})
+
+        # Create features dict with a feature example
+        features = [{"name": "example",
+                     "on": True,
+                     "functions": {
+                         "r_std": {"window_size": 100, "window_stride": None},
+                         "w_quantile": {"q": 0.05}
+                     }}]
+
+        dp_config["features"] = features
         with open(config_fname, 'w') as outfile:
             json.dump(dp_config, outfile, indent=2)
 

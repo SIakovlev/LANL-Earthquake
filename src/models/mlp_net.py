@@ -1,4 +1,4 @@
-from torch.nn import Module, Linear, MSELoss, ReLU, ModuleList, Dropout, BatchNorm1d
+from torch.nn import Module, Linear, MSELoss, L1Loss, ReLU, ModuleList, Dropout, BatchNorm1d
 from torch.optim import Adam
 import torch
 import torch.utils.data
@@ -42,7 +42,8 @@ class MLP(Module, ModelBase):
         self.minibatch_size = kwargs['minibatch_size']
         self.num_epochs = kwargs['num_epochs']
 
-        self.loss = MSELoss()
+        # TODO: check this
+        self.loss = L1Loss()
         self = self.to(self.device)
 
     def forward(self, x):
@@ -81,7 +82,8 @@ class MLP(Module, ModelBase):
                 self.optim.step()
 
                 mae_loss = torch.abs(predict - y_batch).mean()
-                print(f"\r step: {i} | mse_loss={loss.detach().cpu():.4f} | mae_loss={mae_loss.detach().cpu():.4f}", end="")
+                print(f"\r step: {i} | mse_loss={loss.detach().cpu():.4f} | mae_loss={mae_loss.detach().cpu():.4f}",
+                      end="")
             print()
             # validate
             pred = torch.tensor(self.predict(valid_data)).to(self.device)
