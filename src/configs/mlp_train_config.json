@@ -1,19 +1,23 @@
 {
-  "train_data_fname": "../../data/train_processed_2.h5",
-  "summary_dest_fname": "../../data/summary.pickle",
+  "train_data_fname": "../../data/original/train_processed.h5",
+  "summary_dest_fname": "../../data/summary/summary.pickle",
 
   "folds":{
-      "name":"KFold",
-      "n_splits": 8
+      "name":"CustomFold",
+      "n_splits": 10,
+      "pad": 15,
+      "fragmentation": 0.4,
+      "shuffle": true
             },
 
   "metrics": ["mean_absolute_error", "mean_squared_error"],
 
   "model": {
     "name": "MLP",
-    "in_features": 1568,
+    "in_features": [24, 750],
     "out_features": 1,
-    "hidden_layers": [1024, 512, 512, 128],
+    "hidden_layers": [512, 128],
+    "dropout": 0.5,
     "device": "cuda",
     "learning_rate": 0.0005,
     "minibatch_size": 256,

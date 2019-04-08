@@ -13,6 +13,9 @@ from src.validation.summary_utils import summarize
 
 import xgboost as xgb
 
+from src.models.mlp_net import MLP
+from src.models.lstm_net import LstmNet
+from src.folds.folds import CustomFold
 from src.models.nn_test import CustomNN
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.tree import DecisionTreeRegressor
@@ -47,8 +50,9 @@ def main(**kwargs):
     train_data_fname = kwargs['train_data_fname']
     train_df = pd.read_hdf(train_data_fname, key='table')
 
-    # train_df
+    train_df = train_df.iloc[:int(6e4)]
 
+    # train_df
     train_data = train_df.drop(['ttf'], axis=1)
     y_train_data = train_df['ttf']
 
@@ -69,7 +73,15 @@ def main(**kwargs):
     # 3. create folds
     folds_kwargs = copy.deepcopy(kwargs['folds'])
     del folds_kwargs['name']
-    folds = str_to_class('sklearn.model_selection', kwargs['folds']['name'])(**folds_kwargs, shuffle=True)
+    try:
+        # first look for folds in sklearn
+        folds = str_to_class('sklearn.model_selection', kwargs['folds']['name'])(**folds_kwargs)
+    except (AttributeError, ImportError) as e:
+        try:
+            # then try to look among imported folds
+            folds = str_to_class(__name__, kwargs['folds']['name'])(**folds_kwargs)
+        except (AttributeError, ImportError) as e1:
+            raise e1
 
     # 4. create metrics
     metrics_classes = [str_to_class('sklearn.metrics', m) for m in kwargs['metrics']]
@@ -80,7 +92,6 @@ def main(**kwargs):
 
     # instantiate and train model
     model_params = copy.deepcopy(kwargs['model'])
-    # TODO: fix this
     if 'name' in model_params:
         model_params.pop("name")
 
@@ -93,53 +104,29 @@ def main(**kwargs):
         X_train, X_valid = train_data.iloc[train_index], train_data.iloc[valid_index]
         y_train, y_valid = y_train_data.iloc[train_index], y_train_data.iloc[valid_index]
 
-        plt.figure(figsize=(30, 15))
-        plt.imshow(np.log(X_valid+1.0).T, vmax=0.001)
-        plt.savefig(f'valid_data_log_{fold_n}.png')
-        plt.figure(figsize=(30, 15))
-        plt.imshow(X_valid.T, vmax=0.001)
-        plt.savefig(f'valid_data_{fold_n}.png')
-        plt.figure(figsize=(30, 15))
-        plt.plot(y_valid.values)
-        plt.savefig(f'valid_data_y_{fold_n}.png')
-
         model = model_cls(**model_params)
         model.fit(X_train, y_train)
 
         # validate
 
-        predict = model.predict(X_train)
-
-        plt.figure()
-        plt.plot(y_train.values)
-        plt.plot(predict)
-        plt.ylim([0., 20.])
-        plt.title('train')
-        # plt.show(block=False)
-        plt.savefig(f'train_{fold_n}.png')
-
+        rand_train_idx = np.random.randint(0, X_train.shape[0], 1024)
+        predict = model.predict(X_train.iloc[rand_train_idx])
         for metric_name, metric in metrics.items():
-            score = metric(predict, y_train)
+            score = metric(predict, y_train.iloc[rand_train_idx])
             scores[metric_name].append(score)
             print(f"train score: {score.mean():.4f}")
 
         predict = model.predict(X_valid)
-
-        plt.figure()
-        plt.plot(y_valid.values)
-        plt.plot(predict)
-        plt.ylim([0., 20.])
-        plt.title('valid')
-        # plt.show(block=False)
-        plt.savefig(f'valid_{fold_n}.png')
-
         for metric_name, metric in metrics.items():
             score = metric(predict, y_valid)
             scores[metric_name].append(score)
             print(f"validation score: {score.mean():.4f}")
 
-    # with open(f"Model {kwargs['model']['name']}", 'wb') as file:
-    #     pickle.dump(model, file)
+
+    # save last model
+    # TODO: consider saving the best performing model instead of the last one
+    with open(f"Model {kwargs['model']['name']}", 'wb') as file:
+        pickle.dump(model, file)
 
     # 7. create summary
     summary_row = summarize(scores=scores, **kwargs)
