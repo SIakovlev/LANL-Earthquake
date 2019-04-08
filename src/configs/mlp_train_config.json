@@ -1,6 +1,6 @@
 {
-  "train_data_fname": "../../data.nosync/train_processed_nn_test.h5",
-  "summary_dest_fname": "../../data.nosync/summary.pickle",
+  "train_data_fname": "../../data/train_processed_2.h5",
+  "summary_dest_fname": "../../data/summary.pickle",
 
   "folds":{
       "name":"KFold",
@@ -11,12 +11,12 @@
 
   "model": {
     "name": "MLP",
-    "in_features": 30000,
+    "in_features": 1568,
     "out_features": 1,
     "hidden_layers": [1024, 512, 512, 128],
-    "device": "cpu",
+    "device": "cuda",
     "learning_rate": 0.0005,
     "minibatch_size": 256,
-    "num_epochs": 30
+    "num_epochs": 200
   }
 }

@@ -1,4 +1,4 @@
-from torch.nn import Module, Linear, MSELoss, ReLU, ModuleList, Dropout, BatchNorm1d
+from torch.nn import Module, Linear, MSELoss, L1Loss, ReLU, ModuleList, Dropout, BatchNorm1d
 from torch.optim import Adam
 import torch
 import torch.utils.data
@@ -32,7 +32,8 @@ class MLP(Module, ModelBase):
         self.minibatch_size = kwargs['minibatch_size']
         self.num_epochs = kwargs['num_epochs']
 
-        self.loss = MSELoss()
+        # TODO: check this
+        self.loss = L1Loss()
         self = self.to(self.device)
 
     def forward(self, x):
@@ -51,12 +52,11 @@ class MLP(Module, ModelBase):
 
         n_train_steps_per_epoch = train_data.shape[0] // self.minibatch_size
 
-        n_rows_per_sample = self.in_features // train_data.shape[1]
         for e in range(self.num_epochs):
             print(f" epoch: {e} out of {self.num_epochs}")
             for i in range(n_train_steps_per_epoch):
-                batch_idx = np.random.randint(low=n_rows_per_sample, high=train_data.shape[0], size=self.minibatch_size)
-                x_batch = torch.stack([train_data[idx - n_rows_per_sample: idx] for idx in batch_idx]).view(self.minibatch_size, self.in_features)
+                batch_idx = np.random.randint(low=0, high=train_data.shape[0], size=self.minibatch_size)
+                x_batch = train_data[batch_idx]
                 y_batch = train_y[batch_idx]
                 predict = self(x_batch)
 
@@ -66,7 +66,8 @@ class MLP(Module, ModelBase):
                 self.optim.step()
 
                 mae_loss = torch.abs(predict - y_batch).mean()
-                print(f"\r step: {i} | mse_loss={loss.detach().cpu():.4f} | mae_loss={mae_loss.detach().cpu():.4f}", end="")
+                print(f"\r step: {i} | mse_loss={loss.detach().cpu():.4f} | mae_loss={mae_loss.detach().cpu():.4f}",
+                      end="")
             print()
         del train_data
         del train_y
