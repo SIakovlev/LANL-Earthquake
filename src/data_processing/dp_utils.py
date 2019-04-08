@@ -153,17 +153,15 @@ def calculate_feature(df, feature, default_window_size, default_window_stride, s
     from feature import Feature
 
     feature_obj = Feature(df=df, save_dir=save_dir)
-
+    
     for func_name, func_params in feature['functions'].items():
         window_size = default_window_size if 'window_size' not in func_params \
             else func_params['window_size']
-        if window_size is None:
-            window_stride = None
-        else:
-            window_stride = default_window_stride if 'window_stride' not in func_params \
-                else func_params['window_stride']
+        window_stride = default_window_stride if 'window_stride' not in func_params \
+            else func_params['window_stride']
         func_params["window_size"] = window_size
         func_params["window_stride"] = window_stride
+
         desc_line = f"{func_name}(self, " + \
                     ', '.join("{!s}={!r}".format(key, val) for (key, val) in func_params.items()) + ')'
         func_params["desc_line"] = desc_line

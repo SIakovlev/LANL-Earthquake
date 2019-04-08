@@ -10,32 +10,54 @@
       "name": "q_05_std_rolling_50",
       "on": false,
       "functions": {
-        "r_std": {"window_size": 50, "window_stride": null},
-        "w_quantile": {"q": 0.05}
+        "r_std": {
+          "window_size": 50,
+          "window_stride": null
+        },
+        "w_quantile": {
+          "q": 0.05
+        }
       }
     },
     {
       "name": "q_05_std_rolling_200",
       "on": false,
       "functions": {
-        "r_std": {"window_size": 200, "window_stride": null},
-        "w_quantile": {"q": 0.05}
+        "r_std": {
+          "window_size": 200,
+          "window_stride": null
+        },
+        "w_quantile": {
+          "q": 0.05
+        }
       }
     },
     {
       "name": "q_05_std_rolling_1000",
       "on": false,
       "functions": {
-        "r_std": {"window_size": 1000, "window_stride": null},
-        "w_quantile": {"q": 0.05}
+        "r_std": {
+          "window_size": 1000,
+          "window_stride": null
+        },
+        "w_quantile": {
+          "q": 0.05
+        }
       }
     },
     {
       "name": "test",
       "on": true,
       "functions": {
-        "w_periodogram": {"window_size": 150000, "window_stride": 1000},
-        "w_mean": {"window_size": 1, "window_stride": 1, "axis": 1}
+        "w_periodogram": {
+          "window_size": 150000,
+          "window_stride": 1000
+        },
+        "w_mean": {
+          "window_size": 1,
+          "window_stride": 1,
+          "axis": 1
+        }
       }
     }
   ]

@@ -1,19 +1,16 @@
 {
-  "train_data": "../../data.nosync/train_processed.h5",
-  "summary_dest": "../../data.nosync/summary_train.csv",
-  "predict_directory": "../../data.nosync/predict",
-  "models_directory": "../../data.nosync/saved_models",
+  "train_data": "data/train_good_smoothed.h5",
+  "summary_dest": "data/summary_train_.csv",
+  "predict_directory": "data/predict",
+  "models_directory": "data/saved_models",
   "preproc": {
     "name": "StandardScaler"
   },
  "folds":
           [
             {
-              "name":"TimeSeriesSplit",
-              "n_splits": 5
-            },
-            {
               "name":"KFold",
+              "shuffle": true,
               "n_splits": 5
             }
 
@@ -26,23 +23,27 @@
   "validate":
           [
             {
+              "model": { "Ridge": {},
+                          "RandomForestRegressor": {"criterion":"mse",
+                                                   "max_depth": 9,
+                                                   "n_estimators":1000
+                                                  }
+                       }
+
+            },
+            {
               "model": {
-                "Ridge": {
+                "XGBRegressor": {
+                  "eta": 0.003,
+                  "max_depth": 9,
+                  "n_estimators": 1000,
+                  "subsample": 0.9,
+                  "objective": "reg:linear",
+                  "eval_metric": "mae",
+                  "silent": true,
+                  "nthread": -1
                 }
               }
-            },
-            {
-              "model":{ "LinearRegression":{"n_jobs":"-1"},
-
-                        "Ridge":{"alpha":0.1},
-                        "RandomForestRegressor": {"criterion":"mse"}
-                      }
-
-            },
-            {
-              "model":{ "XGBRegressor" : {"learning_rate": 0.1},
-                        "LGBMRegressor" : {"max_depth": 2}
-                      }
             }
 
           ]
