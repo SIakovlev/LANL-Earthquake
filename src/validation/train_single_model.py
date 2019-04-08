@@ -148,7 +148,7 @@ if __name__ == '__main__':
     parser.add_argument('--config_fname',
                         help='name of the config file',
                         type=str,
-                        default="../configs/train_config.json")
+                        default="../configs/mlp_train_config.json")
 
     args = parser.parse_args()
 

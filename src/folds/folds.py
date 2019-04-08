@@ -50,7 +50,6 @@ class CustomFold:
             for seq_len in seq_lens:
                 seq_begin_idx = np.random.randint(self.pad, data_len-1, 1)
                 seq_begin_idx_padded = max(seq_begin_idx - self.pad, 0)
-                # TODO: fix padding for seq_begin_idx
                 seq_end_idx = min(seq_begin_idx + seq_len, data_len-1)
                 seq_end_idx_padded = min(seq_end_idx + self.pad, data_len-1)
                 seq_idx_padded = np.arange(seq_begin_idx_padded, seq_end_idx_padded)
