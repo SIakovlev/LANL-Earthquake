@@ -21,3 +21,10 @@
 **/data.nosync
 *.h5
 *.html
+
+# ignore .ipynb in feature_elimination and in data_processing
+/feature_elimination/*.ipynb
+/data_processing/*.ipynb
+
+# ignore .png in feature_elimination
+/feature_elimination/*.png
