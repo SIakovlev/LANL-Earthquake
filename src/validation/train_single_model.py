@@ -50,8 +50,6 @@ def main(**kwargs):
     train_data_fname = kwargs['train_data_fname']
     train_df = pd.read_hdf(train_data_fname, key='table')
 
-    train_df = train_df.iloc[:int(6e4)]
-
     # train_df
     train_data = train_df.drop(['ttf'], axis=1)
     y_train_data = train_df['ttf']
@@ -109,18 +107,18 @@ def main(**kwargs):
 
         # validate
 
-        rand_train_idx = np.random.randint(0, X_train.shape[0], 1024)
+        rand_train_idx = np.random.randint(0, X_train.shape[0], X_valid.shape[0])
         predict = model.predict(X_train.iloc[rand_train_idx])
         for metric_name, metric in metrics.items():
             score = metric(predict, y_train.iloc[rand_train_idx])
             scores[metric_name].append(score)
-            print(f"train score: {score.mean():.4f}")
+            print(f"train score ({metric_name}): {score.mean():.4f}")
 
         predict = model.predict(X_valid)
         for metric_name, metric in metrics.items():
             score = metric(predict, y_valid)
             scores[metric_name].append(score)
-            print(f"validation score: {score.mean():.4f}")
+            print(f"validation score ({metric_name}): {score.mean():.4f}")
 
 
     # save last model
@@ -148,7 +146,7 @@ if __name__ == '__main__':
     parser.add_argument('--config_fname',
                         help='name of the config file',
                         type=str,
-                        default="../configs/mlp_train_config.json")
+                        default="../configs/train_config.json")
 
     args = parser.parse_args()
 

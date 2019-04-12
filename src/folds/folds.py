@@ -60,6 +60,7 @@ class CustomFold:
             train_idx = np.setxor1d(np.arange(0, data_len), test_idx_padded)
             test_idx = np.array(test_idx)
 
+            print(f"Percentage of data thrown out: {(data_len - len(train_idx) - len(test_idx)) *100 / data_len}%")
             yield train_idx, test_idx
 
 
