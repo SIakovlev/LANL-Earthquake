@@ -717,7 +717,8 @@ class Feature:
 
         """
         data = self.data if df is None else df
-        self.data = tsfresh.feature_extraction.feature_calculators.quantile(data.values.squeeze(), q=q)
+        self.data = np.quantile(data.values.squeeze(), q=q)
+        # self.data = tsfresh.feature_extraction.feature_calculators.quantile(data.values.squeeze(), q=q)
         return self
     
     @window_decorator
