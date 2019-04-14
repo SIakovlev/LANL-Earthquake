@@ -1,5 +1,5 @@
 {
-  "train_data": "../../data/train_processed_e1.h5",
+  "train_data": "../../data/train_.h5",
   "summary_dest": "../../data/summary_train_.csv",
   "predict_directory": "../../data/predict",
   "models_directory": "../../data/saved_models",
@@ -11,7 +11,7 @@
             {
               "name":"CustomFold",
               "n_splits": 10,
-              "pad": 150,
+              "pad": 0,
               "fragmentation": 0,
               "shuffle": true
             }
@@ -26,12 +26,11 @@
               "model": {
                 "XGBRegressor": {
                   "eta": 0.01,
-                  "max_depth": 9,
-                  "n_estimators": 2000,
+                  "max_depth": 5,
+                  "n_estimators": 100,
                   "subsample": 0.9,
-                  "objective": "gpu:reg:linear",
+                  "objective": "reg:linear",
                   "eval_metric": "mae",
-                  "tree_method": "gpu_hist",
                   "verbosity": 3,
                   "nthread": 15
                 }

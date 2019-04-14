@@ -1,0 +1,31 @@
+{
+  "data_dir": "../../data/",
+  "data_processed_dir": "../../data/",
+  "data_fname": "train.h5",
+  "data_processed_fname": "train_processed_e1.h5",
+  "window_size": 150000,
+  "window_stride": 1000,
+  "features": [
+    {
+      "name": "std_rolling_10000_q_05",
+      "on": true,
+      "functions": {
+        "w_quantile": {
+          "q": 0.05
+        },
+        "r_std": {
+          "window_size": 10000,
+          "window_stride": null
+        }
+      }
+    },
+    {
+      "name": "psd_sum",
+      "on": true,
+      "functions": {
+        "w_psd": {
+        }
+      }
+    }
+  ]
+}

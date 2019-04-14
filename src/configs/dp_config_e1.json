@@ -1,0 +1,69 @@
+{
+  "data_dir": "../../data/",
+  "data_processed_dir": "../../data/",
+  "data_fname": "train.h5",
+  "data_processed_fname": "train_processed_e1.h5",
+  "window_size": 150000,
+  "window_stride": 1000,
+  "features": [
+    {
+      "name": "q_05_std_rolling_50",
+      "on": true,
+      "functions": {
+        "r_std": {
+          "window_size": 50,
+          "window_stride": null
+        },
+        "w_quantile": {
+          "q": 0.05
+        }
+      }
+    },
+    {
+      "name": "q_05_std_rolling_200",
+      "on": true,
+      "functions": {
+        "r_std": {
+          "window_size": 200,
+          "window_stride": null
+        },
+        "w_quantile": {
+          "q": 0.05
+        }
+      }
+    },
+    {
+      "name": "q_05_std_rolling_1000",
+      "on": true,
+      "functions": {
+        "r_std": {
+          "window_size": 1000,
+          "window_stride": null
+        },
+        "w_quantile": {
+          "q": 0.05
+        }
+      }
+    },
+    {
+      "name": "med_std_rolling_1000",
+      "on": false,
+      "functions": {
+        "r_std": {
+          "window_size": 1000,
+          "window_stride": null
+        },
+        "w_median": {
+        }
+      }
+    },
+    {
+      "name": "psd_sum",
+      "on": false,
+      "functions": {
+        "w_psd": {
+        }
+      }
+    }
+  ]
+}
