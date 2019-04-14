@@ -215,12 +215,11 @@ def read_write_summary(path, extension, action, df=None):
     elif extension == '.h5' or extension == '.hdf5':
         with open(path, action) as f:
             if 'r' in action:
-                return pd.read_hdf(path, key = 'table')
+                return pd.read_hdf(path, key='table')
             else:
-                df.to_hdf(path, index=False, key = 'table')
+                df.to_hdf(path, index=False, key='table')
     else:
-        raise  KeyError(f"extension {extension} not find")
-
+        raise KeyError(f"extension {extension} not found")
 
 
 def summary_to_config(path_summary, path_json, rows = 1):

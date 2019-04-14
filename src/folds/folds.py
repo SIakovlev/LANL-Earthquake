@@ -5,7 +5,7 @@ class CustomFold:
     """
     This fold split ensures that test data doesn't leak into the train data and visa versa. This behaviour is typical
     for datasets calculated with the running window when stride is smaller than the window size
-    (2 consequtive windows are getting overlapped)
+    (2 consecutive windows are getting overlapped)
 
     Parameter "fragmentation" controls whether your test and train split come from the same distribution.
     Value of 1 means that test samples are randomly sampled across the whole dataset and thus come from the same
@@ -60,6 +60,7 @@ class CustomFold:
             train_idx = np.setxor1d(np.arange(0, data_len), test_idx_padded)
             test_idx = np.array(test_idx)
 
+            print(f"Percentage of data thrown out: {(data_len - len(train_idx) - len(test_idx)) *100 / data_len}%")
             yield train_idx, test_idx
 
 

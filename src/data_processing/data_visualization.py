@@ -8,14 +8,14 @@ plotly.tools.set_credentials_file(username='ptolmachev', api_key='Fs5sBFAg7YuBn5
 import sys
 from feature import Feature
 
-
+# TODO: delete
 def nice_plot(series):
     fig = plt.figure(figsize = (16,4))
     plt.grid(True)
     try:
-        plt.plot(series.compute().tolist(), 'r-',linewidth = 2, alpha = 0.7)
+        plt.plot(series.compute().tolist(), 'r-',linewidth=2, alpha=0.7)
     except:
-        plt.plot(series.tolist(), 'r-',linewidth = 2, alpha = 0.7)
+        plt.plot(series.tolist(), 'r-', linewidth=2, alpha=0.7)
     plt.show()
 
 def plot_data(list_of_dataframes, feature_name, window_size, window_stride):
@@ -73,6 +73,7 @@ def plot_data(list_of_dataframes, feature_name, window_size, window_stride):
     plotly.offline.plot(fig2,
                         filename="Earthquakes samples (first, middle, last " + str(size_of_slice) + " points).html",
                         auto_open=True)
+
 
 if __name__ == '__main__':
     # example
