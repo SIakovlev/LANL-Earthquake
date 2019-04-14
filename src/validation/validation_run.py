@@ -9,6 +9,9 @@ from sklearn.model_selection import KFold, RepeatedKFold, StratifiedKFold, Repea
 from ast import literal_eval
 
 import src.validation.validation_utils
+from src.folds.folds import CustomFold
+import warnings
+warnings.filterwarnings("ignore")
 
 import os
 import sys
@@ -77,7 +80,7 @@ def main(**kwargs):
 
     for index_f, f in enumerate(kwargs['folds']):
         fold_features[index_f] = {'folds_name': f['name'], "folds_params":[]}
-        class_ = str_to_class('sklearn.model_selection', f['name'])
+        class_ = str_to_class(__name__, f['name'])
         del f['name']
         fold_features[index_f]["folds_params"] = f
         fold_features.append({})
@@ -99,7 +102,7 @@ def main(**kwargs):
     print('....................... Train models ..............................')
 
     for i_f, f in enumerate(folds_list):
-        for v in tqdm(validators):
+        for v in validators:
             # train models in validator and create summary for all models
             v.train_models(train_df,
                            y_data,

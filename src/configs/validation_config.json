@@ -1,8 +1,6 @@
 {
-  "train_data": "data/train_good_smoothed.h5",
-  "summary_dest": "data/summary_train_.csv",
-  "predict_directory": "data/predict",
-  "models_directory": "data/saved_models",
+  "train_data": "data/train_good_features.h5",
+  "summary_dest": "data/summary_temp.csv",
   "preproc": {
     "name": "StandardScaler"
   },
@@ -12,8 +10,14 @@
               "name":"KFold",
               "shuffle": true,
               "n_splits": 5
+            },
+            {
+              "name":"CustomFold",
+              "n_splits": 10,
+              "pad": 15,
+              "fragmentation": 0.1,
+              "shuffle": true
             }
-
           ],
 
   "metrics": ["mean_absolute_error", "mean_squared_error"],
@@ -23,24 +27,16 @@
   "validate":
           [
             {
-              "model": { "Ridge": {},
-                          "RandomForestRegressor": {"criterion":"mse",
-                                                   "max_depth": 9,
-                                                   "n_estimators":1000
-                                                  }
-                       }
-
-            },
-            {
               "model": {
                 "XGBRegressor": {
                   "eta": 0.003,
                   "max_depth": 9,
                   "n_estimators": 1000,
                   "subsample": 0.9,
-                  "objective": "reg:linear",
+                  "objective": "gpu:reg:linear",
                   "eval_metric": "mae",
                   "silent": true,
+                  "tree_method": "gpu_hist",
                   "nthread": -1
                 }
               }

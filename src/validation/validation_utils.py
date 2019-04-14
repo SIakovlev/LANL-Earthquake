@@ -15,7 +15,7 @@ from sklearn.linear_model import Ridge
 from xgboost import XGBRegressor
 from catboost import CatBoostRegressor
 from lightgbm import LGBMRegressor
-
+from tqdm import tqdm
 import copy
 
 from src.utils import str_to_class
@@ -103,7 +103,8 @@ class ValidationBase:
             predict_data = pd.DataFrame(columns=['y_valid','y_predict'], index= range(train_data.shape[0]))
 
         for num_model, model in enumerate(self.models_list):
-            for fold_n, (train_index, valid_index) in enumerate(folds.split(train_data)):
+            print("Train model :", self.models_features[num_model]["model_name"])
+            for fold_n, (train_index, valid_index) in enumerate(tqdm(folds.split(train_data))):
                 # get data
                 X_train, X_valid = train_data.iloc[train_index], train_data.iloc[valid_index]
                 y_train, y_valid = y_train_data.iloc[train_index], y_train_data.iloc[valid_index]
@@ -111,17 +112,26 @@ class ValidationBase:
                 model = self._create_model(self.models_features[num_model]["model_name"], self.models_features[num_model]["model_params"])
                 # train model
                 model.fit(X_train, y_train)
+                #predict on train
+                y_train_pr = model.predict(X_train)
                 # validate
                 y_predict = model.predict(X_valid)
                 if predict_data is not None:
                     predict_data['y_valid'].iloc[valid_index] =y_valid.values
                     predict_data['y_predict'].iloc[valid_index] = np.squeeze(y_predict)
                 # compute all scores
+                print(f"*******************************Compute on {fold_n} fold*******************************")
                 for metric_name, metric_value in metric_classes.items():
                     if fold_n==0:
                         self.score_data[metric_name] = []
-                    score_d = metric_value(y_valid, y_predict)
-                    self.score_data[metric_name].append(score_d)
+                        self.score_data[metric_name+"_train"] = []
+                    score_valid = metric_value(y_valid, y_predict)
+                    score_train = metric_value(y_train, y_train_pr)
+                    print("train_error on METRIC: {0} is {1:0.4f} ".format(metric_name, score_train))
+                    print("validation_error on METRIC: {0} is {1:0.4f} ".format(metric_name, score_valid))
+                    self.score_data[metric_name + "_train"].append(score_train)
+                    self.score_data[metric_name].append(score_valid)
+                print("*****************************************************************************************")
             #save predict data
             if predict_data is not None:
                 save_predict_path = os.path.join(models_directory_dict[0]['predict_directory'],"{0}_{1}_{2}.pickle".format(
