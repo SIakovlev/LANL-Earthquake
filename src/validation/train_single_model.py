@@ -67,9 +67,9 @@ def main(**kwargs):
 
     # 2. create preprocessor
     # TODO: add Standard Scaler
-    # preprocessor = None
-    # if 'preproc' in kwargs:
-    #     preprocessor = str_to_class("src.preprocessing.preproc", kwargs['preproc']['name'])(**kwargs['preproc'])
+    preprocessor = None
+    if 'preproc' in kwargs:
+        preprocessor = str_to_class("src.preprocessing.preproc", kwargs['preproc']['name'])()
 
     # 3. create folds
     folds_kwargs = copy.deepcopy(kwargs['folds'])
@@ -105,6 +105,10 @@ def main(**kwargs):
         # split data
         X_train, X_valid = train_data.iloc[train_index], train_data.iloc[valid_index]
         y_train, y_valid = y_train_data.iloc[train_index], y_train_data.iloc[valid_index]
+
+        preprocessor.fit(X_train)
+        X_train = pd.DataFrame(preprocessor.transform(X_train))
+        X_valid = pd.DataFrame(preprocessor.transform(X_valid))
 
         model = model_cls(**model_params)
 
