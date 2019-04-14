@@ -16,10 +16,11 @@
 # ignore other platform specific file types
 *.DS_Store
 
-# ignore data folder and all .h5 files
+# ignore data folder and all .h5 and html files
 **/data
 **/data.nosync
 *.h5
+*.html
 
 # ignore Drafts.ipynb
 Drafts.ipynb

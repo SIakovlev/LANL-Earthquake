@@ -3,10 +3,10 @@ from matplotlib import pyplot as plt
 import pandas as pd
 import plotly.graph_objs as go
 import plotly
+from plotly import tools
 plotly.tools.set_credentials_file(username='ptolmachev', api_key='Fs5sBFAg7YuBn52rzy6n')
 import sys
-# TODO: fix this, dp_features does not exist
-# from dp_features import *
+from feature import Feature
 
 # TODO: delete
 def nice_plot(series):
@@ -18,16 +18,15 @@ def nice_plot(series):
         plt.plot(series.tolist(), 'r-', linewidth=2, alpha=0.7)
     plt.show()
 
-
-def plot_data(list_of_dataframes, feature_name, window_size):
+def plot_data(list_of_dataframes, feature_name, window_size, window_stride):
 
     if not np.all([dataframe.shape[1] == list_of_dataframes[0].shape[1] for dataframe in list_of_dataframes] ):
         raise ValueError("The number of columns in dataframes in 'list_of_dataframes' should be the same! ")
 
-    size_of_slice = int(150000/window_size)
+    size_of_slice = int(150000/window_stride) # 150000 - number of points in one data slice
     num_EQs = len(list_of_dataframes)
 
-    # plotting part
+    # PLOTTING PART
     for i in range(num_EQs):
         list_of_dataframes[i].columns = [feature_name,"s", "ttf"]
 
@@ -40,19 +39,14 @@ def plot_data(list_of_dataframes, feature_name, window_size):
                df["downsampled_signal"].ravel(),  # downsampled signal
                df["downsampled_ttf"].ravel()]  # downsample ttf
 
-    s_max = []
-    for i in range(len(signals)):
-        s_max.append(abs(signals[i]).max())
-    s_max.append(0)
+    traces = []
+    for i in range(len(names)): # 3 traces: feature, signal, ttf
+        trace = go.Scatter(y=(signals[i]), opacity=0.7, name=names[i])
+        traces.append(trace)
 
-    data1 = [go.Scatter(y=(signals[i] - 0.7 * sum(s_max[:i + 1])), opacity=0.7, name=names[i]) for i in
-             range(len(signals))]
-
-    layout1 = dict(
-        title='Eathquakes ' + feature_name
-    )
-
-    fig1 = dict(data=data1, layout=layout1)
+    fig1 = tools.make_subplots(rows=len(traces), cols=1)
+    for i in range(len(traces)):
+        fig1.append_trace(traces[i], i+1, 1)
     plotly.offline.plot(fig1, filename="Earthquakes.html", auto_open=True)
 
     #####################################################################################################
@@ -60,43 +54,50 @@ def plot_data(list_of_dataframes, feature_name, window_size):
     b = int((len(list_of_dataframes[0].s) - size_of_slice) / 2)
     e = int((len(list_of_dataframes[0].s) + size_of_slice) / 2)
 
+    names = ["first " + str(size_of_slice) + 'points',
+             "middle " + str(size_of_slice) + 'points',
+             "last " + str(size_of_slice) + 'points']
+
     samples = [list_of_dataframes[0][feature_name][:int(size_of_slice)].values.ravel(),
                list_of_dataframes[0][feature_name][b:e].values.ravel(),
                list_of_dataframes[0][feature_name][len(list_of_dataframes[0]) - size_of_slice:].values.ravel()]
+    traces = []
+    for i in range(len(names)):
+        trace = go.Scatter(y=(samples[i]), opacity=0.7, name=names[i])
+        traces.append(trace)
 
-    s_max = []
-    for i in range(len(samples)):
-        s_max.append(abs(samples[i]).max())
-    s_max.append(0)
+    fig2 = tools.make_subplots(rows=len(traces), cols=1)
+    for i in range(len(traces)):
+        fig2.append_trace(traces[i], i+1, 1)
 
-    names = ["first " + str(size_of_slice), "middle " + str(size_of_slice), "last " + str(size_of_slice)]
-    data2 = [go.Scatter(y=(samples[i] - 0.7 * sum(s_max[:i + 1])), opacity=0.7, name=names[i]) for i in
-             range(len(samples))]
-
-    layout2 = dict(
-        title='Earthquakes ' + feature_name
-    )
-
-    fig2 = dict(data=data2, layout=layout2)
     plotly.offline.plot(fig2,
-                        filename="Earthquakes samples (first, middle, last " + str(size_of_slice) + " dp).html",
+                        filename="Earthquakes samples (first, middle, last " + str(size_of_slice) + " points).html",
                         auto_open=True)
 
 
 if __name__ == '__main__':
     # example
-    #list of dataframes
     list_of_dataframes = []
     window_size = 15000
-    feature_name = 'quantile'
+    window_stride = 1000
+    feature_name = 'w_quantile'
     params = {'q' : 0.05}
-    for i in [3,4,5,7]: # which eqs to take
+    for i in [3,4,7]: # which EQs to take
         df = pd.read_hdf('../../data/EQs/EQ_'+str(i)+'.h5', key='table')
-        feature = eval("w_"+feature_name + "(df.s, window_size = window_size, **params)")
-        # TODO: fix this, dp_features does not exist, w_last_elem should be called from feature.py
-        # downsampled_s = w_last_elem(df.s, window_size = window_size)
-        # downsampled_ttf = w_last_elem(df.ttf, window_size = window_size)
-        # processed_df = pd.DataFrame(np.array([feature.values.ravel(), downsampled_s.values.ravel(), downsampled_ttf.values.ravel()]).T)
-        # processed_df.columns = [feature_name,"downsampled_signal", "downsampled_ttf"]
-        # list_of_dataframes.append(processed_df)
-    plot_data(list_of_dataframes, feature_name, window_size)
+
+        # bunch of feature objects
+        f_s = Feature(df['s'], '../../data/EQs/EQ_'+str(i))
+        f_downsampled_s = Feature(df['s'], '../../data/EQs/EQ_'+str(i))
+        f_downsampled_ttf = Feature(df['ttf'], '../../data/EQs/EQ_'+str(i))
+
+        #get the data
+        feature = eval('f_s.' + feature_name + "(df.s, window_size = window_size, window_stride = window_stride, **params).data")
+        downsampled_s = f_downsampled_s.w_last_elem(window_size = window_size, window_stride = window_stride).data
+        downsampled_ttf = f_downsampled_ttf.w_last_elem(window_size = window_size, window_stride = window_stride).data
+
+        # shape it into a dataframe
+        processed_df = pd.DataFrame(np.array([feature.values.ravel(), downsampled_s.values.ravel(), downsampled_ttf.values.ravel()]).T)
+        processed_df.columns = [feature_name,"downsampled_signal", "downsampled_ttf"]
+        list_of_dataframes.append(processed_df)
+
+    plot_data(list_of_dataframes, feature_name, window_size, window_stride)
