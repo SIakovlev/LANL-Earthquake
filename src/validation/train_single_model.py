@@ -23,6 +23,8 @@ from xgboost import XGBRegressor
 from catboost import CatBoostRegressor
 # from lightgbm import LGBMRegressor
 
+from sklearn.preprocessing import StandardScaler
+
 import matplotlib as mpl
 if platform.system() == 'Darwin':
     mpl.use('TkAgg')  # Mac OS specific
@@ -62,9 +64,10 @@ def main(**kwargs):
         summary = None
 
     # 2. create preprocessor
-    preprocessor = None
-    if 'preproc' in kwargs:
-        preprocessor = str_to_class("src.validation.preproc", kwargs['preproc']['name'])(**kwargs['preproc'])
+    # TODO: add Standard Scaler
+    # preprocessor = None
+    # if 'preproc' in kwargs:
+    #     preprocessor = str_to_class("src.preprocessing.preproc", kwargs['preproc']['name'])(**kwargs['preproc'])
 
     # 3. create folds
     folds_kwargs = copy.deepcopy(kwargs['folds'])
@@ -87,6 +90,7 @@ def main(**kwargs):
     # 6. train model
     print('....................... Training model ..............................')
     scores = defaultdict(list)
+
     for fold_n, (train_index, valid_index) in enumerate(folds.split(train_data)):
         print(f" --------------- fold #{fold_n} out of -------------------")
         # split data
@@ -104,6 +108,7 @@ def main(**kwargs):
         plt.savefig(f'valid_data_y_{fold_n}.png')
 
         model = model_cls(**model_params)
+
         model.fit(X_train, y_train)
 
         # validate

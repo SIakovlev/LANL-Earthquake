@@ -1,8 +1,8 @@
 {
-  "data_dir": "../../data.nosync/",
-  "data_processed_dir": "../../data.nosync/",
-  "data_fname": "train_short.h5",
-  "data_processed_fname": "train_processed_short.h5",
+  "data_dir": "../../data/",
+  "data_processed_dir": "../../data/",
+  "data_fname": "train.h5",
+  "data_processed_fname": "train_processed_e1.h5",
   "window_size": 150000,
   "window_stride": 1000,
   "features": [
@@ -46,17 +46,22 @@
       }
     },
     {
-      "name": "test",
+      "name": "med_std_rolling_1000",
       "on": true,
       "functions": {
-        "w_periodogram": {
-          "window_size": 150000,
-          "window_stride": 1000
+        "r_std": {
+          "window_size": 1000,
+          "window_stride": null
         },
-        "w_mean": {
-          "window_size": 1,
-          "window_stride": 1,
-          "axis": 1
+        "w_median": {
+        }
+      }
+    },
+    {
+      "name": "psd_sum",
+      "on": true,
+      "functions": {
+        "w_psd": {
         }
       }
     }

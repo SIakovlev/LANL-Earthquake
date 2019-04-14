@@ -1,51 +1,42 @@
 {
-  "train_data": "data/train_good_smoothed.h5",
-  "summary_dest": "data/summary_train_.csv",
-  "predict_directory": "data/predict",
-  "models_directory": "data/saved_models",
+  "train_data": "../../data/train_processed_e1.h5",
+  "summary_dest": "../../data/summary_train_.csv",
+  "predict_directory": "../../data/predict",
+  "models_directory": "../../data/saved_models",
   "preproc": {
     "name": "StandardScaler"
   },
  "folds":
           [
             {
-              "name":"KFold",
-              "shuffle": true,
-              "n_splits": 5
+              "name":"CustomFold",
+              "n_splits": 10,
+              "pad": 150,
+              "fragmentation": 0,
+              "shuffle": true
             }
 
           ],
 
   "metrics": ["mean_absolute_error", "mean_squared_error"],
 
-
-
   "validate":
           [
             {
-              "model": { "Ridge": {},
-                          "RandomForestRegressor": {"criterion":"mse",
-                                                   "max_depth": 9,
-                                                   "n_estimators":1000
-                                                  }
-                       }
-
-            },
-            {
               "model": {
                 "XGBRegressor": {
-                  "eta": 0.003,
+                  "eta": 0.01,
                   "max_depth": 9,
-                  "n_estimators": 1000,
+                  "n_estimators": 2000,
                   "subsample": 0.9,
-                  "objective": "reg:linear",
+                  "objective": "gpu:reg:linear",
                   "eval_metric": "mae",
-                  "silent": true,
-                  "nthread": -1
+                  "tree_method": "gpu_hist",
+                  "verbosity": 3,
+                  "nthread": 15
                 }
               }
             }
-
           ]
 
 }
