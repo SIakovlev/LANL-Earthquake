@@ -649,7 +649,8 @@ class Feature:
 
         """
         data = self.data if df is None else df
-        self.data = tsfresh.feature_extraction.feature_calculators.median(data.values.squeeze())
+        self.data = np.median(data.values.squeeze())
+        # self.data = tsfresh.feature_extraction.feature_calculators.median(data.values.squeeze())
         return self
 
     @window_decorator
