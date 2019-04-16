@@ -127,8 +127,8 @@ class ValidationBase:
                         self.score_data[metric_name+"_train"] = []
                     score_valid = metric_value(y_valid, y_predict)
                     score_train = metric_value(y_train, y_train_pr)
-                    print("train_error on METRIC: {0} is {1:0.4f} ".format(metric_name, score_train))
-                    print("validation_error on METRIC: {0} is {1:0.4f} ".format(metric_name, score_valid))
+                    print("train_error ({0}): {1:0.4f}".format(metric_name, score_train))
+                    print("validation_error ({0}): {1:0.4f} ".format(metric_name, score_valid))
                     self.score_data[metric_name + "_train"].append(score_train)
                     self.score_data[metric_name].append(score_valid)
                 print("*****************************************************************************************")
