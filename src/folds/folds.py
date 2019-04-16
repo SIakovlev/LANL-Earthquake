@@ -60,15 +60,15 @@ class CustomFold:
             train_idx = np.setxor1d(np.arange(0, data_len), test_idx_padded)
             test_idx = np.array(test_idx)
 
-            print(f"Percentage of data thrown out: {(data_len - len(train_idx) - len(test_idx)) *100 / data_len}%")
+            print(f"{self.__class__.__name__}: Percentage of data thrown out: {(data_len - len(train_idx) - len(set(test_idx))) * 100 / data_len}%")
             yield train_idx, test_idx
 
 
 if __name__ == '__main__':
 
-    train_data = np.arange(int(1000))
+    train_data = np.arange(int(10000000))
 
-    kwargs = {"n_splits": 10, "shuffle": True, "fragmentation": 0.0, "pad": 5}
+    kwargs = {"n_splits": 10, "shuffle": True, "fragmentation": 0.001, "pad": 0}
 
     folds = CustomFold(**kwargs)
     for fold_n, (train_index, valid_index) in enumerate(folds.split(train_data)):
