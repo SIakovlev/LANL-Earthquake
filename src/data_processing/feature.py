@@ -1,16 +1,124 @@
-import numpy as np
 import scipy.signal
-from scipy.signal import savgol_filter
 import tsfresh
 import feets
-from tqdm import tqdm
 import warnings
 import os
+import functools
+import sys
+import inspect
+import numpy as np
 import pandas as pd
-from dp_utils import window_decorator, rolling_decorator
-
-
+from tqdm import tqdm
+from scipy.signal import savgol_filter
 warnings.filterwarnings("ignore", category=feets.ExtractorWarning)
+
+
+def window_decorator(func):
+    @functools.wraps(func)
+    def wrapper(self, *args, **kwargs):
+
+        window_size = kwargs['window_size']
+        window_stride = kwargs['window_stride']
+        verbose = True if "verbose" not in kwargs else kwargs['verbose']
+        desc_line = get_function_descriptor(func, kwargs) if "desc_line" not in kwargs else kwargs['desc_line']
+
+        assert self.data.shape[0] >= window_size, "Dataframe size is too small for a chosen window size"
+        if not isinstance(verbose, bool):
+            raise TypeError("verbose parameter must be a bool type!")
+        if not isinstance(desc_line, str):
+            raise TypeError("desc_line parameter must be a string type!")
+        if not isinstance(window_size, int):
+            raise TypeError("window_size parameter must be an integer type!")
+        if not isinstance(window_stride, int):
+            raise TypeError("window_stride parameter must be an integer type!")
+
+        feature_name = self.update_name(desc_line)
+        self.update_path()
+        if self.exists():
+            return self.read_feature()
+
+        temp = []
+        df = self.data
+        if window_size is None:
+            temp = func(self, df, *args, **kwargs).data
+        else:
+            for i in tqdm(range(0, df.shape[0] - window_size + window_stride, window_stride),
+                          desc=desc_line, file=sys.stdout, disable=not verbose):
+                batch = df.iloc[i: i + window_size]
+                temp.append(func(self, batch, *args, **kwargs).data)
+
+        if verbose:
+            tqdm.write(f"\t window decorator for {func.__name__}: ")
+            tqdm.write("\t - window size: {}".format(window_size))
+            tqdm.write("\t - window stride: {}".format(window_stride))
+
+        if hasattr(temp[0], 'shape') and temp[0].shape is not ():
+            out_features = temp[0].shape[0]
+            column_names = [feature_name + '_' + str(i) for i in range(out_features)]
+        else:
+            column_names = [feature_name]
+
+        self.data = pd.DataFrame(temp, columns=column_names)
+        return self
+    return wrapper
+
+
+def rolling_decorator(func):
+    @functools.wraps(func)
+    def wrapper(self, *args, **kwargs):
+        verbose = True if "verbose" not in kwargs else kwargs['verbose']
+        desc_line = get_function_descriptor(func, kwargs) if "desc_line" not in kwargs else kwargs['desc_line']
+
+        if not isinstance(verbose, bool):
+            raise TypeError("verbose parameter must be a bool type!")
+        if not isinstance(desc_line, str):
+            raise TypeError("desc_line parameter must be a string type!")
+
+        feature_name = self.update_name(desc_line)
+        self.update_path()
+        if self.exists():
+            return self.read_feature()
+
+        df = self.data
+        temp = func(self, df, *args, **kwargs).data
+
+        if verbose:
+            tqdm.write(f"\t Rolling decorator for {func.__name__}: ")
+
+        column_names = [feature_name]
+        self.data = pd.DataFrame(temp, columns=column_names)
+        return self
+
+    return wrapper
+
+
+def get_function_descriptor(func, extra_params):
+    """
+    Parse all function args and get a complete description
+
+    Parameters
+    ----------
+    func : function reference object
+    extra_params : external params passed to decorated function (i.e. window size, desc_line, etc...)
+
+    Returns
+    -------
+    String with function name and its parameters
+    """
+
+    inspect_params = inspect.getfullargspec(func)
+    funcname_line = func.__name__
+    args_line = "{}, ".format(*inspect_params.args)
+    kwargs_line = ', '.join("{}={}".format(k, v) for k, v in extra_params.items())
+    if inspect_params.kwonlydefaults is not None:
+        kwonlydefaults_line = ', (' + ', '.join("{}={}".format(k, v) for k, v in inspect_params.kwonlydefaults.items()) \
+                              + ')'
+    else:
+        kwonlydefaults_line = ''
+
+    desc_line = funcname_line + '(' + args_line + kwargs_line + kwonlydefaults_line + ')'
+
+    return desc_line
 
 
 def classic_sta_lta(x, length_sta, length_lta):
@@ -83,7 +191,7 @@ class Feature:
     """
 
     @window_decorator
-    def w_psd(self, df=None, *args, fs=4e6, **kwargs):
+    def w_psd_sum(self, df=None, *args, fs=4e6, **kwargs):
         """
         Calculates total power spectrum density of the dataframe and sums it up
 
@@ -100,6 +208,26 @@ class Feature:
         """
         data = self.data if df is None else df
         self.data = np.sum(scipy.signal.periodogram(data.values.squeeze(), fs=fs)[1])
+        return self
+
+    @window_decorator
+    def w_psd(self, df=None, *args, fs=4e6, **kwargs):
+        """
+        Calculates total power spectrum density of the dataframe and sums it up
+
+        Parameters
+        ----------
+        df : pandas DataFrame
+        args : None
+        fs : sampling frequency
+        kwargs :
+
+        Returns
+        -------
+        spectral components of the dataframe
+        """
+        data = self.data if df is None else df
+        self.data = scipy.signal.periodogram(data.values.reshape(-1,), fs=fs)[1]
         return self
 
     @window_decorator
@@ -191,7 +319,7 @@ class Feature:
         return self
 
     @rolling_decorator
-    def r_sta_lta(self, df=None, *args, sta_window=100, lta_window=1000, **kwargs):
+    def r_sta_lta(self, df=None, *args, sta_window=1000, lta_window=10000, **kwargs):
         """
         Calculates STA/LTA ratio over windows sta_window and lta_window
 
@@ -207,6 +335,7 @@ class Feature:
         -------
 
         """
+
         data = self.data if df is None else df
         if sta_window > lta_window:
             raise ValueError(f"Short-time window can't be longer than long-time window!")
@@ -228,6 +357,18 @@ class Feature:
     def w_std(self, df=None, *args, axis=0, **kwargs):
         data = self.data if df is None else df
         self.data = np.std(data.values, axis=axis)
+        return self
+
+    @window_decorator
+    def w_max(self, df=None, *args, **kwargs):
+        data = self.data if df is None else df
+        self.data = np.max(data.values)
+        return self
+
+    @window_decorator
+    def w_min(self, df=None, *args, **kwargs):
+        data = self.data if df is None else df
+        self.data = np.min(data.values)
         return self
     
     """
@@ -302,7 +443,7 @@ class Feature:
         return self
 
     @window_decorator
-    def w_autocorrelation(self, df=None, *args, lag=100, **kwargs):
+    def w_autocorrelation(self, df=None, *args, lag=10, **kwargs):
         """
         Calculates the autocorrelation of the specified lag
 
@@ -323,7 +464,7 @@ class Feature:
         return self
 
     @window_decorator
-    def w_binned_entropy(self, df=None, *args, max_bins=10, **kwargs):
+    def w_binned_entropy(self, df=None, *args, max_bins=100, **kwargs):
         """
 
         Performs entropy based discretisation
@@ -649,7 +790,8 @@ class Feature:
 
         """
         data = self.data if df is None else df
-        self.data = tsfresh.feature_extraction.feature_calculators.median(data.values.squeeze())
+        self.data = np.median(data.values.squeeze())
+        # self.data = tsfresh.feature_extraction.feature_calculators.median(data.values.squeeze())
         return self
 
     @window_decorator
@@ -701,7 +843,7 @@ class Feature:
         return self
 
     @window_decorator
-    def w_quantile(self, df=None, *args, q=0.5, **kwargs):
+    def w_quantile(self, df=None, *args, q=0.05, **kwargs):
         """
         Calculates the q quantile of x. This is the value of x greater than q% of the ordered values from x.
 
@@ -717,11 +859,12 @@ class Feature:
 
         """
         data = self.data if df is None else df
-        self.data = tsfresh.feature_extraction.feature_calculators.quantile(data.values.squeeze(), q=q)
+        self.data = np.quantile(data.values.squeeze(), q=q)
+        # self.data = tsfresh.feature_extraction.feature_calculators.quantile(data.values.squeeze(), q=q)
         return self
     
     @window_decorator
-    def w_ratio_beyond_r_sigma(self, df=None, *args, r=0.5, **kwargs):
+    def w_ratio_beyond_r_sigma(self, df=None, *args, r=2, **kwargs):
         """
         Ratio of values that are more than r*std(x) (so r sigma) away from the mean of x.
 

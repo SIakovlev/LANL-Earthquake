@@ -27,7 +27,8 @@ def main(**kwargs):
                         kwargs['features'],
                         default_window_size,
                         default_window_stride,
-                        kwargs['data_processed_dir'] + os.path.splitext(kwargs["data_processed_fname"])[0] + '/')
+                        kwargs['data_processed_dir'] + os.path.splitext(kwargs["data_processed_fname"])[0] + '/',
+                        is_test=False)
     print(' - Dataframe was successfully processed')
 
     # 3. Save modified dataframe
@@ -59,13 +60,42 @@ if __name__ == '__main__':
                           "window_stride": 1000,
                           "features": {}})
 
-        # Create features dict with a feature example
-        features = [{"name": "example",
-                     "on": True,
-                     "functions": {
-                         "r_std": {"window_size": 100, "window_stride": None},
-                         "w_quantile": {"q": 0.05}
-                     }}]
+        # Create features dict with a feature set
+        win_list = [11, 101, 1001, 10001]
+
+        features_1st = ['r_std', 'r_mean', 'r_sta_lta']
+
+        features_2nd = [
+            'w_median',
+            'w_mean',
+            'w_min',
+            'w_max',
+            'w_binned_entropy',
+            'w_quantile',
+            'w_kurtosis',
+            'w_skewness',
+            'w_q31',
+            'w_ratio_beyond_r_sigma',
+            'w_median_BRP',
+            'w_autocorrelation',
+            'w_count_above_mean',
+            'w_mean_abs_change',
+            'w_mean_change'
+        ]
+
+        features = []
+        for win in win_list:
+            for feature1 in features_1st:
+                for feature2 in features_2nd:
+                    feature = {"name": "", "on": True}
+                    functions = {}
+                    if feature1 == 'r_sta_lta':
+                        functions[feature1] = {"sta_window": win, "lta_window": win * 10}
+                    else:
+                        functions[feature1] = {"window_size": win, "window_stride": None}
+                    functions[feature2] = {}
+                    feature["functions"] = functions
+                    features.append(feature)
 
         dp_config["features"] = features
         with open(config_fname, 'w') as outfile:
