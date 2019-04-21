@@ -114,19 +114,20 @@ def main(**kwargs):
         model.fit(X_train, y_train)
 
         # validate
-
-        rand_train_idx = np.random.randint(0, X_train.shape[0], X_valid.shape[0])
+        num_to_predict = X_valid.shape[0] if X_valid.shape[0] != 0 else 5000
+        rand_train_idx = np.random.randint(0, X_train.shape[0], num_to_predict)
         predict = model.predict(X_train.iloc[rand_train_idx])
         for metric_name, metric in metrics.items():
             score = metric(predict, y_train.iloc[rand_train_idx])
             scores[metric_name+'_train'].append(score)
             print(f"train score ({metric_name}): {score.mean():.4f}")
 
-        predict = model.predict(X_valid)
-        for metric_name, metric in metrics.items():
-            score = metric(predict, y_valid)
-            scores[metric_name].append(score)
-            print(f"validation score ({metric_name}): {score.mean():.4f}")
+        if X_valid.shape[0] != 0:
+            predict = model.predict(X_valid)
+            for metric_name, metric in metrics.items():
+                score = metric(predict, y_valid)
+                scores[metric_name].append(score)
+                print(f"validation score ({metric_name}): {score.mean():.4f}")
 
     # save last model
     # TODO: consider saving the best performing model instead of the last one
