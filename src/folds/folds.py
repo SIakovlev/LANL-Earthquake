@@ -34,34 +34,39 @@ class CustomFold:
         self.pad = pad
 
     def split(self, data):
-        for i in range(self.n_splits):
-            data_len = data.shape[0]
+        if self.n_splits == 1:
+            idx = np.arange(data.shape[0])
+            np.random.shuffle(idx)
+            yield idx, np.empty(0)
+        else:
+            for i in range(self.n_splits):
+                data_len = data.shape[0]
 
-            # how many samples in test subset
-            test_len = int(data_len / self.n_splits)
+                # how many samples in test subset
+                test_len = int(data_len / self.n_splits)
 
-            # how many consecutive chunks in test subset
-            num_test_fragments = max(1, int(test_len * self.frag))
-            seq_lens = [max(1, test_len // num_test_fragments)] * num_test_fragments
+                # how many consecutive chunks in test subset
+                num_test_fragments = max(1, int(test_len * self.frag))
+                seq_lens = [max(1, test_len // num_test_fragments)] * num_test_fragments
 
-            test_idx = []
-            test_idx_padded = []
+                test_idx = []
+                test_idx_padded = []
 
-            for seq_len in seq_lens:
-                seq_begin_idx = np.random.randint(self.pad, data_len-1, 1)
-                seq_begin_idx_padded = max(seq_begin_idx - self.pad, 0)
-                seq_end_idx = min(seq_begin_idx + seq_len, data_len-1)
-                seq_end_idx_padded = min(seq_end_idx + self.pad, data_len-1)
-                seq_idx_padded = np.arange(seq_begin_idx_padded, seq_end_idx_padded)
-                seq_idx = np.arange(seq_begin_idx, seq_end_idx)
-                test_idx.extend(seq_idx)
-                test_idx_padded.extend(seq_idx_padded)
+                for seq_len in seq_lens:
+                    seq_begin_idx = np.random.randint(self.pad, data_len-1, 1)
+                    seq_begin_idx_padded = max(seq_begin_idx - self.pad, 0)
+                    seq_end_idx = min(seq_begin_idx + seq_len, data_len-1)
+                    seq_end_idx_padded = min(seq_end_idx + self.pad, data_len-1)
+                    seq_idx_padded = np.arange(seq_begin_idx_padded, seq_end_idx_padded)
+                    seq_idx = np.arange(seq_begin_idx, seq_end_idx)
+                    test_idx.extend(seq_idx)
+                    test_idx_padded.extend(seq_idx_padded)
 
-            train_idx = np.setxor1d(np.arange(0, data_len), test_idx_padded)
-            test_idx = np.array(test_idx)
+                train_idx = np.setxor1d(np.arange(0, data_len), test_idx_padded)
+                test_idx = np.array(test_idx)
 
-            print(f"{self.__class__.__name__}: Percentage of data thrown out: {(data_len - len(train_idx) - len(set(test_idx))) * 100 / data_len}%")
-            yield train_idx, test_idx
+                print(f"{self.__class__.__name__}: Percentage of data thrown out: {(data_len - len(train_idx) - len(set(test_idx))) * 100 / data_len}%")
+                yield train_idx, test_idx
 
 
 if __name__ == '__main__':
@@ -87,4 +92,5 @@ if __name__ == '__main__':
         print("Test len", len(valid_index))
         # print("Test", valid_index)
         print()
+    print('done')
 
