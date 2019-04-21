@@ -27,7 +27,8 @@ def main(**kwargs):
                         kwargs['features'],
                         default_window_size,
                         default_window_stride,
-                        kwargs['data_processed_dir'] + os.path.splitext(kwargs["data_processed_fname"])[0] + '/')
+                        kwargs['data_processed_dir'] + os.path.splitext(kwargs["data_processed_fname"])[0] + '/',
+                        is_test=False)
     print(' - Dataframe was successfully processed')
 
     # 3. Save modified dataframe
@@ -43,7 +44,7 @@ def main(**kwargs):
 
 if __name__ == '__main__':
 
-    config_fname = "../configs/dp_config_e3.json"
+    config_fname = "../configs/dp_config.json"
     # build config if there is no .json file
     if not os.path.isfile(config_fname):
         # MacOS specific

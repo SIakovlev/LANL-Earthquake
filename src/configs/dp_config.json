@@ -1,7 +1,7 @@
 {
   "data_dir": "../../data/",
   "data_processed_dir": "../../data/",
-  "data_fname": "train.h5",
+  "data_fname": "seg_00030f.h5",
   "data_processed_fname": "train_processed_e1.h5",
   "window_size": 150000,
   "window_stride": 1000,

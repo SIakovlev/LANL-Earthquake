@@ -1,16 +1,124 @@
-import numpy as np
 import scipy.signal
-from scipy.signal import savgol_filter
 import tsfresh
 import feets
-from tqdm import tqdm
 import warnings
 import os
+import functools
+import sys
+import inspect
+import numpy as np
 import pandas as pd
-from dp_utils import window_decorator, rolling_decorator
-
-
+from tqdm import tqdm
+from scipy.signal import savgol_filter
 warnings.filterwarnings("ignore", category=feets.ExtractorWarning)
+
+
+def window_decorator(func):
+    @functools.wraps(func)
+    def wrapper(self, *args, **kwargs):
+
+        window_size = kwargs['window_size']
+        window_stride = kwargs['window_stride']
+        verbose = True if "verbose" not in kwargs else kwargs['verbose']
+        desc_line = get_function_descriptor(func, kwargs) if "desc_line" not in kwargs else kwargs['desc_line']
+
+        assert self.data.shape[0] >= window_size, "Dataframe size is too small for a chosen window size"
+        if not isinstance(verbose, bool):
+            raise TypeError("verbose parameter must be a bool type!")
+        if not isinstance(desc_line, str):
+            raise TypeError("desc_line parameter must be a string type!")
+        if not isinstance(window_size, int):
+            raise TypeError("window_size parameter must be an integer type!")
+        if not isinstance(window_stride, int):
+            raise TypeError("window_stride parameter must be an integer type!")
+
+        feature_name = self.update_name(desc_line)
+        self.update_path()
+        if self.exists():
+            return self.read_feature()
+
+        temp = []
+        df = self.data
+        if window_size is None:
+            temp = func(self, df, *args, **kwargs).data
+        else:
+            for i in tqdm(range(0, df.shape[0] - window_size + window_stride, window_stride),
+                          desc=desc_line, file=sys.stdout, disable=not verbose):
+                batch = df.iloc[i: i + window_size]
+                temp.append(func(self, batch, *args, **kwargs).data)
+
+        if verbose:
+            tqdm.write(f"\t window decorator for {func.__name__}: ")
+            tqdm.write("\t - window size: {}".format(window_size))
+            tqdm.write("\t - window stride: {}".format(window_stride))
+
+        if hasattr(temp[0], 'shape') and temp[0].shape is not ():
+            out_features = temp[0].shape[0]
+            column_names = [feature_name + '_' + str(i) for i in range(out_features)]
+        else:
+            column_names = [feature_name]
+
+        self.data = pd.DataFrame(temp, columns=column_names)
+        return self
+    return wrapper
+
+
+def rolling_decorator(func):
+    @functools.wraps(func)
+    def wrapper(self, *args, **kwargs):
+        verbose = True if "verbose" not in kwargs else kwargs['verbose']
+        desc_line = get_function_descriptor(func, kwargs) if "desc_line" not in kwargs else kwargs['desc_line']
+
+        if not isinstance(verbose, bool):
+            raise TypeError("verbose parameter must be a bool type!")
+        if not isinstance(desc_line, str):
+            raise TypeError("desc_line parameter must be a string type!")
+
+        feature_name = self.update_name(desc_line)
+        self.update_path()
+        if self.exists():
+            return self.read_feature()
+
+        df = self.data
+        temp = func(self, df, *args, **kwargs).data
+
+        if verbose:
+            tqdm.write(f"\t Rolling decorator for {func.__name__}: ")
+
+        column_names = [feature_name]
+        self.data = pd.DataFrame(temp, columns=column_names)
+        return self
+
+    return wrapper
+
+
+def get_function_descriptor(func, extra_params):
+    """
+    Parse all function args and get a complete description
+
+    Parameters
+    ----------
+    func : function reference object
+    extra_params : external params passed to decorated function (i.e. window size, desc_line, etc...)
+
+    Returns
+    -------
+    String with function name and its parameters
+    """
+
+    inspect_params = inspect.getfullargspec(func)
+    funcname_line = func.__name__
+    args_line = "{}, ".format(*inspect_params.args)
+    kwargs_line = ', '.join("{}={}".format(k, v) for k, v in extra_params.items())
+    if inspect_params.kwonlydefaults is not None:
+        kwonlydefaults_line = ', (' + ', '.join("{}={}".format(k, v) for k, v in inspect_params.kwonlydefaults.items()) \
+                              + ')'
+    else:
+        kwonlydefaults_line = ''
+
+    desc_line = funcname_line + '(' + args_line + kwargs_line + kwonlydefaults_line + ')'
+
+    return desc_line
 
 
 def classic_sta_lta(x, length_sta, length_lta):
