@@ -83,7 +83,7 @@ class Feature:
     """
 
     @window_decorator
-    def w_psd(self, df=None, *args, fs=4e6, **kwargs):
+    def w_psd_sum(self, df=None, *args, fs=4e6, **kwargs):
         """
         Calculates total power spectrum density of the dataframe and sums it up
 
@@ -100,6 +100,26 @@ class Feature:
         """
         data = self.data if df is None else df
         self.data = np.sum(scipy.signal.periodogram(data.values.squeeze(), fs=fs)[1])
+        return self
+
+    @window_decorator
+    def w_psd(self, df=None, *args, fs=4e6, **kwargs):
+        """
+        Calculates total power spectrum density of the dataframe and sums it up
+
+        Parameters
+        ----------
+        df : pandas DataFrame
+        args : None
+        fs : sampling frequency
+        kwargs :
+
+        Returns
+        -------
+        spectral components of the dataframe
+        """
+        data = self.data if df is None else df
+        self.data = scipy.signal.periodogram(data.values.reshape(-1,), fs=fs)[1]
         return self
 
     @window_decorator
@@ -191,7 +211,7 @@ class Feature:
         return self
 
     @rolling_decorator
-    def r_sta_lta(self, df=None, *args, sta_window=100, lta_window=1000, **kwargs):
+    def r_sta_lta(self, df=None, *args, sta_window=1000, lta_window=10000, **kwargs):
         """
         Calculates STA/LTA ratio over windows sta_window and lta_window
 
@@ -207,6 +227,7 @@ class Feature:
         -------
 
         """
+
         data = self.data if df is None else df
         if sta_window > lta_window:
             raise ValueError(f"Short-time window can't be longer than long-time window!")
@@ -228,6 +249,18 @@ class Feature:
     def w_std(self, df=None, *args, axis=0, **kwargs):
         data = self.data if df is None else df
         self.data = np.std(data.values, axis=axis)
+        return self
+
+    @window_decorator
+    def w_max(self, df=None, *args, **kwargs):
+        data = self.data if df is None else df
+        self.data = np.max(data.values)
+        return self
+
+    @window_decorator
+    def w_min(self, df=None, *args, **kwargs):
+        data = self.data if df is None else df
+        self.data = np.min(data.values)
         return self
     
     """
@@ -302,7 +335,7 @@ class Feature:
         return self
 
     @window_decorator
-    def w_autocorrelation(self, df=None, *args, lag=100, **kwargs):
+    def w_autocorrelation(self, df=None, *args, lag=10, **kwargs):
         """
         Calculates the autocorrelation of the specified lag
 
@@ -323,7 +356,7 @@ class Feature:
         return self
 
     @window_decorator
-    def w_binned_entropy(self, df=None, *args, max_bins=10, **kwargs):
+    def w_binned_entropy(self, df=None, *args, max_bins=100, **kwargs):
         """
 
         Performs entropy based discretisation
@@ -702,7 +735,7 @@ class Feature:
         return self
 
     @window_decorator
-    def w_quantile(self, df=None, *args, q=0.5, **kwargs):
+    def w_quantile(self, df=None, *args, q=0.05, **kwargs):
         """
         Calculates the q quantile of x. This is the value of x greater than q% of the ordered values from x.
 
@@ -723,7 +756,7 @@ class Feature:
         return self
     
     @window_decorator
-    def w_ratio_beyond_r_sigma(self, df=None, *args, r=0.5, **kwargs):
+    def w_ratio_beyond_r_sigma(self, df=None, *args, r=2, **kwargs):
         """
         Ratio of values that are more than r*std(x) (so r sigma) away from the mean of x.
 

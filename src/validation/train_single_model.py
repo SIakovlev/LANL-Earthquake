@@ -14,6 +14,7 @@ from src.validation.summary_utils import summarize
 import xgboost as xgb
 
 from src.models.mlp_net import MLP
+from src.models.mlp_classifier_net import MLP_classifier
 from src.models.lstm_net import LstmNet
 from src.folds.folds import CustomFold
 from src.models.nn_test import CustomNN
@@ -129,6 +130,12 @@ def main(**kwargs):
             scores[metric_name].append(score)
             print(f"validation score ({metric_name}): {score.mean():.4f}")
 
+        predict = model.predict(X_valid)
+        plt.figure(figsize=(10, 5))
+        plt.plot(predict, 'k')
+        plt.plot(y_valid.values, 'r')
+        plt.show()
+
 
     # save last model
     # TODO: consider saving the best performing model instead of the last one
@@ -155,7 +162,7 @@ if __name__ == '__main__':
     parser.add_argument('--config_fname',
                         help='name of the config file',
                         type=str,
-                        default="../configs/train_config.json")
+                        default="../configs/mlp_classifier_train_config.json")
 
     args = parser.parse_args()
 

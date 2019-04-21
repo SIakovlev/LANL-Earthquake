@@ -1,6 +1,6 @@
 {
-  "train_data_fname": "../../data.nosync/train_good_smoothed_better_e1.h5",
-  "summary_dest_fname": "../../data/summary/summary.pickle",
+  "train_data_fname": "../../data/e3.h5",
+  "summary_dest_fname": "../../data/e3_summary.pickle",
 
 
   "folds":{
@@ -19,12 +19,13 @@
 
   "model": {
     "name": "XGBRegressor",
-    "eta": 0.01,
-    "max_depth": 6,
-    "n_estimators": 300,
-    "subsample": 0.9,
-    "objective": "reg:linear",
+    "eta": 0.001,
+    "max_depth": 5,
+    "n_estimators": 150,
+    "subsample": 0.7,
+    "objective": "gpu:reg:linear",
     "eval_metric": "mae",
+    "tree_method": "gpu_hist",
     "verbosity": 3,
     "nthread": 15
   }
