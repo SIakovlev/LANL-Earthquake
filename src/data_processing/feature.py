@@ -13,6 +13,8 @@ from scipy.signal import savgol_filter
 warnings.filterwarnings("ignore", category=feets.ExtractorWarning)
 
 
+
+
 def window_decorator(func):
     @functools.wraps(func)
     def wrapper(self, *args, **kwargs):
@@ -348,6 +350,25 @@ class Feature:
     """
 
     @window_decorator
+    def w_av_change_abs(self, df=None, *args, axis=0, **kwargs):
+        data = self.data if df is None else df
+        self.data = np.mean(np.diff(data.values.squeeze()), axis=axis)
+        return self
+
+    @window_decorator
+    def w_av_change_rate(self, df=None, *args, axis=0, **kwargs):
+        data = self.data if df is None else df
+        self.data = np.mean(np.nonzero((np.diff(data.values.squeeze()) /data.values.squeeze()[:-1]))[0],axis=axis)
+        return self
+
+    @window_decorator
+    def w_min(self, df=None, *args, axis=0, **kwargs):
+        data = self.data if df is None else df
+        self.data = np.min(data.values, axis=axis)
+        return self
+
+
+    @window_decorator
     def w_mean(self, df=None, *args, axis=0, **kwargs):
         data = self.data if df is None else df
         self.data = np.mean(data.values, axis=axis)
@@ -442,8 +463,70 @@ class Feature:
                                                                                        r=r)
         return self
 
+    def w_fft_rmean_last_5000(self, df=None, *args, lag=100, **kwargs):
+        """
+        Calculates the autocorrelation of the specified lag
+
+        Parameters
+        ----------
+        df : pandas DataFrame
+        args :
+        lag : the lag in samples
+        kwargs :
+
+        Returns
+        -------
+
+        """
+        data = self.data if df is None else df
+        zc = np.fft.fft(data.values.squeeze())
+        self.data = np.real(zc[-5000:]).mean()
+        return self
+
     @window_decorator
-    def w_autocorrelation(self, df=None, *args, lag=10, **kwargs):
+    def w_irq(self, df=None, *args, lag=100, **kwargs):
+        """
+        Calculates the autocorrelation of the specified lag
+
+        Parameters
+        ----------
+        df : pandas DataFrame
+        args :
+        lag : the lag in samples
+        kwargs :
+
+        Returns
+        -------
+
+        """
+        data = self.data if df is None else df
+        self.data = np.subtract(*np.percentile(data.values.squeeze(), [75, 25]))
+        return self
+
+
+    @window_decorator
+    def w_fft_lmean_last_5000(self, df=None, *args, lag=100, **kwargs):
+        """
+        Calculates the autocorrelation of the specified lag
+
+        Parameters
+        ----------
+        df : pandas DataFrame
+        args :
+        lag : the lag in samples
+        kwargs :
+
+        Returns
+        -------
+
+        """
+        data = self.data if df is None else df
+        zc = np.fft.fft(data.values.squeeze())
+        self.data = np.imag(zc[-5000:]).mean()
+        return self
+
+    @window_decorator
+    def w_autocorrelation(self, df=None, *args, lag=100, **kwargs):
         """
         Calculates the autocorrelation of the specified lag
 
@@ -689,6 +772,8 @@ class Feature:
         """
         data = self.data if df is None else df
         self.data = tsfresh.feature_extraction.feature_calculators.longest_strike_above_mean(data.values.squeeze())
+        # del data
+        # gc.collect()
         return self
 
     
@@ -709,6 +794,8 @@ class Feature:
         """
         data = self.data if df is None else df
         self.data = tsfresh.feature_extraction.feature_calculators.longest_strike_below_mean(data.values.squeeze())
+        # del data
+        # gc.collect()
         return self
 
     @window_decorator
@@ -972,6 +1059,30 @@ class Feature:
         return self
 
     @window_decorator
+    def w_percent_difference_flux_percentile(self, df=None, *args, **kwargs):
+        """
+        Ratio of F5,95 over the median magnitude.
+
+        Parameters
+        ----------
+        df : pandas DataFrame
+        args :
+        kwargs :
+
+        Returns
+        -------
+
+        """
+        data = self.data if df is None else df
+        size = data.shape[0]
+        time = np.linspace(0, size - 1, size)
+        magnitude = data.values.squeeze()
+        t_m = [time, magnitude]
+        fs = feets.FeatureSpace(only=['PercentDifferenceFluxPercentile'], data=['time', 'magnitude'])
+        self.data = fs.extract(*t_m)[1][0]
+        return self
+
+    @window_decorator
     def w_eta_e(self, df=None, *args, **kwargs):
         """
         Variability index η is the ratio of the mean of the square of successive differences to the variance of data points.
@@ -1127,6 +1238,58 @@ class Feature:
         fs = feets.FeatureSpace(only=['Q31'], data=['time', 'magnitude'])
         self.data = fs.extract(*t_m)[1][0]
         return self
+
+    @window_decorator
+    def w_flux_percentile_ratio_sum(self, df=None, *args, **kwargs):
+        """
+        Freq2_harmonics_rel_phase_2
+
+        Parameters
+        ----------
+        df : pandas DataFrame
+        args :
+        kwargs :
+
+        Returns
+        -------
+
+        """
+        data = self.data if df is None else df
+        size = df.shape[0]
+        time = np.linspace(0, size - 1, size)
+        magnitude = data.values.squeeze()
+        t_m = [time, magnitude]
+        fs = feets.FeatureSpace(
+            only=['FluxPercentileRatioMid20', 'FluxPercentileRatioMid50', 'FluxPercentileRatioMid80'],
+            data=['time', 'magnitude'])
+        self.data = np.sum(fs.extract(*t_m)[1])
+        return self
+
+    @window_decorator
+    def w_rcs(self, df=None, *args, **kwargs):
+        """
+        Freq2_harmonics_rel_phase_2
+
+        Parameters
+        ----------
+        df : pandas DataFrame
+        args :
+        kwargs :
+
+        Returns
+        -------
+
+        """
+        data = self.data if df is None else df
+        size = df.shape[0]
+        time = np.linspace(0, size - 1, size)
+        magnitude = data.values.squeeze()
+        t_m = [time, magnitude]
+        fs = feets.FeatureSpace(only=['Rcs'], data=['time', 'magnitude'])
+        self.data = fs.extract(*t_m)[1][0]
+        return self
+
+
 
     @window_decorator
     def w_slottedA_length(self, df=None, *args, **kwargs):

@@ -1,21 +1,17 @@
 {
-  "train_data": "data/train_good_features.h5",
-  "summary_dest": "data/summary_temp.csv",
+  "train_data": "data/train_wavelet_proceded_test.h5",
+  "summary_dest": "data/summary_wavelet_int_150000_1000_temp.csv",
+  "models_directory": "data/models_wav_temps/",
   "preproc": {
     "name": "StandardScaler"
   },
  "folds":
           [
             {
-              "name":"KFold",
-              "shuffle": true,
-              "n_splits": 5
-            },
-            {
               "name":"CustomFold",
-              "n_splits": 10,
-              "pad": 15,
-              "fragmentation": 0.1,
+              "n_splits": 1,
+              "pad": 150,
+              "fragmentation": 0.2,
               "shuffle": true
             }
           ],
@@ -28,16 +24,22 @@
           [
             {
               "model": {
+                "Ridge": {
+                }
+              }
+            },
+            {
+              "model": {
                 "XGBRegressor": {
-                  "eta": 0.003,
-                  "max_depth": 9,
-                  "n_estimators": 1000,
-                  "subsample": 0.9,
+                  "eta": 0.01,
+                  "max_depth": 8,
+                  "seed" :17,
+                  "n_estimators": 600,
+                  "subsample": 0.75,
                   "objective": "gpu:reg:linear",
                   "eval_metric": "mae",
                   "silent": true,
-                  "tree_method": "gpu_hist",
-                  "nthread": -1
+                  "tree_method": "gpu_hist"
                 }
               }
             }

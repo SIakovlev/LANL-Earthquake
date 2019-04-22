@@ -16,6 +16,7 @@ from xgboost import XGBRegressor
 from catboost import CatBoostRegressor
 from lightgbm import LGBMRegressor
 from tqdm import tqdm
+from sklearn.externals import joblib
 import copy
 
 from src.utils import str_to_class
@@ -94,10 +95,17 @@ class ValidationBase:
         fold_data = [x for x in params_to_save if x is not None and 'folds_name' in x.keys()]
         fold_data = fold_data[0]
 
+        preproc_ = [x for x in params_to_save if x is not None and 'preproc_name' in x.keys()]
+        if preproc_ != []:
+            preproc_ = preproc_[0]
+        else:
+            preproc_ = None
+
         #options that not save in output summary
         models_directory_dict = [x for x in params_to_save if x is not None and 'models_directory' in x.keys()]
         predict_data = None
         params_to_save.remove(models_directory_dict[0])
+
 
         if models_directory_dict[0]['predict_directory'] is not None:
             predict_data = pd.DataFrame(columns=['y_valid','y_predict'], index= range(train_data.shape[0]))
@@ -106,11 +114,26 @@ class ValidationBase:
             print("Train model :", self.models_features[num_model]["model_name"])
             for fold_n, (train_index, valid_index) in enumerate(tqdm(folds.split(train_data))):
                 # get data
+                if len(valid_index)== 0:
+                    valid_index = train_index
+
+
                 X_train, X_valid = train_data.iloc[train_index], train_data.iloc[valid_index]
                 y_train, y_valid = y_train_data.iloc[train_index], y_train_data.iloc[valid_index]
+
+                if preproc_ is not None:
+                    print(f' - Attempt to preprocess data')
+                    print(preproc_)
+                    preprocessor_class = str_to_class("src.preprocessing.preproc", preproc_['preproc_name'])(**preproc_['preproc_params'])
+                    preprocessor_class.fit(X_train)
+                    X_train = pd.DataFrame(preprocessor_class.transform(X_train))
+                    X_valid = pd.DataFrame(preprocessor_class.transform(X_valid))
+
+
                 #clean model
                 model = self._create_model(self.models_features[num_model]["model_name"], self.models_features[num_model]["model_params"])
                 # train model
+                print(X_train.shape, X_train.dtypes)
                 model.fit(X_train, y_train)
                 #predict on train
                 y_train_pr = model.predict(X_train)
@@ -142,6 +165,14 @@ class ValidationBase:
                 predict_data.to_pickle(save_predict_path)
 
                 predict_data = predict_data.iloc[0:train_data.shape[0]]
+
+            if preproc_ is not None:
+                preproc_name = "Preproc_{0}_{1}_.save".format(
+                    preproc_['preproc_name'], preproc_['preproc_params'])
+                save_prep_path = os.path.join(models_directory_dict[0]['models_directory'], preproc_name)
+                read_write_summary(save_prep_path, '.pickle', 'wb', preprocessor_class)
+                #joblib.dump(preprocessor_class, save_prep_path)
+
 
             #save model
             if models_directory_dict[0]['models_directory'] is not None:

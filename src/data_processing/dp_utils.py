@@ -16,7 +16,6 @@ def process_df(df, features, default_window_size, default_window_stride, df_path
     1) Calculate all features listed in configuration file (dp_config.json)
     2) Append labels
     3) Perform data re-sampling in case different window sizes are used
-
     :param df: raw data pandas DataFrame
     :param features: list of features specified in .json file
     :param default_window_size:
@@ -127,15 +126,12 @@ def calculate_feature_by_name(df, feature_name, save_dir, config_name='../config
 def resample_columns(df, resulted_size):
     """
     Perform resampling of dataframe df to the resulted size
-
     Parameters
     ----------
     df : pandas DataFrame
     resulted_size (int) : size of the resampled dataframe
-
     Returns
     -------
-
     """
     old_size = df.shape[0]
 
@@ -158,4 +154,3 @@ def resample_columns(df, resulted_size):
             temp.append(y_new)
 
         return pd.DataFrame(dict(zip(col_names, temp)), columns=col_names)
-

@@ -4,7 +4,7 @@ import argparse
 import dp_utils as dp
 import pandas as pd
 import platform
-
+from src.validation.validation_utils import read_write_summary
 
 def main(**kwargs):
     data_path = kwargs['data_dir'] + kwargs["data_fname"]
@@ -16,7 +16,8 @@ def main(**kwargs):
     # 1. Load data
     print('.......................Processing started.........................')
     print(f' - Attempt to load data from {data_path}')
-    df = pd.read_hdf(data_path, key='table')
+    _, file_extension = os.path.splitext(data_path)
+    df = read_write_summary(data_path,file_extension, 'rb')
     print(' - Data was successfully loaded into memory')
 
     # 2. Run processing
@@ -42,7 +43,7 @@ def main(**kwargs):
 
 if __name__ == '__main__':
 
-    config_fname = "../configs/dp_config.json"
+    config_fname = "src/configs/dp_config.json"
     # build config if there is no .json file
     if not os.path.isfile(config_fname):
         # MacOS specific
@@ -111,4 +112,3 @@ if __name__ == '__main__':
     with open(args.config_fname) as config:
         params = json.load(config)
     main(**params)
-
