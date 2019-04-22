@@ -1,5 +1,6 @@
 import json
 import argparse
+import numpy as np
 import pandas as pd
 import platform
 import matplotlib as mpl
@@ -11,6 +12,7 @@ import sys
 import glob
 import pywt
 import gc
+from subprocess import Popen, PIPE
 from tqdm import tqdm
 from src.utils import str_to_class
 from src.validation.validation_utils import read_write_summary
@@ -73,27 +75,38 @@ def main(**kwargs):
         test_config["data_processed_dir"] = kwargs["output_dir"]
 
 
-    for _, test_file in enumerate(tqdm(sort_test_names)):
+    multi_num = int(kwargs["multi_proc"])
+    test_configs = [test_config for x in range(multi_num)]
+    config_tests_dp = [config_test_dp+str(i) for i in range(multi_num)]
 
-        #modify test_config
-        test_config["data_fname"] = test_file
-        test_config["data_processed_fname"] = f"{test_file.split('.')[0]}.h5"
+    for _, test_files in enumerate(tqdm(np.reshape(sort_test_names, (-1,multi_num)))):
 
-        with open(config_test_dp, 'w') as write_file:
-            json.dump(test_config, write_file, sort_keys=True, indent=5)
+        for i, config_i in enumerate(config_tests_dp):
+            #modify test_config
+            test_configs[i]["data_fname"] = test_files[i]
+            test_configs[i]["data_processed_fname"] = f"{test_files[i].split('.')[0]}.h5"
+
+            with open(config_i, 'w') as write_file:
+                json.dump(test_configs[i], write_file, sort_keys=True, indent=5)
+
+        cmds_list = [["python","/home/alex/kaggleLan/LANL-Earthquake/LANL-Earthquake/src/data_processing/dp_run.py", f"--config_fname={config_test_dp}"] for config_test_dp in config_tests_dp]
+        procs_list = [Popen(cmd, stdout=devnull, stderr=devnull) for cmd in cmds_list]
+        for proc in procs_list:
+            proc.wait()
 
         #preprocess test data with dp
-        subprocess.check_call(["python","/home/alex/kaggleLan/LANL-Earthquake/LANL-Earthquake/src/data_processing/dp_run.py", f"--config_fname={config_test_dp}"],
-                              stdout=devnull,stderr=devnull)
+
+        # subprocess.check_call(["python","/home/alex/kaggleLan/LANL-Earthquake/LANL-Earthquake/src/data_processing/dp_run.py", f"--config_fname={config_test_dp}"],
+        #                       stdout=devnull, stderr=devnull)
 
         #try:
-        test_df = pd.read_hdf(os.path.join(kwargs["output_dir"], f"{test_file.split('.')[0]}.h5"),key='table')
+        for test_file in test_files:
+            test_df = pd.read_hdf(os.path.join(kwargs["output_dir"], f"{test_file.split('.')[0]}.h5"), key='table')
 
-        if  preprocessor_class is not None:
-            X_test = preprocessor_class.transform(test_df)
-
-        data_predict = model_class.predict(X_test)
-        df_to_submit.loc[len(df_to_submit)] = [test_file.split('.')[0], data_predict[-1]]
+            if  preprocessor_class is not None:
+                X_test = preprocessor_class.transform(test_df)
+            data_predict = model_class.predict(X_test)
+            df_to_submit.loc[len(df_to_submit)] = [test_file.split('.')[0], data_predict[-1]]
        # except UnboundLocalError:
         #    raise ValueError("model not trained")
 

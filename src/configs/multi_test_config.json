@@ -1,0 +1,11 @@
+{
+  "test_dir": "/home/alex/kaggleLan/LANL-Earthquake-Prediction/test/",
+  "models_dir": "data/models_wav_temps/",
+  "model_fname": "Model_Ridge_{}_train_on_last_CustomFold.pickle",
+  "model_load": "sklearn",
+  "dp_config": "/home/alex/kaggleLan/LANL-Earthquake/LANL-Earthquake/src/configs/dp_config.json",
+  "preproc_path": "Preproc_StandardScaler_{}_.save",
+  "multi_proc": 32,
+  "output_dir": "data/test/",
+  "output_file": "data/temp.csv"
+}
