@@ -43,35 +43,36 @@ def eliminate_features(dataset, estimator, **kwargs):
 
 if __name__ == '__main__':
 
+    # TODO: remove or refactor (for P.T.)
     #Creating a dataset of features
     data_path = '/home/pavel/Documents/0Research/Projects/LANL-Earthquake/data/EQs/EQ_2.h5'
-    df = pd.read_hdf(data_path, key='table')
-    df.columns = ['s', 'ttf']
-    config_path = "/home/pavel/Documents/0Research/Projects/LANL-Earthquake/src/data_processing/dp_config.json"
-    import sys
-    import json
-    sys.path.insert(0, '/home/pavel/Documents/0Research/Projects/LANL-Earthquake/src/data_processing')
-    from dp_utils import process_df
-
-    df = pd.read_hdf(data_path, key='table')
-    df.columns = ['s', 'ttf']
-    with open(config_path, 'rb') as config:
-        params = json.load(config)
-
-    routines = params['routines']
-    default_window_size = params['window_size']
-
-    df = process_df(df, routines, default_window_size)
-
-
-    # Working Example
-    params = dict()
-    params["percentile"] = 70
-    params['num_of_features'] = 2
-    estimator = DecisionTreeRegressor()
-
-    new_df = eliminate_features(df, estimator, **params)
-
-    print(new_df.columns)
+    # df = pd.read_hdf(data_path, key='table')
+    # df.columns = ['s', 'ttf']
+    # config_path = "/home/pavel/Documents/0Research/Projects/LANL-Earthquake/src/data_processing/dp_config.json"
+    # import sys
+    # import json
+    # sys.path.insert(0, '/home/pavel/Documents/0Research/Projects/LANL-Earthquake/src/data_processing')
+    # from dp_utils import process_df
+    #
+    # df = pd.read_hdf(data_path, key='table')
+    # df.columns = ['s', 'ttf']
+    # with open(config_path, 'rb') as config:
+    #     params = json.load(config)
+    #
+    # routines = params['routines']
+    # default_window_size = params['window_size']
+    #
+    # df = process_df(df, routines, default_window_size)
+    #
+    #
+    # # Working Example
+    # params = dict()
+    # params["percentile"] = 70
+    # params['num_of_features'] = 2
+    # estimator = DecisionTreeRegressor()
+    #
+    # new_df = eliminate_features(df, estimator, **params)
+    #
+    # print(new_df.columns)
 
 
