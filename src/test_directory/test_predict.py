@@ -85,8 +85,8 @@ def main(**kwargs):
             json.dump(test_config, write_file, sort_keys=True, indent=5)
 
         #preprocess test data with dp
-        subprocess.check_call(["python","/home/alex/kaggleLan/LANL-Earthquake/LANL-Earthquake/src/data_processing/dp_run.py", f"--config_fname={config_test_dp}"])
-                              #stdout=devnull,stderr=devnull)
+        subprocess.check_call(["python","/home/alex/kaggleLan/LANL-Earthquake/LANL-Earthquake/src/data_processing/dp_run.py", f"--config_fname={config_test_dp}"],
+                              stdout=devnull,stderr=devnull)
 
         #try:
         test_df = pd.read_hdf(os.path.join(kwargs["output_dir"], f"{test_file.split('.')[0]}.h5"),key='table')
