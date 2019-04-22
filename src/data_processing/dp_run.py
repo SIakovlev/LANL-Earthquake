@@ -1,9 +1,7 @@
 import os
 import json
 import argparse
-import inspect
 import dp_utils as dp
-# import dp_features
 import pandas as pd
 import platform
 
@@ -28,7 +26,7 @@ def main(**kwargs):
                         default_window_size,
                         default_window_stride,
                         kwargs['data_processed_dir'] + os.path.splitext(kwargs["data_processed_fname"])[0] + '/',
-                        is_test=False)
+                        )
     print(' - Dataframe was successfully processed')
 
     # 3. Save modified dataframe
@@ -114,7 +112,3 @@ if __name__ == '__main__':
         params = json.load(config)
     main(**params)
 
-
-# TODO: add in future if needed
-def update_config(name):
-    pass

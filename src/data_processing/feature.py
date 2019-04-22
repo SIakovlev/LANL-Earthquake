@@ -1,3 +1,5 @@
+import numpy as np
+import pandas as pd
 import scipy.signal
 import tsfresh
 import feets
@@ -6,8 +8,6 @@ import os
 import functools
 import sys
 import inspect
-import numpy as np
-import pandas as pd
 from tqdm import tqdm
 from scipy.signal import savgol_filter
 warnings.filterwarnings("ignore", category=feets.ExtractorWarning)
