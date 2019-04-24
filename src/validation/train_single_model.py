@@ -130,11 +130,11 @@ def main(**kwargs):
             scores[metric_name].append(score)
             print(f"validation score ({metric_name}): {score.mean():.4f}")
 
-        predict = model.predict(X_valid)
-        plt.figure(figsize=(10, 5))
-        plt.plot(predict, 'k')
-        plt.plot(y_valid.values, 'r')
-        plt.show()
+        # predict = model.predict(X_valid)
+        # plt.figure(figsize=(10, 5))
+        # plt.plot(predict, 'k')
+        # plt.plot(y_valid.values, 'r')
+        # plt.show()
 
 
     # save last model
@@ -162,7 +162,7 @@ if __name__ == '__main__':
     parser.add_argument('--config_fname',
                         help='name of the config file',
                         type=str,
-                        default="../configs/mlp_classifier_train_config.json")
+                        default="../configs/train_config.json")
 
     args = parser.parse_args()
 

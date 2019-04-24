@@ -33,7 +33,7 @@ class CustomFold:
         self.frag = fragmentation
         self.pad = pad
 
-    def split(self, data):
+    def split(self, data, y=None, groups=None):
         for i in range(self.n_splits):
             data_len = data.shape[0]
 
