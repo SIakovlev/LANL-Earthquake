@@ -45,7 +45,7 @@ def main(**kwargs):
 
     #load model
     model_path = os.path.join(kwargs["models_dir"], kwargs["model_fname"])
-    if kwargs["model_load"] == 'sklearn':
+    if kwargs["model_load"] == 'standard':
         _, file_extension = os.path.splitext(model_path)
         model_class = read_write_summary(model_path, file_extension, 'rb')
     else:
@@ -72,12 +72,26 @@ def main(**kwargs):
     with open(kwargs["dp_config"], "r") as read_file:
         test_config = json.load(read_file)
         test_config["data_dir"] = kwargs['test_dir']
-        test_config["data_processed_dir"] = kwargs["output_dir"]
-
+        test_config["data_processed_dir"] = kwargs["proceded_dir"]
 
     multi_num = int(kwargs["multi_proc"])
+    ## if test shape not divide on multi_num - fix this
+    i = 0
+    while True:
+        if len(sort_test_names)%multi_num == 0:
+            break;
+        elif multi_num - i < 0:
+            print(f"Len of test data: {len(sort_test_names)} must divided on multi_num: {multi_num}")
+            multi_num =1
+            break;
+        else:
+            i +=1
+            multi_num -= i
+
+    print(f'Use {multi_num} processes')
+
     test_configs = [test_config for x in range(multi_num)]
-    config_tests_dp = [config_test_dp+str(i) for i in range(multi_num)]
+    config_tests_dp = [config_test_dp[:-5]+str(i)+'.json' for i in range(multi_num)]
 
     for _, test_files in enumerate(tqdm(np.reshape(sort_test_names, (-1,multi_num)))):
 
@@ -88,8 +102,8 @@ def main(**kwargs):
 
             with open(config_i, 'w') as write_file:
                 json.dump(test_configs[i], write_file, sort_keys=True, indent=5)
-
-        cmds_list = [["python","/home/alex/kaggleLan/LANL-Earthquake/LANL-Earthquake/src/data_processing/dp_run.py", f"--config_fname={config_test_dp}"] for config_test_dp in config_tests_dp]
+        python_dir = kwargs["dp_run_file"]
+        cmds_list = [["python", python_dir, f"--config_fname={config_test_dp}"] for config_test_dp in config_tests_dp]
         procs_list = [Popen(cmd, stdout=devnull, stderr=devnull) for cmd in cmds_list]
         for proc in procs_list:
             proc.wait()
@@ -101,16 +115,22 @@ def main(**kwargs):
 
         #try:
         for test_file in test_files:
-            test_df = pd.read_hdf(os.path.join(kwargs["output_dir"], f"{test_file.split('.')[0]}.h5"), key='table')
+            test_df = pd.read_hdf(os.path.join(kwargs["proceded_dir"], f"{test_file.split('.')[0]}.h5"), key='table')
 
             if  preprocessor_class is not None:
+                print(test_df.head())
+                print(preprocessor_class.get_params())
                 X_test = preprocessor_class.transform(test_df)
             data_predict = model_class.predict(X_test)
             df_to_submit.loc[len(df_to_submit)] = [test_file.split('.')[0], data_predict[-1]]
        # except UnboundLocalError:
         #    raise ValueError("model not trained")
-
+    #remove test configs
+    for file_d in config_tests_dp:
+        if os.path.exists(file_d):
+            os.remove(file_d)
     print("***********************Save to file***************************")
+
     df_to_submit.to_csv(kwargs['output_file'], index=False)
 
 
