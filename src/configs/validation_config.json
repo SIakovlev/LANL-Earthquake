@@ -24,10 +24,10 @@
             {
               "model": {
                 "XGBRegressor": {
-                  "eta": 0.01,
+                  "eta": 0.001,
                   "max_depth": 5,
                   "n_estimators": 151,
-                  "subsample": 0.9,
+                  "subsample": 0.7,
                   "objective": "gpu:reg:linear",
                   "eval_metric": "mae",
                   "tree_method": "gpu_hist",

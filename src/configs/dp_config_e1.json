@@ -59,7 +59,7 @@
     },
     {
       "name": "psd_sum",
-      "on": false,
+      "on": true,
       "functions": {
         "w_psd": {
         }

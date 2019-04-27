@@ -1,11 +1,11 @@
 {
-  "test_dir": "/home/alex/kaggleLan/LANL-Earthquake-Prediction/test/",
-  "models_dir": "data/models_wav_temps/",
-  "model_fname": "Model_Ridge_{}_train_on_last_CustomFold.pickle",
+  "test_dir": "../../data/test/",
+  "models_dir": "../../data/submit_27_04/saved_models",
+  "model_fname": "Model_XGBRegressor_{'eta': 0.001, 'max_depth': 5, 'n_estimators': 151, 'subsample': 0.7, 'objective': 'gpu:reg:linear', 'eval_metric': 'mae', 'tree_method': 'gpu_hist', 'verbosity': 3, 'nthread': 15}_train_on_last_CustomFold.pickle",
   "model_load": "sklearn",
-  "dp_config": "/home/alex/kaggleLan/LANL-Earthquake/LANL-Earthquake/src/configs/dp_config.json",
+  "dp_config": "../configs/dp_config_e1.json",
   "preproc_path": "Preproc_StandardScaler_{}_.save",
-  "multi_proc": 32,
-  "output_dir": "data/test/",
-  "output_file": "data/temp.csv"
+  "multi_proc": 16,
+  "output_dir": "../../results/submit_27_04/",
+  "output_file": "../../results/submit_27_04/submit_27_04.csv"
 }

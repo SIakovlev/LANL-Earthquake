@@ -10,7 +10,7 @@ import os
 import re
 import sys
 import glob
-import pywt
+# import pywt
 import gc
 from subprocess import Popen, PIPE
 from tqdm import tqdm
@@ -79,7 +79,7 @@ def main(**kwargs):
     test_configs = [test_config for x in range(multi_num)]
     config_tests_dp = [config_test_dp+str(i) for i in range(multi_num)]
 
-    for _, test_files in enumerate(tqdm(np.reshape(sort_test_names, (-1,multi_num)))):
+    for _, test_files in enumerate(tqdm(np.reshape(sort_test_names, (-1, multi_num)))):
 
         for i, config_i in enumerate(config_tests_dp):
             #modify test_config
@@ -120,7 +120,8 @@ if __name__ == '__main__':
 
     parser.add_argument('--config_fname',
                         help='name of the config file',
-                        type=str)
+                        type=str,
+                        default="../configs/multi_test_config.json")
 
     args = parser.parse_args()
 
