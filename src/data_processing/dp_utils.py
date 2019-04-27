@@ -9,7 +9,7 @@ from feature import Feature
 from scipy import interpolate
 
 
-def process_df(df, features, default_window_size, default_window_stride, df_path=None, is_test=False):
+def process_df(df, features, default_window_size, default_window_stride, df_path=None):
 
     """
     Data processing is done in three main steps:
@@ -22,7 +22,6 @@ def process_df(df, features, default_window_size, default_window_stride, df_path
     :param default_window_size:
     :param default_window_stride:
     :param df_path: path to a folder where the processed pandas DataFrame will be stored
-    :param is_test: test/non-test dataset flag (True in case if train dataset is used)
     :return: processed pandas DataFrame
     """
 
@@ -43,14 +42,15 @@ def process_df(df, features, default_window_size, default_window_stride, df_path
         if not feature['on']:
             print(f"Feature {feature['name']} calcualtion is disabled")
             continue
-        if is_test:
-            data_processed, feature_name = calculate_feature(df, feature, *general_params)
-        else:
+
+        if 'ttf' in df.columns:
             data_processed, feature_name = calculate_feature(df.drop(['ttf'], axis=1), feature, *general_params)
+        else:
+            data_processed, feature_name = calculate_feature(df, feature, *general_params)
         temp_data[feature_name] = data_processed
 
-    if not is_test:
-        # append column with labels
+    if 'ttf' in df.columns:
+        # calculate column with labels for the processed dataframe
         try:
             temp_data['ttf'] = Feature(df=df['ttf'], save_dir=df_path).w_last_elem(df['ttf'],
                                                                                    window_size=default_window_size,
@@ -127,15 +127,12 @@ def calculate_feature_by_name(df, feature_name, save_dir, config_name='../config
 def resample_columns(df, resulted_size):
     """
     Perform resampling of dataframe df to the resulted size
-
     Parameters
     ----------
     df : pandas DataFrame
     resulted_size (int) : size of the resampled dataframe
-
     Returns
     -------
-
     """
     old_size = df.shape[0]
 

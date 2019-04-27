@@ -24,14 +24,17 @@ def summarize(scores=None,
     # preproc is optional, so put None if missing
     if preproc is not None:
         row.append(preproc['name'])
+        del preproc['name']
         row.append(preproc)
     else:
         row.extend([None, None])
 
     row.append(folds['name'])
+    del folds['name']
     row.append(folds)
 
     row.append(model['name'])
+    del model['name']
     row.append(model)
 
     for k in scores.keys():

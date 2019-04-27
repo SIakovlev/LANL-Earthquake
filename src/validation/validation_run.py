@@ -4,21 +4,33 @@ import pandas as pd
 import platform
 import matplotlib as mpl
 import copy
+
 from sklearn.model_selection import KFold, RepeatedKFold, StratifiedKFold, RepeatedStratifiedKFold, TimeSeriesSplit
 from src.folds.folds import CustomFold
 
 from ast import literal_eval
-
-import src.validation.validation_utils
-
 import os
 import sys
+
+sys.path.append(os.getcwd())
+
+
+import src.validation.validation_utils
+from src.folds.folds import CustomFold
+import warnings
+warnings.filterwarnings("ignore")
+
+
 import glob
+
 
 # import importlib.util
 # spec = importlib.util.spec_from_file_location("utils", os.path.join(os.getcwd(), 'src/utils.py'))
 # foo = importlib.util.module_from_spec(spec)
 # spec.loader.exec_module(foo)
+
+
+
 
 from src.utils import str_to_class
 
@@ -67,30 +79,16 @@ def main(**kwargs):
         print(kwargs['preproc']['name'])
         name_class = kwargs['preproc']['name']
         del kwargs['preproc']['name']
-        preprocessor_class = str_to_class("src.preprocessing.preproc", name_class)(**kwargs['preproc'])
-        print(f' - Attempt to preprocess data')
-        train_df = pd.DataFrame(preprocessor_class.fit_transform(train_df), columns=train_columns[:-1])
-        preprocessor  = {"preproc_name":name_class, "preproc_params":kwargs['preproc']}
+        preprocessor  = {"preproc_name": name_class, "preproc_params": kwargs['preproc']}
 
     # 3. parse params and create a chain of folds
     folds_list = []
     fold_features = [{}]
 
     for index_f, f in enumerate(kwargs['folds']):
-        fold_features[index_f] = {'folds_name': f['name'], "folds_params": []}
-        # class_ = str_to_class('sklearn.model_selection', f['name'])
+
+        fold_features[index_f] = {'folds_name': f['name'], "folds_params":[]}
         class_ = str_to_class(__name__, f['name'])
-
-        # try:
-        #     # first look for folds in sklearn
-        #     class_ = str_to_class('sklearn.model_selection', f['name'])
-        # except (AttributeError, ImportError) as e:
-        #     try:
-        #         # then try to look among imported folds
-        #         class__ = str_to_class(__name__, f['name'])
-        #     except (AttributeError, ImportError) as e1:
-        #         raise e1
-
         del f['name']
         fold_features[index_f]["folds_params"] = f
         fold_features.append({})
@@ -110,9 +108,9 @@ def main(**kwargs):
 
     # 4. train validators
     print('....................... Train models ..............................')
-
+    print(train_df)
     for i_f, f in enumerate(folds_list):
-        for v in tqdm(validators):
+        for v in validators:
             # train models in validator and create summary for all models
             v.train_models(train_df,
                            y_data,

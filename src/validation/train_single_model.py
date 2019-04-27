@@ -1,5 +1,7 @@
 import json
+import os
 import argparse
+import pprint
 import platform
 import pandas as pd
 import numpy as np
@@ -10,6 +12,7 @@ from collections import defaultdict
 
 from src.utils import str_to_class
 from src.validation.summary_utils import summarize
+from src.validation.validation_utils import read_write_summary
 
 import xgboost as xgb
 
@@ -35,8 +38,6 @@ if platform.system() == 'Darwin':
 
 import matplotlib.pyplot as plt
 
-from src.models.mlp_net import MLP
-
 
 def main(**kwargs):
     '''
@@ -57,20 +58,14 @@ def main(**kwargs):
     train_data = train_df.drop(['ttf'], axis=1)
     y_train_data = train_df['ttf']
 
-    # path to summary
-    summary_dest_fname = kwargs['summary_dest_fname']
-    try:
-        with open(summary_dest_fname, 'rb') as f:
-            summary = pickle.load(f)
-    except:
-        print(f"Couldn't open summary file: {summary_dest_fname}")
-        summary = None
-
     # 2. create preprocessor
     # TODO: add Standard Scaler
-    preprocessor = None
+
+    preproc_cls = None
     if 'preproc' in kwargs:
-        preprocessor = str_to_class("src.preprocessing.preproc", kwargs['preproc']['name'])()
+        preproc_kwargs = copy.deepcopy(kwargs['preproc'])
+        del preproc_kwargs['name']
+        preproc_cls = str_to_class("src.preprocessing.preproc", kwargs['preproc']['name'])
 
     # 3. create folds
     folds_kwargs = copy.deepcopy(kwargs['folds'])
@@ -94,6 +89,9 @@ def main(**kwargs):
 
     # instantiate and train model
     model_params = copy.deepcopy(kwargs['model'])
+    print("Model params:")
+    pp = pprint.PrettyPrinter(indent=4)
+    pp.pprint(model_params)
     if 'name' in model_params:
         model_params.pop("name")
 
@@ -102,33 +100,36 @@ def main(**kwargs):
     scores = defaultdict(list)
 
     for fold_n, (train_index, valid_index) in enumerate(folds.split(train_data)):
-        print(f" --------------- fold #{fold_n} out of -------------------")
+        print(f" --------------- fold #{fold_n} -------------------")
         # split data
         X_train, X_valid = train_data.iloc[train_index], train_data.iloc[valid_index]
         y_train, y_valid = y_train_data.iloc[train_index], y_train_data.iloc[valid_index]
 
-        preprocessor.fit(X_train)
-        X_train = pd.DataFrame(preprocessor.transform(X_train))
-        X_valid = pd.DataFrame(preprocessor.transform(X_valid))
+        if preproc_cls is not None:
+            preprocessor = preproc_cls(**preproc_kwargs)
+            preprocessor.fit(X_train)
+            X_train = pd.DataFrame(preprocessor.transform(X_train))
+            X_valid = pd.DataFrame(preprocessor.transform(X_valid))
 
         model = model_cls(**model_params)
 
         model.fit(X_train, y_train)
 
         # validate
-
-        rand_train_idx = np.random.randint(0, X_train.shape[0], X_valid.shape[0])
+        num_to_predict = X_valid.shape[0] if X_valid.shape[0] != 0 else 5000
+        rand_train_idx = np.random.randint(0, X_train.shape[0], num_to_predict)
         predict = model.predict(X_train.iloc[rand_train_idx])
         for metric_name, metric in metrics.items():
             score = metric(predict, y_train.iloc[rand_train_idx])
-            scores[metric_name].append(score)
+            scores[metric_name+'_train'].append(score)
             print(f"train score ({metric_name}): {score.mean():.4f}")
 
-        predict = model.predict(X_valid)
-        for metric_name, metric in metrics.items():
-            score = metric(predict, y_valid)
-            scores[metric_name].append(score)
-            print(f"validation score ({metric_name}): {score.mean():.4f}")
+        if X_valid.shape[0] != 0:
+            predict = model.predict(X_valid)
+            for metric_name, metric in metrics.items():
+                score = metric(predict, y_valid)
+                scores[metric_name].append(score)
+                print(f"validation score ({metric_name}): {score.mean():.4f}")
 
         # predict = model.predict(X_valid)
         # plt.figure(figsize=(10, 5))
@@ -136,19 +137,25 @@ def main(**kwargs):
         # plt.plot(y_valid.values, 'r')
         # plt.show()
 
-
     # save last model
     # TODO: consider saving the best performing model instead of the last one
     with open(f"Model {kwargs['model']['name']}", 'wb') as file:
         pickle.dump(model, file)
 
     # 7. create summary
+    summary_dest_fname = kwargs['summary_dest_fname']
+    print(f'Add summary to "{summary_dest_fname}"')
     summary_row = summarize(scores=scores, **kwargs)
-    summary = pd.concat((summary, summary_row)).fillna(np.nan) if summary is not None else summary_row
-    with open(summary_dest_fname, 'wb') as f:
-        pickle.dump(summary, f)
-    print(summary_row.columns.values)
-    print(summary_row.head(1))
+
+    _, summary_ext = os.path.splitext(summary_dest_fname)
+    if not os.path.exists(summary_dest_fname):
+        read_write_summary(summary_dest_fname, summary_ext, 'wb', summary_row)
+    else:
+        # load summary
+        summary = read_write_summary(summary_dest_fname, summary_ext, 'rb')
+        # concatenate load summary and new model's summary
+        summary = pd.concat((summary, summary_row), sort=False).fillna(np.nan) if summary is not None else summary_row
+        read_write_summary(summary_dest_fname, summary_ext, '+wb', summary)
 
     print('.......................Training finished.........................')
 
