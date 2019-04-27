@@ -129,11 +129,12 @@ class ValidationBase:
                     X_train = pd.DataFrame(preprocessor_class.transform(X_train))
                     X_valid = pd.DataFrame(preprocessor_class.transform(X_valid))
 
-
+                X_valid = X_valid.as_matrix()
+                X_train = X_train.as_matrix()
                 #clean model
                 model = self._create_model(self.models_features[num_model]["model_name"], self.models_features[num_model]["model_params"])
                 # train model
-                print(X_train.shape, X_train.dtypes)
+                #print(X_train.shape, X_train.dtypes)
                 model.fit(X_train, y_train)
                 #predict on train
                 y_train_pr = model.predict(X_train)
