@@ -343,6 +343,29 @@ class Feature:
         self.data = classic_sta_lta(data, sta_window, lta_window)
         return self
 
+    @rolling_decorator
+    def r_clip(self, df=None, *args, q=0.99, **kwargs):
+        """
+        Clips the signal: (0, qunatile value)
+
+        Parameters
+        ----------
+        df : pandas DataFrame
+        args :
+        q: quantile value
+        kwargs :
+
+        Returns
+        -------
+
+        """
+
+        data = self.data if df is None else df
+        thresh = np.quantile(data.values.squeeze(), q=q)
+        print(thresh)
+        self.data = np.clip(data.values.squeeze(), a_min=0, a_max=thresh)
+        return self
+
     """
     Numpy based methods
 
