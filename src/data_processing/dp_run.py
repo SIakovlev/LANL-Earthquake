@@ -17,7 +17,7 @@ def main(**kwargs):
     print('.......................Processing started.........................')
     print(f' - Attempt to load data from {data_path}')
     _, file_extension = os.path.splitext(data_path)
-    df = read_write_summary(data_path,file_extension, 'rb')
+    df = read_write_summary(data_path, file_extension, 'rb')
     print(' - Data was successfully loaded into memory')
 
     # 2. Run processing
