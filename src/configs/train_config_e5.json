@@ -1,6 +1,6 @@
 {
-  "train_data_fname": "../../data/e6.h5",
-  "summary_dest_fname": "../../data/e6_summary.pickle",
+  "train_data_fname": "../../data/e5.h5",
+  "summary_dest_fname": "../../data/e5_summary.pickle",
 
 
   "folds":{

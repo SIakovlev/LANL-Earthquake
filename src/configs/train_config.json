@@ -1,6 +1,6 @@
 {
-  "train_data_fname": "../../data/e1/train_processed_e1.h5",
-  "summary_dest_fname": "../../data/train_processed_e1_summary.pickle",
+  "train_data_fname": "../../data/e6.h5",
+  "summary_dest_fname": "../../data/e6_summary.pickle",
 
 
   "folds":{
@@ -19,9 +19,9 @@
 
   "model": {
     "name": "XGBRegressor",
-    "eta": 0.001,
-    "max_depth": 5,
-    "n_estimators": 151,
+    "eta": 0.01,
+    "max_depth": 4,
+    "n_estimators": 51,
     "subsample": 0.7,
     "objective": "gpu:reg:linear",
     "eval_metric": "mae",

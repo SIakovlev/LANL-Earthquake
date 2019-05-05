@@ -1,0 +1,91 @@
+{
+  "data_dir": "../../data/",
+  "data_processed_dir": "../../data/",
+  "data_fname": "train.h5",
+  "data_processed_fname": "e5.h5",
+  "window_size": 150000,
+  "window_stride": 1000,
+  "features": [
+    {
+      "name": "q_01_std_rolling_50",
+      "on": true,
+      "functions": {
+        "r_std": {
+          "window_size": 50,
+          "window_stride": null
+        },
+        "w_quantile": {
+          "q": 0.01
+        }
+      }
+    },
+    {
+      "name": "q_01_sta_lta",
+      "on": true,
+      "functions": {
+        "r_sta_lta": {
+          "sta_window": 1000,
+          "lta_window": 100000
+        },
+        "w_quantile": {
+          "q": 0.01
+        }
+      }
+    },
+    {
+      "name": "q_05_sta_lta",
+      "on": true,
+      "functions": {
+        "r_sta_lta": {
+          "sta_window": 11,
+          "lta_window": 110
+        },
+        "w_quantile": {}
+      }
+    },
+    {
+      "name": "kur_sta_lta",
+      "on": true,
+      "functions": {
+        "r_sta_lta": {
+          "sta_window": 11,
+          "lta_window": 110
+        },
+        "w_kurtosis": {}
+      }
+    },
+    {
+      "name": "skew_sta_lta",
+      "on": true,
+      "functions": {
+        "r_sta_lta": {
+          "sta_window": 11,
+          "lta_window": 110
+        },
+        "w_skewness": {}
+      }
+    },
+    {
+      "name": "kur_sta_lta",
+      "on": true,
+      "functions": {
+        "r_sta_lta": {
+          "sta_window": 110,
+          "lta_window": 1100
+        },
+        "w_kurtosis": {}
+      }
+    },
+    {
+      "name": "skew_sta_lta",
+      "on": true,
+      "functions": {
+        "r_sta_lta": {
+          "sta_window": 110,
+          "lta_window": 1100
+        },
+        "w_skewness": {}
+      }
+    }
+  ]
+}

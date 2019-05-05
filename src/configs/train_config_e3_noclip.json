@@ -1,6 +1,6 @@
 {
-  "train_data_fname": "../../data/e1.h5",
-  "summary_dest_fname": "../../data/e1_summary.pickle",
+  "train_data_fname": "../../data/e3_noclip.h5",
+  "summary_dest_fname": "../../data/e3_noclip_summary.pickle",
 
 
   "folds":{
