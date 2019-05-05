@@ -21,9 +21,3 @@
 **/data.nosync
 *.h5
 *.html
-
-# ignore data folder and all .h5 files
-**/results
-
-# ignore Drafts.ipynb
-Drafts.ipynb
