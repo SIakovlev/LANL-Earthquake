@@ -7,7 +7,7 @@
   "window_stride": 1000,
   "features": [
     {
-      "name": "q_01_std_rolling_50",
+      "name": "clip_q_005_std_rolling_50",
       "on": true,
       "functions": {
         "r_std": {
@@ -15,32 +15,49 @@
           "window_stride": null
         },
         "w_quantile": {
-          "q": 0.01
-        }
-      }
-    },
-    {
-      "name": "q_01_sta_lta",
-      "on": true,
-      "functions": {
-        "r_sta_lta": {
-          "sta_window": 1000,
-          "lta_window": 100000
+          "q": 0.05
         },
-        "w_quantile": {
-          "q": 0.01
+        "r_clip": {
         }
       }
     },
     {
-      "name": "q_05_sta_lta",
+      "name": "mean_abs_sta_lta",
       "on": true,
       "functions": {
         "r_sta_lta": {
           "sta_window": 11,
           "lta_window": 110
         },
-        "w_quantile": {}
+        "w_mean_abs_change": {
+        }
+      }
+    },
+    {
+      "name": "q005",
+      "on": true,
+      "functions": {
+        "w_quantile": {
+          "q": 0.05
+        }
+      }
+    },
+    {
+      "name": "q095",
+      "on": true,
+      "functions": {
+        "w_quantile": {
+          "q": 0.95
+        }
+      }
+    },
+    {
+      "name": "q05",
+      "on": true,
+      "functions": {
+        "w_quantile": {
+          "q": 0.5
+        }
       }
     },
     {
