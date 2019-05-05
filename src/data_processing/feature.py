@@ -413,7 +413,16 @@ class Feature:
         data = self.data if df is None else df
         self.data = np.min(data.values)
         return self
-    
+
+    @window_decorator
+    def w_integral(self, df=None, *args, q=0.7, **kwargs):
+        data = self.data if df is None else df
+        data = data.values
+        q_value = np.quantile(data, q)
+        data = data[(data < q_value)]
+        self.data = np.trapz(data)
+        return self
+
     """
     tsfresh based methods
 
