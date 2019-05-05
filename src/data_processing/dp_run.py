@@ -43,7 +43,7 @@ def main(**kwargs):
 
 if __name__ == '__main__':
 
-    config_fname = "src/configs/dp_config.json"
+    config_fname = "../configs/dp_config.json"
     # build config if there is no .json file
     if not os.path.isfile(config_fname):
         # MacOS specific
