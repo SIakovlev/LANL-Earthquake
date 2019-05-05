@@ -2,7 +2,7 @@
   "data_dir": "../../data/",
   "data_processed_dir": "../../data/",
   "data_fname": "train.h5",
-  "data_processed_fname": "train_processed_e1.h5",
+  "data_processed_fname": "e1.h5",
   "window_size": 150000,
   "window_stride": 1000,
   "features": [
@@ -61,7 +61,7 @@
       "name": "psd_sum",
       "on": true,
       "functions": {
-        "w_psd": {
+        "w_psd_sum": {
         }
       }
     }

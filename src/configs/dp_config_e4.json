@@ -7,12 +7,28 @@
   "window_stride": 1000,
   "features": [
     {
-      "name": "clip_q_01_std_rolling_50",
+      "name": "q_01_std_rolling_50",
       "on": true,
       "functions": {
         "r_std": {
           "window_size": 50,
           "window_stride": null
+        },
+        "w_quantile": {
+          "q": 0.01
+        },
+        "r_clip": {
+
+        }
+      }
+    },
+    {
+      "name": "q_01_sta_lta",
+      "on": true,
+      "functions": {
+        "r_sta_lta": {
+          "sta_window": 1000,
+          "lta_window": 100000
         },
         "w_quantile": {
           "q": 0.01
