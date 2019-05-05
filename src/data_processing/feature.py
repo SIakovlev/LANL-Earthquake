@@ -1,5 +1,4 @@
-import numpy as np
-import pandas as pd
+
 import scipy.signal
 import tsfresh
 import feets
@@ -8,11 +7,11 @@ import os
 import functools
 import sys
 import inspect
+import numpy as np
+import pandas as pd
 from tqdm import tqdm
 from scipy.signal import savgol_filter
 warnings.filterwarnings("ignore", category=feets.ExtractorWarning)
-
-
 
 
 def window_decorator(func):
@@ -344,6 +343,29 @@ class Feature:
         self.data = classic_sta_lta(data, sta_window, lta_window)
         return self
 
+    @rolling_decorator
+    def r_clip(self, df=None, *args, q=0.99, **kwargs):
+        """
+        Clips the signal: (0, qunatile value)
+
+        Parameters
+        ----------
+        df : pandas DataFrame
+        args :
+        q: quantile value
+        kwargs :
+
+        Returns
+        -------
+
+        """
+
+        data = self.data if df is None else df
+        thresh = np.quantile(data.values.squeeze(), q=q)
+        print(thresh)
+        self.data = np.clip(data.values.squeeze(), a_min=0, a_max=thresh)
+        return self
+
     """
     Numpy based methods
 
@@ -526,7 +548,7 @@ class Feature:
         return self
 
     @window_decorator
-    def w_autocorrelation(self, df=None, *args, lag=100, **kwargs):
+    def w_autocorrelation(self, df=None, *args, lag=10, **kwargs):
         """
         Calculates the autocorrelation of the specified lag
 
