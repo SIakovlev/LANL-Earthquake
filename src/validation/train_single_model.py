@@ -117,6 +117,7 @@ def main(**kwargs):
 
         # validate
         num_to_predict = X_valid.shape[0] if X_valid.shape[0] != 0 else 5000
+        # TODO: try predicting on the whole dataset
         rand_train_idx = np.random.randint(0, X_train.shape[0], num_to_predict)
         predict = model.predict(X_train.iloc[rand_train_idx])
         for metric_name, metric in metrics.items():
@@ -131,11 +132,16 @@ def main(**kwargs):
                 scores[metric_name].append(score)
                 print(f"validation score ({metric_name}): {score.mean():.4f}")
 
-        # predict = model.predict(X_valid)
-        # plt.figure(figsize=(10, 5))
-        # plt.plot(predict, 'k')
-        # plt.plot(y_valid.values, 'r')
-        # plt.show()
+        train_data_scaled = pd.DataFrame(preprocessor.transform(train_data))
+        predict = model.predict(train_data_scaled)
+        plt.figure(figsize=(100, 5), dpi=300)
+        plt.plot(predict, 'k')
+        plt.plot(y_train_data, 'r')
+        plt.plot(valid_index, model.predict(X_valid), 'b')
+        plt.title(f"V: {scores['mean_absolute_error'][-1]} | T:{scores['mean_absolute_error_train'][-1]}")
+        plt.grid(True)
+        plt.savefig(f"123.png")
+        plt.show()
 
     # save last model
     # TODO: consider saving the best performing model instead of the last one
