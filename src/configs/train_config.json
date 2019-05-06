@@ -1,7 +1,7 @@
 {
-  "train_data_fname": "../../data/e6.h5",
-  "summary_dest_fname": "../../data/e6_summary.pickle",
-
+  "train_data_fname": "../../data.nosync/train_processed_e1.h5",
+  "summary_dest_fname": "../../data.nosync/__summary.pickle",
+  "img_folder_path": "../../data.nosync/imgs",
 
   "folds":{
       "name":"CustomFold",
@@ -23,9 +23,8 @@
     "max_depth": 4,
     "n_estimators": 51,
     "subsample": 0.7,
-    "objective": "gpu:reg:linear",
+    "objective": "reg:linear",
     "eval_metric": "mae",
-    "tree_method": "gpu_hist",
     "verbosity": 3,
     "nthread": 15
   }
