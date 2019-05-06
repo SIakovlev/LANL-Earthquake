@@ -50,6 +50,12 @@ def main(**kwargs):
     7. save summary
     '''
 
+    # 0. Create folders for train/validation images
+    img_folder_path = kwargs["img_folder_path"]
+    folder_nums = np.arange(0, 5, 1)
+    for folder_num in folder_nums:
+        os.makedirs(os.path.join(img_folder_path, str(folder_num)), exist_ok=True)
+
     # 1. load data
     train_data_fname = kwargs['train_data_fname']
     train_df = pd.read_hdf(train_data_fname, key='table')
@@ -116,11 +122,9 @@ def main(**kwargs):
         model.fit(X_train, y_train)
 
         # validate
-        num_to_predict = X_valid.shape[0] if X_valid.shape[0] != 0 else 5000
-        rand_train_idx = np.random.randint(0, X_train.shape[0], num_to_predict)
-        predict = model.predict(X_train.iloc[rand_train_idx])
+        predict = model.predict(X_train)
         for metric_name, metric in metrics.items():
-            score = metric(predict, y_train.iloc[rand_train_idx])
+            score = metric(predict, y_train)
             scores[metric_name+'_train'].append(score)
             print(f"train score ({metric_name}): {score.mean():.4f}")
 
@@ -131,11 +135,18 @@ def main(**kwargs):
                 scores[metric_name].append(score)
                 print(f"validation score ({metric_name}): {score.mean():.4f}")
 
-        # predict = model.predict(X_valid)
-        # plt.figure(figsize=(10, 5))
-        # plt.plot(predict, 'k')
-        # plt.plot(y_valid.values, 'r')
-        # plt.show()
+        train_data_scaled = pd.DataFrame(preprocessor.transform(train_data))
+        predict = model.predict(train_data_scaled)
+        plt.figure(figsize=(100, 5), dpi=300)
+        plt.plot(predict, 'k')
+        plt.plot(y_train_data, 'r')
+        plt.plot(valid_index, model.predict(X_valid), 'b')
+        plt.title(f"V: {scores['mean_absolute_error'][-1]} | T:{scores['mean_absolute_error_train'][-1]}")
+        plt.grid(True)
+        plot_path = os.path.join(img_folder_path,
+                                 f"{np.digitize(scores['mean_absolute_error'][-1], folder_nums) - 1}",
+                                 f"v-{scores['mean_absolute_error'][-1]:.4f}__t-{scores['mean_absolute_error_train'][-1]:.4f}")
+        plt.savefig(f"{plot_path}.png")
 
     # save last model
     # TODO: consider saving the best performing model instead of the last one
