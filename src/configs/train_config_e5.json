@@ -1,7 +1,8 @@
 {
   "train_data_fname": "../../data/e5.h5",
   "summary_dest_fname": "../../data/e5_summary.pickle",
-
+  "img_folder_path": "../../data/e5",
+  "verbose": false,
 
   "folds":{
       "name":"CustomFold",
