@@ -50,6 +50,7 @@ def main(**kwargs):
     7. save summary
     '''
 
+    verbose = kwargs['verbose']
     # 0. Create folders for train/validation images
     img_folder_path = kwargs["img_folder_path"]
     folder_nums = np.arange(0, 5, 1)
@@ -65,8 +66,6 @@ def main(**kwargs):
     y_train_data = train_df['ttf']
 
     # 2. create preprocessor
-    # TODO: add Standard Scaler
-
     preproc_cls = None
     if 'preproc' in kwargs:
         preproc_kwargs = copy.deepcopy(kwargs['preproc'])
@@ -95,18 +94,21 @@ def main(**kwargs):
 
     # instantiate and train model
     model_params = copy.deepcopy(kwargs['model'])
-    print("Model params:")
-    pp = pprint.PrettyPrinter(indent=4)
-    pp.pprint(model_params)
+    if verbose:
+        print("Model params:")
+        pp = pprint.PrettyPrinter(indent=4)
+        pp.pprint(model_params)
     if 'name' in model_params:
         model_params.pop("name")
 
     # 6. train model
-    print('....................... Training model ..............................')
+    if verbose:
+        print('....................... Training model ..............................')
     scores = defaultdict(list)
 
     for fold_n, (train_index, valid_index) in enumerate(folds.split(train_data)):
-        print(f" --------------- fold #{fold_n} -------------------")
+        if verbose:
+            print(f" --------------- fold #{fold_n} -------------------")
         # split data
         X_train, X_valid = train_data.iloc[train_index], train_data.iloc[valid_index]
         y_train, y_valid = y_train_data.iloc[train_index], y_train_data.iloc[valid_index]
@@ -126,14 +128,16 @@ def main(**kwargs):
         for metric_name, metric in metrics.items():
             score = metric(predict, y_train)
             scores[metric_name+'_train'].append(score)
-            print(f"train score ({metric_name}): {score.mean():.4f}")
+            if verbose:
+                print(f"train score ({metric_name}): {score.mean():.4f}")
 
         if X_valid.shape[0] != 0:
             predict = model.predict(X_valid)
             for metric_name, metric in metrics.items():
                 score = metric(predict, y_valid)
                 scores[metric_name].append(score)
-                print(f"validation score ({metric_name}): {score.mean():.4f}")
+                if verbose:
+                    print(f"validation score ({metric_name}): {score.mean():.4f}")
 
         train_data_scaled = pd.DataFrame(preprocessor.transform(train_data))
         predict = model.predict(train_data_scaled)
@@ -155,7 +159,8 @@ def main(**kwargs):
 
     # 7. create summary
     summary_dest_fname = kwargs['summary_dest_fname']
-    print(f'Add summary to "{summary_dest_fname}"')
+    if verbose:
+        print(f'Add summary to "{summary_dest_fname}"')
     summary_row = summarize(scores=scores, **kwargs)
 
     _, summary_ext = os.path.splitext(summary_dest_fname)
@@ -168,7 +173,8 @@ def main(**kwargs):
         summary = pd.concat((summary, summary_row), sort=False).fillna(np.nan) if summary is not None else summary_row
         read_write_summary(summary_dest_fname, summary_ext, '+wb', summary)
 
-    print('.......................Training finished.........................')
+    if verbose:
+        print('.......................Training finished.........................')
 
 
 if __name__ == '__main__':

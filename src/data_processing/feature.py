@@ -344,7 +344,7 @@ class Feature:
         return self
 
     @rolling_decorator
-    def r_clip(self, df=None, *args, q=0.99, **kwargs):
+    def r_clip(self, df=None, *args, q_high=0.99, q_low=0.01, **kwargs):
         """
         Clips the signal: (0, qunatile value)
 
@@ -361,9 +361,11 @@ class Feature:
         """
 
         data = self.data if df is None else df
-        thresh = np.quantile(data.values.squeeze(), q=q)
-        print(thresh)
-        self.data = np.clip(data.values.squeeze(), a_min=0, a_max=thresh)
+        thresh_low = np.quantile(data.values.squeeze(), q=q_low)
+        # print(thresh_low)
+        thresh_high = np.quantile(data.values.squeeze(), q=q_high)
+        # print(thresh_high)
+        self.data = np.clip(data.values.squeeze(), a_min=thresh_low, a_max=thresh_high)
         return self
 
     """
@@ -413,7 +415,16 @@ class Feature:
         data = self.data if df is None else df
         self.data = np.min(data.values)
         return self
-    
+
+    @window_decorator
+    def w_integral(self, df=None, *args, q=0.7, **kwargs):
+        data = self.data if df is None else df
+        data = data.values
+        q_value = np.quantile(data, q)
+        data = data[(data < q_value)]
+        self.data = np.trapz(data)
+        return self
+
     """
     tsfresh based methods
 
