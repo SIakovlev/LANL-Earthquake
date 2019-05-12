@@ -1,7 +1,7 @@
 {
-  "train_data_fname": "../../data/e3.h5",
-  "summary_dest_fname": "../../data/e3_summary.pickle",
-  "img_folder_path": "../../data/e3",
+  "train_data_fname": "../../data/e3_clean.h5",
+  "summary_dest_fname": "../../data/e3_clean_summary.pickle",
+  "img_folder_path": "../../data/e3_clean",
   "verbose": false,
 
   "folds":{

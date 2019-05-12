@@ -1,8 +1,8 @@
 {
-  "train_data": "../../data/submit_27_04/submit.h5",
-  "summary_dest": "../../data/submit_27_04/submit.csv",
-  "predict_directory": "../../data/submit_27_04/predict",
-  "models_directory": "../../data/submit_27_04/saved_models",
+  "train_data": "../../data/e5.h5",
+  "summary_dest": "../../data/submit_12_05_2/summary.csv",
+  "predict_directory": "../../data/submit_12_05_2/predict",
+  "models_directory": "../../data/submit_12_05_2/saved_models",
   "preproc": {
     "name": "StandardScaler"
   },
@@ -24,9 +24,9 @@
             {
               "model": {
                 "XGBRegressor": {
-                  "eta": 0.001,
-                  "max_depth": 5,
-                  "n_estimators": 151,
+                  "eta": 0.01,
+                  "max_depth": 4,
+                  "n_estimators": 51,
                   "subsample": 0.7,
                   "objective": "gpu:reg:linear",
                   "eval_metric": "mae",

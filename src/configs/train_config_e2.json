@@ -2,7 +2,7 @@
   "train_data_fname": "../../data/e2_reduced.h5",
   "summary_dest_fname": "../../data/e2_summary.pickle",
   "img_folder_path": "../../data/e2",
-  "verbose": false,
+  "verbose": true,
 
   "folds":{
       "name":"CustomFold",

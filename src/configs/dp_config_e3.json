@@ -1,8 +1,8 @@
 {
   "data_dir": "../../data/",
   "data_processed_dir": "../../data/",
-  "data_fname": "train.h5",
-  "data_processed_fname": "e3.h5",
+  "data_fname": "train_clean.h5",
+  "data_processed_fname": "e3_clean.h5",
   "window_size": 150000,
   "window_stride": 1000,
   "features": [

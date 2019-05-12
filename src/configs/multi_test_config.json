@@ -1,12 +1,12 @@
 {
-  "test_dir": "/home/alex/kaggleLan/LANL-Earthquake-Prediction/test/",
-  "models_dir": "/home/alex/Downloads/submit_27_04/saved_models",
-  "model_fname": "Model_XGBRegressor_{'eta': 0.001, 'max_depth': 5, 'n_estimators': 151, 'subsample': 0.7, 'objective': 'gpu:reg:linear', 'eval_metric': 'mae', 'tree_method': 'gpu_hist', 'verbosity': 3, 'nthread': 15}_train_on_last_CustomFold.pickle",
+  "test_dir": "../../data/test/",
+  "models_dir": "../../data/submit_12_05_2/saved_models",
+  "model_fname": "Model_XGBRegressor_{'eta': 0.01, 'max_depth': 4, 'n_estimators': 51, 'subsample': 0.7, 'objective': 'gpu:reg:linear', 'eval_metric': 'mae', 'tree_method': 'gpu_hist', 'verbosity': 3, 'nthread': 15}_train_on_last_CustomFold.pickle",
   "model_load": "standard",
-  "dp_config": "/home/alex/Downloads/dp_config_e1.json",
-  "dp_run_file": "/home/alex/kaggleLan/LANL-Earthquake/LANL-Earthquake/src/data_processing/dp_run.py",
+  "dp_config": "../configs/dp_config_e5.json",
+  "dp_run_file": "../data_processing/dp_run.py",
   "preproc_path": "Preproc_StandardScaler_{}_.save",
   "multi_proc": 31,
-  "proceded_dir": "data/test_27_04/",
-  "output_file": "data/submit_27_04.csv"
+  "proceded_dir": "data/test_12_05_2/",
+  "output_file": "data/submit_12_05_2.csv"
 }
