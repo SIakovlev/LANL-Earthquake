@@ -79,13 +79,13 @@ def main(**kwargs):
     i = 0
     while True:
         if len(sort_test_names)%multi_num == 0:
-            break;
+            break
         elif multi_num - i < 0:
             print(f"Len of test data: {len(sort_test_names)} must divided on multi_num: {multi_num}")
-            multi_num =1
-            break;
+            multi_num = 1
+            break
         else:
-            i +=1
+            i += 1
             multi_num -= i
 
     print(f'Use {multi_num} processes')
@@ -117,7 +117,7 @@ def main(**kwargs):
         for test_file in test_files:
             test_df = pd.read_hdf(os.path.join(kwargs["proceded_dir"], f"{test_file.split('.')[0]}.h5"), key='table')
 
-            if  preprocessor_class is not None:
+            if preprocessor_class is not None:
                 print(test_df.head())
                 print(preprocessor_class.get_params())
                 X_test = preprocessor_class.transform(test_df)
