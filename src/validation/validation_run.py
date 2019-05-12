@@ -69,7 +69,7 @@ def main(**kwargs):
     # Load data
     print(f' - Attempt to load data from {train_data}')
     train_df = pd.read_hdf(train_data, key='table')
-    train_columns= copy.copy(train_df.columns)
+    train_columns = copy.copy(train_df.columns)
     y_data = train_df[train_columns[-1]]
     train_df = train_df.drop([train_columns[-1]], axis=1)
 
