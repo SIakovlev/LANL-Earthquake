@@ -17,7 +17,7 @@ class CustomFold:
     "test information" doesn't leak into the train data. (i.e. for window_size=150k and stride=10k pad should be 15)
 
     """
-    def __init__(self, n_splits=10, shuffle=True, fragmentation=0.1, pad=15):
+    def __init__(self, n_splits=10, shuffle=True, fragmentation=0.1, pad=15, verbose=False):
         """
         :param n_splits: number of splits
         :param shuffle: shuffle
@@ -32,6 +32,7 @@ class CustomFold:
         self.shuffle = shuffle
         self.frag = fragmentation
         self.pad = pad
+        self.verbose = verbose
 
     def split(self, data):
         if self.n_splits == 1:
@@ -63,8 +64,8 @@ class CustomFold:
 
                 train_idx = np.setxor1d(np.arange(0, data_len), test_idx_padded)
                 test_idx = np.array(test_idx)
-
-                print(f"{self.__class__.__name__}: Percentage of data thrown out: {(data_len - len(train_idx) - len(set(test_idx))) * 100 / data_len}%")
+                if self.verbose:
+                    print(f"{self.__class__.__name__}: Percentage of data thrown out: {(data_len - len(train_idx) - len(set(test_idx))) * 100 / data_len}%")
                 yield train_idx, test_idx
 
 
