@@ -1,5 +1,6 @@
 from folds.folds import CustomFold
 from hyperopt import fmin, hp, tpe, STATUS_OK
+from hyperopt.pyll.base import scope
 from sklearn import preprocessing
 from sklearn.metrics import mean_absolute_error
 from xgboost import XGBRegressor
@@ -43,10 +44,10 @@ def optimize(random_state=314159265):
     """
 
     space = {
-        'n_estimators': hp.choice('n_estimators', np.arange(20, 500, 10, dtype=int)),
-        'eta': hp.quniform('eta', 0.005, 0.5, 0.025),
-        'max_depth': hp.choice('max_depth', np.arange(1, 6, dtype=int)),
-        'min_child_weight': hp.choice('min_child_weight', np.arange(1, 6, dtype=int)),
+        'n_estimators': scope.int(hp.quniform('n_estimators', 10, 300, 5)),
+        'eta': hp.quniform('eta', 0.005, 0.5, 0.005),
+        'max_depth': scope.int(hp.quniform('max_depth', 1, 5, 1)),
+        'min_child_weight': scope.int(hp.quniform('min_child_weight', 1, 10, 1)),
         'subsample': hp.quniform('subsample', 0.5, 1, 0.05),
         'gamma': hp.quniform('gamma', 0.5, 1, 0.05),
         'colsample_bytree': hp.quniform('colsample_bytree', 0.5, 1, 0.05),
@@ -61,7 +62,7 @@ def optimize(random_state=314159265):
     best = fmin(score,
                 space,
                 algo=tpe.suggest,
-                max_evals=250)
+                max_evals=2000)
     return best
 
 
