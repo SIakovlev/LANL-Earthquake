@@ -1,8 +1,8 @@
 {
-  "train_data": "../../data/e5.h5",
-  "summary_dest": "../../data/submit_12_05_2/summary.csv",
-  "predict_directory": "../../data/submit_12_05_2/predict",
-  "models_directory": "../../data/submit_12_05_2/saved_models",
+  "train_data": "../../data/e6.h5",
+  "summary_dest": "../../data/submit_13_05/summary.csv",
+  "predict_directory": "../../data/submit_13_05/predict",
+  "models_directory": "../../data/submit_13_05/saved_models",
   "preproc": {
     "name": "StandardScaler"
   },
@@ -10,7 +10,7 @@
           [
             {
               "name":"CustomFold",
-              "n_splits": 9,
+              "n_splits": 1,
               "pad": 150,
               "fragmentation": 0,
               "shuffle": true
@@ -24,10 +24,14 @@
             {
               "model": {
                 "XGBRegressor": {
-                  "eta": 0.01,
-                  "max_depth": 4,
-                  "n_estimators": 51,
-                  "subsample": 0.7,
+                  "eta": 0.015,
+                  "max_depth": 6,
+                  "min_child_weight": 10,
+                  "n_estimators": 20,
+                  "subsample": 0.95,
+                  "gamma": 0.75,
+                  "colsample_bytree": 0.95,
+                  "seed": 168,
                   "objective": "gpu:reg:linear",
                   "eval_metric": "mae",
                   "tree_method": "gpu_hist",
