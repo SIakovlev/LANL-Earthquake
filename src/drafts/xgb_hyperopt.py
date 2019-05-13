@@ -34,14 +34,14 @@ def score(params, n=10):
     return {'loss': loss, 'status': STATUS_OK}
 
 
-def optimize(random_state=314159265):
+def optimize(random_state=0):
     """
     This is the optimization function that given a space (space here) of
     hyperparameters and a scoring function (score here), finds the best hyperparameters.
     """
 
     space = {
-        'n_estimators': scope.int(hp.quniform('n_estimators', 10, 50, 1)),
+        'n_estimators': scope.int(hp.quniform('n_estimators', 10, 30, 1)),
         'eta': hp.quniform('eta', 0.005, 0.3, 0.005),
         'max_depth': scope.int(hp.quniform('max_depth', 1, 8, 1)),
         'min_child_weight': scope.int(hp.quniform('min_child_weight', 1, 10, 1)),
@@ -56,16 +56,32 @@ def optimize(random_state=314159265):
         'seed': random_state
     }
 
+    # space = {
+    #     'n_estimators': 20,
+    #     'eta': 0.015,
+    #     'max_depth': 6,
+    #     'min_child_weight': 10,
+    #     'subsample': 0.95,
+    #     'gamma': 0.75,
+    #     'colsample_bytree': 0.95,
+    #     'eval_metric': 'mae',
+    #     'objective': 'gpu:reg:linear',
+    #     'booster': 'gbtree',
+    #     'tree_method': 'gpu_hist',
+    #     'silent': 1,
+    #     'seed': scope.int(hp.quniform('n_estimators', 0, 1000000, 1))
+    # }
+
     best = fmin(score,
                 space,
                 algo=tpe.suggest,
-                max_evals=2000)
+                max_evals=300)
     return best
 
 
 if __name__ == '__main__':
 
-    df = pd.read_hdf('../../data/e3.h5', key='table')
+    df = pd.read_hdf('../../data/e2.h5', key='table')
     train_data = df.drop(['ttf'], axis=1)
     y_train_data = df['ttf']
 
