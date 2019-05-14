@@ -108,7 +108,6 @@ def main(**kwargs):
 
     # 4. train validators
     print('....................... Train models ..............................')
-    print(train_df)
     for i_f, f in enumerate(folds_list):
         for v in validators:
             # train models in validator and create summary for all models

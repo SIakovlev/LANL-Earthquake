@@ -3,6 +3,7 @@ import numpy as np
 
 import pickle
 import os
+from datetime import datetime
 
 import xgboost as xgb
 
@@ -15,7 +16,8 @@ from sklearn.linear_model import Ridge
 from xgboost import XGBRegressor
 from catboost import CatBoostRegressor
 
-# from lightgbm import LGBMRegressor
+from lightgbm import LGBMRegressor
+import time
 from tqdm import tqdm
 from sklearn.externals import joblib
 import copy
@@ -25,6 +27,7 @@ import re
 import ast
 
 import json
+import functools
 
 
 """
@@ -35,7 +38,6 @@ Date: 19.02.2019
 Description:
 
 """
-
 
 class ValidationBase:
 
@@ -124,7 +126,6 @@ class ValidationBase:
 
                 if preproc_ is not None:
                     print(f' - Attempt to preprocess data')
-                    print(preproc_)
                     preprocessor_class = str_to_class("src.preprocessing.preproc", preproc_['preproc_name'])(**preproc_['preproc_params'])
                     preprocessor_class.fit(X_train)
                     X_train = pd.DataFrame(preprocessor_class.transform(X_train))
@@ -157,34 +158,50 @@ class ValidationBase:
                     self.score_data[metric_name + "_train"].append(score_train)
                     self.score_data[metric_name].append(score_valid)
                 print("*****************************************************************************************")
-            #save predict data
-            if predict_data is not None:
-                save_predict_path = os.path.join(models_directory_dict[0]['predict_directory'],"{0}_{1}_{2}.pickle".format(
-                                                                                    self.models_features[num_model]["model_name"],
-                                                                                    self.models_features[num_model]["model_params"],
-                                                                                    fold_data["folds_name"]
-                                                                                    ))
-                predict_data.to_pickle(save_predict_path)
 
-                predict_data = predict_data.iloc[0:train_data.shape[0]]
+            time_data_str = datetime.strftime(datetime.now(), "date%d_%m_time%H_%M_%S")
+
 
             if preproc_ is not None:
                 preproc_name = "Preproc_{0}_{1}_.save".format(
                     preproc_['preproc_name'], preproc_['preproc_params'])
-                save_prep_path = os.path.join(models_directory_dict[0]['models_directory'], preproc_name)
-                read_write_summary(save_prep_path, '.pickle', 'wb', preprocessor_class)
+
+                if models_directory_dict[0]['models_directory'] is not None:
+                    save_prep_path = os.path.join(models_directory_dict[0]['models_directory'], preproc_name)
+                    read_write_summary(save_prep_path, '.pickle', 'wb', preprocessor_class)
                 #joblib.dump(preprocessor_class, save_prep_path)
 
 
-            #save model
+            #save model and predict if need
             if models_directory_dict[0]['models_directory'] is not None:
-                model_name = "Model_{0}_{1}_train_on_last_{2}.pickle".format(self.models_features[num_model]["model_name"],
-                                                                      self.models_features[num_model]["model_params"],
+                model_name = "Model_{0}_save_at_{1}_train_on_last_{2}.pickle".format(self.models_features[num_model]["model_name"],
+                                                                      time_data_str,
                                                                       fold_data["folds_name"])
 
                 save_model_path = os.path.join(models_directory_dict[0]['models_directory'], model_name)
-
                 read_write_summary(save_model_path, '.pickle', 'wb', model)
+
+                save_parameters_path = os.path.join(models_directory_dict[0]['models_directory'],
+                                                    "{0}_save_at_{1}_fold_{2}_parameters.json".format(
+                                                        self.models_features[num_model]["model_name"],
+                                                        time_data_str,
+                                                        fold_data["folds_name"]
+                                                    ))
+
+                with open(save_parameters_path,'w') as f:
+                    json.dump(self.models_features[num_model]["model_params"], f, sort_keys=True,indent=5)
+
+                if predict_data is not None:
+                    save_predict_path = os.path.join(models_directory_dict[0]['predict_directory'],
+                                                     "{0}_save_at_{1}_fold_{2}.pickle".format(
+                                                         self.models_features[num_model]["model_name"],
+                                                         time_data_str,
+                                                         fold_data["folds_name"]
+                                                     ))
+                    predict_data.to_pickle(save_predict_path)
+                    #clear model
+                    predict_data = predict_data.iloc[0:train_data.shape[0]]
+
 
             # save summary
             params_to_save.append(self.models_features[num_model])
