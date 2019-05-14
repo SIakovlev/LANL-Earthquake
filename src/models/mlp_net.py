@@ -1,9 +1,15 @@
 from torch.nn import Module, Linear, MSELoss, L1Loss, ReLU, ModuleList, Dropout, BatchNorm1d
+from torch.nn.init import xavier_uniform_
 from torch.optim import Adam
 import torch
 import torch.utils.data
 import numpy as np
 from models.models import ModelBase
+
+
+def init_weights(m):
+    if type(m) == Linear:
+        xavier_uniform_(m.weight, gain=1)
 
 
 class MLP(Module, ModelBase):
@@ -44,10 +50,10 @@ class MLP(Module, ModelBase):
 
         # TODO: check this
         self.loss = L1Loss()
+        self.apply(init_weights)
         self = self.to(self.device)
 
     def forward(self, x):
-        x = torch.clamp(x, max=0.1)
         orig_shape = x.shape
         x = x.view(-1, self.in_features)
         x = self.bn(x)
@@ -56,7 +62,7 @@ class MLP(Module, ModelBase):
         for linear in self.linears:
             x = self.relu(linear(x))
             x = self.dropout(x)
-        res = self.out(x)
+        res = self.relu(self.out(x))
         return res
 
     def fit(self, train_data, train_y):
@@ -85,12 +91,6 @@ class MLP(Module, ModelBase):
                 print(f"\r step: {i} | mse_loss={loss.detach().cpu():.4f} | mae_loss={mae_loss.detach().cpu():.4f}",
                       end="")
             print()
-            # validate
-            # pred = torch.tensor(self.predict(valid_data)).to(self.device)
-            # loss = self.loss(pred, valid_y)
-            # mae_loss = torch.abs(pred - valid_y).mean()
-            # self.train()
-            # print(f"validation score: mse_loss={loss.detach().cpu():.4f} | mae_loss={mae_loss.detach().cpu():.4f}")
         del train_data
         del train_y
 
