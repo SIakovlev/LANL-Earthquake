@@ -17,6 +17,7 @@ from src.validation.validation_utils import read_write_summary
 import xgboost as xgb
 
 from src.models.mlp_net import MLP
+from src.models.mlp_net import MLPEnsemble
 from src.models.mlp_classifier_net import MLP_classifier
 from src.models.lstm_net import LstmNet
 from src.folds.folds import CustomFold
@@ -139,23 +140,33 @@ def main(**kwargs):
                 if verbose:
                     print(f"validation score ({metric_name}): {score.mean():.4f}")
 
-        train_data_scaled = pd.DataFrame(preprocessor.transform(train_data))
-        predict = model.predict(train_data_scaled)
-        plt.figure(figsize=(100, 5), dpi=300)
-        plt.plot(predict, 'k')
-        plt.plot(y_train_data, 'r')
-        plt.plot(valid_index, model.predict(X_valid), 'b')
-        plt.title(f"V: {scores['mean_absolute_error'][-1]} | T:{scores['mean_absolute_error_train'][-1]}")
-        plt.grid(True)
-        plot_path = os.path.join(img_folder_path,
-                                 f"{np.digitize(scores['mean_absolute_error'][-1], folder_nums) - 1}",
-                                 f"v-{scores['mean_absolute_error'][-1]:.4f}__t-{scores['mean_absolute_error_train'][-1]:.4f}")
-        plt.savefig(f"{plot_path}.png")
+        if verbose:
+            if preproc_cls is not None:
+                train_data_scaled = pd.DataFrame(preprocessor.transform(train_data))
+            else:
+                train_data_scaled = train_data
+            predict = model.predict(train_data_scaled)
+            plt.figure(figsize=(100, 5), dpi=300)
+            plt.plot(predict, 'k')
+            plt.plot(y_train_data, 'r')
+            plt.plot(valid_index, model.predict(X_valid), 'b')
+            plt.title(f"V: {scores['mean_absolute_error'][-1]} | T:{scores['mean_absolute_error_train'][-1]}")
+            plt.grid(True)
+            plot_path = os.path.join(img_folder_path,
+                                     f"{np.digitize(scores['mean_absolute_error'][-1], folder_nums) - 1}",
+                                     f"v-{scores['mean_absolute_error'][-1]:.4f}__t-{scores['mean_absolute_error_train'][-1]:.4f}")
+            plt.savefig(f"{plot_path}.png")
 
+        if 'model_save_dir' in kwargs:
+            with open(kwargs['model_save_dir'] + f"Model_{kwargs['model']['name']}_valid_{scores['mean_absolute_error'][-1]:.4f}", 'wb') as file:
+                pickle.dump(model, file)
+            with open(kwargs['model_save_dir'] + f"Preproc_{kwargs['model']['name']}_valid_{scores['mean_absolute_error'][-1]:.4f}", 'wb') as file_preproc:
+                pickle.dump(preprocessor, file_preproc)
     # save last model
-    # TODO: consider saving the best performing model instead of the last one
-    with open(f"Model {kwargs['model']['name']}", 'wb') as file:
-        pickle.dump(model, file)
+    # # TODO: consider saving the best performing model instead of the last one
+    # with open(f"Model {kwargs['model']['name']}", 'wb') as file:
+    #     pickle.dump(model, file)
+
 
     # 7. create summary
     summary_dest_fname = kwargs['summary_dest_fname']
