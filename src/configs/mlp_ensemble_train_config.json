@@ -2,7 +2,8 @@
   "train_data_fname": "../../data/e6.h5",
   "summary_dest_fname": "../../data/summary/summary_e9.pickle",
   "img_folder_path": "../../data/e6/img",
-  "verbose": false,
+  "model_save_dir": "../../models/",
+  "verbose": true,
 
   "folds":{
       "name":"CustomFold",
@@ -19,14 +20,15 @@
   },
 
   "model": {
-    "name": "MLP",
+    "name": "MLPEnsemble",
+    "num_nets": 10,
     "in_features": 1,
     "out_features": 1,
-    "hidden_layers": [16, 8],
-    "dropout": 0.15,
+    "hidden_layers": [32, 16],
+    "dropout": 0.05,
     "device": "cpu",
     "learning_rate": 0.0005,
     "minibatch_size": 1024,
-    "num_epochs": 2
+    "num_epochs": 4
   }
 }
