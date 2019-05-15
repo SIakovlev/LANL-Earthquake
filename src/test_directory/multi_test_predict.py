@@ -19,6 +19,22 @@ from src.validation.validation_utils import read_write_summary
 import subprocess
 from sklearn.externals import joblib
 
+from src.models.mlp_net import MLP
+from src.models.mlp_classifier_net import MLP_classifier
+from src.models.lstm_net import LstmNet
+from src.folds.folds import CustomFold
+from src.models.nn_test import CustomNN
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.tree import ExtraTreeRegressor
+from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import Ridge
+from xgboost import XGBRegressor
+from catboost import CatBoostRegressor
+# from lightgbm import LGBMRegressor
+
+from sklearn.preprocessing import StandardScaler
+
 if platform.system() == 'Darwin':
     mpl.use('TkAgg')  # Mac OS specific
 
@@ -120,9 +136,9 @@ def main(**kwargs):
             if preprocessor_class is not None:
                 print(test_df.head())
                 print(preprocessor_class.get_params())
-                X_test = preprocessor_class.transform(test_df)
+                X_test = pd.DataFrame(preprocessor_class.transform(test_df))
             data_predict = model_class.predict(X_test)
-            df_to_submit.loc[len(df_to_submit)] = [test_file.split('.')[0], data_predict[-1]]
+            df_to_submit.loc[len(df_to_submit)] = [test_file.split('.')[0], data_predict[-1].squeeze()]
        # except UnboundLocalError:
         #    raise ValueError("model not trained")
     #remove test configs
