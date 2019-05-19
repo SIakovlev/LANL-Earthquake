@@ -1,6 +1,15 @@
 # LANL-Earthquake
 LANL Earthquake Prediction Challenge: https://www.kaggle.com/c/LANL-Earthquake-Prediction#description
 
+# Team <a name="team"></a>
+
+|      Name  |          Email |    Responsibilities |
+|:------------:|:------------:|:-----------:|
+| Denish Shitov | - | - |
+| Alexey Shaymanov | - | - |
+| Pavel Tolmachev | - | - |
+| Sergey Iakovlev | siakovlev@student.unimelb.edu.au |  - |
+
 Notes:
 - Fold: `CustomFold(n_splits=9, shuffle=True, fragmentation=0, pad=150)`
 - 10 runs is equivalent to 90 model trainings
