@@ -7,6 +7,53 @@
   "window_stride": 1000,
   "features": [
     {
+      "name": "q_05_std_rolling_50",
+      "on": true,
+      "functions": {
+        "r_std": {
+          "window_size": 50,
+          "window_stride": null
+        },
+        "w_quantile": {
+          "q": 0.05
+        }
+      }
+    },
+    {
+      "name": "q_05_std_rolling_200",
+      "on": true,
+      "functions": {
+        "r_std": {
+          "window_size": 200,
+          "window_stride": null
+        },
+        "w_quantile": {
+          "q": 0.05
+        }
+      }
+    },
+    {
+      "name": "q_05_std_rolling_1000",
+      "on": true,
+      "functions": {
+        "r_std": {
+          "window_size": 1000,
+          "window_stride": null
+        },
+        "w_quantile": {
+          "q": 0.05
+        }
+      }
+    },
+    {
+      "name": "psd_sum",
+      "on": true,
+      "functions": {
+        "w_psd_sum": {
+        }
+      }
+    },
+    {
       "name": "integral_std_rolling_100",
       "on": true,
       "functions": {
@@ -16,22 +63,6 @@
         },
         "w_integral": {
             "q": 0.1
-        }
-      }
-    },
-    {
-      "name": "clip_q_01_std_rolling_50",
-      "on": true,
-      "functions": {
-        "r_std": {
-          "window_size": 50,
-          "window_stride": null
-        },
-        "w_quantile": {
-          "q": 0.01
-        },
-        "r_clip": {
-
         }
       }
     }
