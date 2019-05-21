@@ -158,7 +158,8 @@ class Feature:
         return '-'.join(self.__name)
 
     def get_name(self):
-        return '-'.join(self.__name)
+        temp = '-'.join(self.__name)
+        return temp[:250] + (temp[:250] and '..')
 
     def update_path(self, save_dir=None):
         self.__path = self.save_dir if save_dir is None else save_dir
