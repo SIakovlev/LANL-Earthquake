@@ -28,3 +28,4 @@ Other models:
 
 | Feature config | Model           | Params  | 10 runs score(std) | 100 runs score(std) | 300 runs score(std) | Public score |
 | ------------- |:-------------:| -----:|-----:|-----:|-----:|-----:|
+[e6](https://github.com/SIakovlev/LANL-Earthquake/blob/develop/src/configs/dp_config_e6.json) | AdaBoost |{'learning_rate': 0.23, 'loss': 'linear', 'n_estimators': 13, 'random_state': 0} | **2.0728** | - |- | - |
