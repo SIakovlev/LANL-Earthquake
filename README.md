@@ -1,6 +1,23 @@
 # LANL-Earthquake
 LANL Earthquake Prediction Challenge: https://www.kaggle.com/c/LANL-Earthquake-Prediction#description
 
+Date: 01 Aug 2018 </pre>
+
+# Table of contents
+
+1. [Team](#team) 
+2. [Abstract](#abstract)
+3. [Introduction](#intro)
+   1. [Project structure](#struct)
+   2. [Setup](#setup)
+4. [Pipeline architecture](#architecture)
+   1. [Data processing](#dp)
+   2. [Validation](#cv)
+   3. [Testing](#testing)
+5. [Results](#results)
+6. [Summary](#summary)
+
+
 # Team <a name="team"></a>
 
 |      Name  |          Email |    Responsibilities |
@@ -9,6 +26,34 @@ LANL Earthquake Prediction Challenge: https://www.kaggle.com/c/LANL-Earthquake-P
 | Alexey Shaymanov | - | - |
 | Pavel Tolmachev | - | - |
 | Sergey Iakovlev | siakovlev@student.unimelb.edu.au |  - |
+
+# Abstract <a name="abstract"></a>
+
+# Introduction <a name="intro"></a>
+
+## Project structure <a name="struct"></a>
+
+The project has the following structure:
+* `/configs` - configs for data processing, model training and validation.
+* `/data_processing`
+  * `dp_run.py` - main data processing script.
+  * `feature.py` - `Feature` class implementation.
+  * `dp_utils.py` - 
+* `/folds` - directory with custom fold implementation
+* `/models` - custom models that follow `model.py` interface
+* `/preproc` - ?
+* `/test_directory` - the main script generating test prediction results
+* `/validation` - directory with training and validation scripts:
+  * `train_single_model.py` - 
+  * `validation_run.py`- 
+
+## Setup <a name="setup"></a>
+
+### Windows
+### Mac OS
+### Linux
+
+# Results <a name="results"></a>
 
 Notes:
 - Fold: `CustomFold(n_splits=9, shuffle=True, fragmentation=0, pad=150)`
