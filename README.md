@@ -33,10 +33,10 @@ Date: 01 Aug 2018 </pre>
 
 ## Project structure <a name="struct"></a>
 
-The project has the following structure:
+Under the `/src` directory there is the following structure:
 * `/configs` - configs for data processing, model training and validation.
 * `/data_processing`
-  * `dp_run.py` - main data processing script.
+  * `dp_run.py` - main data processing script with parameters specified in `dp_config.json`.
   * `feature.py` - `Feature` class implementation.
   * `dp_utils.py` - 
 * `/folds` - directory with custom fold implementation
@@ -44,8 +44,37 @@ The project has the following structure:
 * `/preproc` - ?
 * `/test_directory` - the main script generating test prediction results
 * `/validation` - directory with training and validation scripts:
-  * `train_single_model.py` - 
-  * `validation_run.py`- 
+  * `train_single_model.py` - script for training of a single model with parameters specified in `/configs/train_config.json`
+  * `validation_run.py`- script for training of a single/multiple models with parameters specified in `/configs/validation_config.json`
+
+## Configs
+Data processing, model training and generation of test results can be managed via the following configs (in `/configs` dir):
+
+* [`dp_config.json`](https://github.com/SIakovlev/LANL-Earthquake/blob/develop/src/configs/dp_config.json)
+   - A user needs to specify directories with the original dataframe (`data_dir`), output directory for the processed dataframe (`data_processed_dir`), and their names (`data_fname` and `data_processed_fname`);
+   - There are two global parameters: `window_size` and `window_stride` that are used by default during each feature calculation. Note, these parameters can be overriden by each feature locally (see below).
+   - `features` is the list of features to be calculated. In the configuration file, each feature has 3 parameters: 
+      - `name` - feature name;
+      - `on` - the feature caluculation can be enabled or disabled;
+      - `functions` - a dictionary of functions with corresponding parameters from `feature.py`.
+   An example of a single feature is provided below:
+   ```
+   {
+      "name": "q_05_std_rolling_50",
+      "on": true,
+      "functions": {
+        "r_std": {
+          "window_size": 50,
+          "window_stride": null
+        },
+        "w_quantile": {
+          "q": 0.05
+        }
+      }
+    }
+   ```
+* [`train_config.json`]() or [`validation_config.json`]()
+* [`multi_test_config.json`](https://github.com/SIakovlev/LANL-Earthquake/blob/develop/src/configs/multi_test_config.json)
 
 ## Setup <a name="setup"></a>
 
