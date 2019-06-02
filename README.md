@@ -85,7 +85,7 @@ Data processing, model training and generation of test results can be managed vi
 # Results <a name="results"></a>
 
 Notes:
-- Fold: `CustomFold(n_splits=9, shuffle=True, fragmentation=0, pad=150)`
+- Fold: `CustomFold(n_splits=1, shuffle=True, fragmentation=0, pad=150)`
 - 10 runs is equivalent to 90 model trainings
 
 Best performing models:
