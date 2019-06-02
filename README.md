@@ -90,8 +90,11 @@ Notes:
 
 Best performing models:
 
+{'booster': 'gbtree', 'colsample_bytree': 1.0, 'eta': 0.177, 'eval_metric': 'mae', 'gamma': 0.93, 'max_depth': 5, 'min_child_weight': 10, 'n_estimators': 20, 'objective': 'gpu:reg:linear', 'seed': 65001, 'silent': 1, 'subsample': 0.65, 'tree_method': 'gpu_hist'}
+
 | Feature config | Model           | Params  | 10 runs score(std) | 100 runs score(std) | 300 runs score(std) | Public score |
 | ------------- |:-------------:| -----:|-----:|-----:|-----:|-----:|
+| [e9](https://github.com/SIakovlev/LANL-Earthquake/blob/develop/src/configs/dp_config_e9.json) | XGBRegressor | {'booster': 'gbtree', 'colsample_bytree': 1.0, 'eta': 0.177, 'eval_metric': 'mae', 'gamma': 0.93, 'max_depth': 5, 'min_child_weight': 10, 'n_estimators': 20, 'objective': 'gpu:reg:linear', 'seed': 65001, 'silent': 1, 'subsample': 0.65, 'tree_method': 'gpu_hist'} | **2.0092** |-|  |  |
 | [e9](https://github.com/SIakovlev/LANL-Earthquake/blob/develop/src/configs/dp_config_e9.json) | XGBRegressor | {'booster': 'gbtree', 'colsample_bytree': 1.00, 'eta': 0.165, 'eval_metric': 'mae', 'gamma': 0.95, 'max_depth': 5, 'min_child_weight': 10, 'n_estimators': 20, 'objective': 'gpu:reg:linear', 'seed': 0, 'silent': 1, 'subsample': 0.60, 'tree_method': 'gpu_hist'} | **2.0096** |-| **2.1368** (0.7929) | 1.646 |
 | [e7](https://github.com/SIakovlev/LANL-Earthquake/blob/develop/src/configs/dp_config_e7.json) | XGBRegressor | {'booster': 'gbtree', 'colsample_bytree': 0.59, 'eta': 0.273, 'eval_metric': 'mae', 'gamma': 0.82, 'max_depth': 4, 'min_child_weight': 10, 'n_estimators': 20, 'objective': 'gpu:reg:linear', 'seed': 0, 'silent': 1, 'subsample': 0.78, 'tree_method': 'gpu_hist'} | **2.0105** | **2.0917** (0.7735)| **2.1393** (0.7966) | 1.650 |
 | [e1](https://github.com/SIakovlev/LANL-Earthquake/blob/develop/src/configs/dp_config_e1.json) | XGBRegressor | {'booster': 'gbtree', 'colsample_bytree': 0.8, 'eta': 0.07, 'eval_metric': 'mae', 'gamma': 0.6, 'max_depth': 4, 'min_child_weight': 3, 'n_estimators': 20, 'objective': 'gpu:reg:linear', 'seed': 0, 'silent': 1, 'subsample': 1.0, 'tree_method': 'gpu_hist'} | **2.011** | **2.092**| **2.1397** (0.7959) | 1.650 |
