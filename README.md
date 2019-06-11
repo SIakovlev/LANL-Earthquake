@@ -1,7 +1,7 @@
 # LANL-Earthquake
 LANL Earthquake Prediction Challenge: https://www.kaggle.com/c/LANL-Earthquake-Prediction#description
 
-Date: 01 Aug 2018 </pre>
+Date: 11 Feb 2019 </pre>
 
 # Table of contents
 
